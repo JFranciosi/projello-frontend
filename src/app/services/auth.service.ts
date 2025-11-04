@@ -2,25 +2,60 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
+type TokenResponse = { accessToken: string; refreshToken: string };
+
+export interface CreateUserRequestPayload {
+  email: string;
+  password: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+}
+
+const ACCESS_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private API_URL = 'http://localhost:8080/auth';
+  private AUTH_API = 'http://localhost:8080/auth';
+  private USER_API = 'http://localhost:8080/user';
 
   constructor(private http: HttpClient) {}
 
-  async login(email: string, password: string) {
-    const response = await firstValueFrom(
-      this.http.post<{ accessToken: string, refreshToken: string}>(`${this.API_URL}/login`, { email, password })
+  /** LOGIN */
+  async login(email: string, password: string): Promise<void> {
+    const res = await firstValueFrom(
+      this.http.post<TokenResponse>(`${this.AUTH_API}/login`, { email, password })
     );
-    localStorage.setItem('accessToken', response.accessToken);
-    localStorage.setItem('refreshToken', response.refreshToken);
+    localStorage.setItem(ACCESS_TOKEN_KEY, res.accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, res.refreshToken);
   }
 
-  logout() {
-    localStorage.removeItem('token');
+  /** REGISTER su /user/register — il backend risponde 200 senza body */
+  async register(payload: CreateUserRequestPayload): Promise<void> {
+    await firstValueFrom(
+      this.http.post(`${this.USER_API}/register`, payload, {
+        responseType: 'text' as 'json',
+      })
+    );
   }
 
+  /** LOGOUT */
+  logout(): void {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  }
+
+  /** STATO */
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem(ACCESS_TOKEN_KEY);
+  }
+
+  /** GETTERS */
+  getAccessToken(): string | null {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
+  }
+  getRefreshToken(): string | null {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
   }
 }
