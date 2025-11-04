@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { Login } from './login/login';
-import { Home } from './home/home';
+import { Dashboard } from './dashboard/dashboard';
 
 export const routes: Routes = [
   { 
@@ -14,8 +14,8 @@ export const routes: Routes = [
     pathMatch: 'full' 
   },
   {
-    path: '/home',
-    component: Home,
-    title: 'Home'
+    path: 'dashboard',
+    component: Dashboard,
+    title: 'Dashboard'
   },
 ];
