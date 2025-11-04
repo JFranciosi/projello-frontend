@@ -16,21 +16,25 @@ export class Login {
   loading = false;
   errorMessage = '';
   form: any;
+  authService: any;
 
   constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
     });
+    this.authService = auth;
   }
 
   async submit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid){
+      return;
+    }
     this.loading = true;
     this.errorMessage = '';
 
     try {
-      await this.auth.login(this.form.value.email!, this.form.value.password!);
+      await this.authService.login(this.form.value.email!, this.form.value.password!);
       this.router.navigate(['/dashboard']);
     } catch (err: any) {
       this.errorMessage = err.error?.message || 'Credenziali non valide';
