@@ -127,6 +127,27 @@ button:disabled {
   font-weight: 500;
 }
 
+.register-link {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.register-anchor {
+  color: #333;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 4px;
+  transition: color 0.2s ease;
+}
+
+.register-anchor:hover {
+  color: #333;
+  text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .login-container {
