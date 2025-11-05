@@ -3,3 +3,19 @@
     padding: 0;
     box-sizing: border-box;
 }
+
+.ng-toast {
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.ng-toast.success {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: #fff;
+}
+
+.ng-toast.error {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+}
+

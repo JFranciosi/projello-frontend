@@ -5,6 +5,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService, CreateUserRequestPayload } from '../services/auth.service';
+import { NgToastService } from 'ng-angular-popup';
 
 @Component({
   selector: 'app-register',
@@ -17,6 +18,7 @@ export class Register {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   private router = inject(Router);
+  private toast = inject(NgToastService); 
 
   loading = false;
   errorMessage = '';
@@ -45,6 +47,7 @@ export class Register {
       this.form.markAllAsTouched();
       return;
     }
+
     this.loading = true;
     this.errorMessage = '';
 
@@ -59,9 +62,16 @@ export class Register {
 
     try {
       await this.auth.register(payload);
+
+      // Mostra toast di successo
+      this.toast.success('Registrazione completata con successo!', 'Benvenuto 👋', 4000);
+
       await this.router.navigateByUrl('/login');
     } catch (e: any) {
       this.errorMessage = e?.error ?? 'Registrazione non riuscita.';
+
+      // Mostra toast di errore
+      this.toast.danger('Errore durante la registrazione', 'Riprova più tardi', 4000);
     } finally {
       this.loading = false;
     }
