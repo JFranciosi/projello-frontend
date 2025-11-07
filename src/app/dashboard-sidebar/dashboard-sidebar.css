@@ -1,0 +1,166 @@
+/* ==== ROOT / CONTAINER ==== */
+:host {
+  display: block;
+}
+
+.sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  border-right: 1px solid #e4e4e4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem 1.5rem;
+  color: #111111;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #e6e6e6 transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: #e6e6e6;
+  border-radius: 8px;
+}
+
+/* ==== TITLE ==== */
+.sidebar-title {
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #333333;
+  margin: 0 0 1.2rem 0;
+}
+
+/* ==== MENU ==== */
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu li {
+  margin: 0.15rem 0;
+  border-radius: 10px;
+  transition: 0.2s ease, color 0.2s ease, transform 0.12s ease;
+}
+
+.menu .menu-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.75rem 0.75rem;
+  border-radius: 10px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Icone */
+.menu-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+  color: #444444;
+  flex: 0 0 18px;
+}
+
+/* Hover / Active */
+.menu li:hover {
+  background-color: #fff4da; /* giallo molto chiaro */
+}
+
+.menu li.active,
+.menu li[aria-current='page'] {
+  background-color: #fff4da;
+  color: #000000;
+  font-weight: 600;
+}
+
+.menu li.active .menu-icon,
+.menu li[aria-current='page'] .menu-icon {
+  color: #000000;
+}
+
+/* Focus accessibile */
+.menu .menu-link:focus-visible {
+  outline: 2px solid rgba(228, 179, 99, 0.6); /* #E4B363 trasparente */
+  outline-offset: 2px;
+}
+
+/* Micro feedback */
+.menu li:active {
+  transform: translateY(1px);
+}
+
+/* Separator opzionale */
+.menu-divider {
+  height: 1px;
+  background: #efefef;
+  margin: 0.75rem 0;
+  border-radius: 1px;
+}
+
+/* ==== CTA NUOVO PROGETTO ==== */
+.new-project-btn {
+  margin-top: 34.6rem;
+  padding: 0.9rem;
+  width: 100%;
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.2px;
+  transition: box-shadow 0.2s ease, transform 0.12s ease, 0.25s ease;
+}
+
+.new-project-btn:hover {
+  background-color: #222222;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.new-project-btn:active {
+  transform: translateY(1px);
+}
+
+.new-project-btn:focus-visible {
+  outline: 2px solid rgba(0, 0, 0, 0.5);
+  outline-offset: 2px;
+}
+
+/* Badge numeri (se usi badge nel markup) */
+.menu .badge {
+  margin-left: auto;
+  background: #e4b363;
+  color: #000000;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Piccolo sottotitolo (se metti categorie) */
+.menu .section-label {
+  margin: 1rem 0 0.5rem 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #777777;
+  text-transform: uppercase;
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 900px) {
+  :host, .sidebar {
+    display: none;
+  }
+}

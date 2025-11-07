@@ -1,0 +1,21 @@
+<aside class="sidebar" role="complementary" aria-label="Menu laterale">
+  <div>
+    <ul class="menu">
+      @for (link of nav; track link.path) {
+        <li
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: link.path === '/dashboard' }"
+        >
+          <a [routerLink]="link.path" class="menu-link">
+            <lucide-icon [name]="link.icon" class="menu-icon" aria-hidden="true"></lucide-icon>
+            <span>{{ link.label }}</span>
+          </a>
+        </li>
+      } @empty {
+        <li class="muted">Nessuna voce di menu</li>
+      }
+    </ul>
+  </div>
+
+  <button class="new-project-btn" (click)="createProject.emit()">＋ Nuovo progetto</button>
+</aside>
