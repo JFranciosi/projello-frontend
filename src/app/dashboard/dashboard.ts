@@ -23,13 +23,11 @@ import { TaskService, Task } from '../services/task.service';
   styleUrls: ['./dashboard.css'],
 })
 export class Dashboard implements OnInit {
-  // STATE (camelCase)
   modalOpen = signal(false);
   panelOpen = signal(false);
   modalType = signal<'task' | 'project'>('task');
   loading = signal(false);
   errorMsg = signal<string | null>(null);
-
   projectId = signal<string | null>(null);
   phases = signal<Phase[]>([]);
   tasksByPhase = signal<Record<string, Task[]>>({});
@@ -40,24 +38,44 @@ export class Dashboard implements OnInit {
     Object.values(this.tasksByPhase()).reduce((acc, arr) => acc + (arr?.length || 0), 0)
   );
 
-  // DI
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(NgToastService);
   private readonly phaseSrv = inject(PhaseService);
   private readonly taskSrv = inject(TaskService);
 
-  // INIT
+  /** ======= Fallback locale: 3 colonne standard ======= */
+  private static readonly DEFAULT_PHASES: Phase[] = [
+    { _id: 'todo',        project_id: '__local__', title: 'Da fare',     order: 1 },
+    { _id: 'in_progress', project_id: '__local__', title: 'In corso',    order: 2 },
+    { _id: 'done',        project_id: '__local__', title: 'Completato',  order: 3, is_done: true },
+  ];
+
+  private useFallbackPhases(reason: 'no-project' | 'empty' | 'error'): void {
+    const cols = Dashboard.DEFAULT_PHASES;
+    this.phases.set(cols);
+    const map: Record<string, Task[]> = {};
+    cols.forEach(c => (map[c._id] = []));
+    this.tasksByPhase.set(map);
+    this.loading.set(false);
+
+    if (reason === 'no-project') {
+      this.errorMsg.set('Nessun projectId. Mostro colonne di default.');
+    } else if (reason === 'empty') {
+      this.errorMsg.set('Nessuna phase trovata. Mostro colonne di default.');
+    } else {
+      this.errorMsg.set('Errore API. Mostro colonne di default.');
+    }
+  }
+
   ngOnInit(): void {
-    const fromRoute =
-      this.route.snapshot.paramMap.get('projectId') ??
-      this.route.snapshot.paramMap.get('project_id');
+    const fromRoute = this.route.snapshot.paramMap.get('projectId');
     const fallback = localStorage.getItem('project_id');
     const pid = fromRoute || fallback;
 
     if (!pid) {
-      this.toast.warning('Attenzione', 'Project non selezionato.');
-      this.errorMsg.set('Nessun project_id.');
+      // Nessun projectId -> mostra colonne base
+      this.useFallbackPhases('no-project');
       return;
     }
 
@@ -66,10 +84,13 @@ export class Dashboard implements OnInit {
     this.loadBoard();
   }
 
-  // LOAD BOARD
+  /** ======= Load board ======= */
   loadBoard(): void {
     const pid = this.projectId();
-    if (!pid) return;
+    if (!pid) {
+      this.useFallbackPhases('no-project');
+      return;
+    }
 
     this.loading.set(true);
     this.errorMsg.set(null);
@@ -77,38 +98,43 @@ export class Dashboard implements OnInit {
     this.phaseSrv.list(pid).subscribe({
       next: (cols) => {
         const ordered = [...(cols || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+        if (!ordered.length) {
+          // Nessuna fase dal backend -> 3 colonne default
+          this.useFallbackPhases('empty');
+          return;
+        }
+
         this.phases.set(ordered);
 
-        // mappa vuota per colonne
+        // inizializza mappa vuota
         const blank: Record<string, Task[]> = {};
         ordered.forEach((p) => (blank[p._id] = []));
         this.tasksByPhase.set(blank);
 
-        // carica i task di ogni colonna
+        // carica tasks di ogni colonna
         ordered.forEach((p) => this.loadPhaseTasks(p._id));
       },
       error: (err) => {
         console.error(err);
-        this.errorMsg.set('Errore nel caricamento colonne.');
-        this.toast.danger('Errore', 'Impossibile caricare le colonne (phases).');
-        this.loading.set(false);
+        // Errore API -> 3 colonne default
+        this.useFallbackPhases('error');
       },
     });
   }
 
-  private loadPhaseTasks(phaseId: string): void {
+  private loadPhaseTasks(phase_id: string): void {
     const pid = this.projectId();
     if (!pid) return;
 
-    // >>> snake_case SOLO nei payload/params <<<
-    this.taskSrv.list({ project_id: pid, phase_id: phaseId }).subscribe({
+    this.taskSrv.list({ project_id: pid, phase_id }).subscribe({
       next: (items) => {
         const map = { ...this.tasksByPhase() };
-        map[phaseId] = items ?? [];
+        map[phase_id] = items ?? [];
         this.tasksByPhase.set(map);
       },
       error: (err) => {
-        console.error('Errore caricamento tasks per phase', phaseId, err);
+        console.error('Errore caricamento tasks per phase', phase_id, err);
         this.toast.danger('Errore', 'Impossibile caricare i task della colonna.');
       },
       complete: () => {
@@ -117,12 +143,12 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // HELPERS
+  /** Helper per template */
   tasksFor(phaseId: string): Task[] {
     return this.tasksByPhase()[phaseId] ?? [];
   }
 
-  // NAVBAR
+  /** ======= Navbar: Logout ======= */
   logout(): void {
     try {
       localStorage.removeItem('auth_token');
@@ -131,75 +157,79 @@ export class Dashboard implements OnInit {
     this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
   }
 
-  // MODAL
+  /** ======= Modale ======= */
   openModal(type: 'task' | 'project' = 'task', phaseId?: string): void {
     this.modalType.set(type);
     const target = phaseId || this.phases()[0]?._id || null;
     this.draftPhaseId.set(target);
     this.modalOpen.set(true);
   }
-
   closeModal(): void {
     this.modalOpen.set(false);
   }
 
+  /** onSave: collega i valori reali del form (stub minimo pronto) */
   onSave(ev?: Event): void {
     ev?.preventDefault();
     const pid = this.projectId();
     const dest = this.draftPhaseId();
 
-    if (!pid) {
-      this.toast.warning('Attenzione', 'Project mancante.');
+    if (this.modalType() !== 'task') {
+      this.toast.info('Info', 'Crea progetto: integra la tua API /projects.');
+      this.closeModal();
       return;
     }
 
-    if (this.modalType() === 'task') {
-      if (!dest) {
-        this.toast.warning('Attenzione', 'Seleziona una colonna di destinazione.');
-        return;
-      }
-
-      // >>> snake_case SOLO nel payload <<<
-      const payload: { project_id: string; phase_id: string; title: string } = {
-        project_id: pid,
-        phase_id: dest,
-        title: 'Nuovo task', // TODO: leggi dal form
-      };
-
-      this.taskSrv.create(payload).subscribe({
-        next: (created) => {
-          const map = { ...this.tasksByPhase() };
-          map[dest] = [created, ...(map[dest] || [])];
-          this.tasksByPhase.set(map);
-          this.toast.success('Creato', 'Task creato con successo.');
-          this.closeModal();
-        },
-        error: (err) => {
-          console.error(err);
-          this.toast.danger('Errore', 'Creazione task fallita.');
-        },
-      });
-    } else {
-      this.toast.info('Info', 'Crea progetto: integra la tua API /projects.');
+    if (!pid) {
+      // Se stai usando le colonne fallback, non chiamiamo l’API
+      this.toast.warning('Attenzione', 'Nessun projectId: il task non verrà creato sul backend.');
       this.closeModal();
+      return;
     }
+
+    if (!dest) {
+      this.toast.warning('Attenzione', 'Seleziona una colonna di destinazione.');
+      return;
+    }
+
+    const payload = {
+      project_id: pid,
+      phase_id: dest,
+      title: 'Nuovo task',
+    };
+
+    this.taskSrv.create(payload).subscribe({
+      next: (created) => {
+        const map = { ...this.tasksByPhase() };
+        map[dest] = [created, ...(map[dest] || [])];
+        this.tasksByPhase.set(map);
+        this.toast.success('Creato', 'Task creato con successo.');
+        this.closeModal();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toast.danger('Errore', 'Creazione task fallita.');
+      },
+    });
   }
 
-  // PANEL
+  /** ======= Pannello task ======= */
   openPanel(task?: Task): void {
     this.panelOpen.set(true);
 
-    if (task?._id) {
-      this.taskSrv.getById(task._id).subscribe({
-        next: (full) => this.selectedTask.set(full),
-        error: () => {
-          this.selectedTask.set(task ?? null);
-          this.toast.warning('Attenzione', 'Dettagli non disponibili.');
-        },
-      });
-    } else {
-      this.selectedTask.set(null);
+    // Se stai usando fallback (no projectId), apro solo in lettura locale
+    if (!this.projectId() || !task?._id) {
+      this.selectedTask.set(task ?? null);
+      return;
     }
+
+    this.taskSrv.getById(task._id).subscribe({
+      next: (full) => this.selectedTask.set(full),
+      error: () => {
+        this.selectedTask.set(task ?? null);
+        this.toast.warning('Attenzione', 'Dettagli non disponibili.');
+      },
+    });
   }
 
   closePanel(): void {
@@ -207,16 +237,20 @@ export class Dashboard implements OnInit {
     this.selectedTask.set(null);
   }
 
-  // ESC
+  /** ESC per chiudere modale/pannello */
   @HostListener('document:keydown.escape')
   onEsc(): void {
     if (this.modalOpen()) this.closeModal();
     if (this.panelOpen()) this.closePanel();
   }
 
-  // TASK ACTIONS
+  /** ======= Azioni task ======= */
   moveTaskToPhase(task: Task, toPhaseId: string, position = 0): void {
-    // >>> snake_case SOLO nel payload <<<
+    if (!this.projectId()) {
+      this.toast.warning('Attenzione', 'Spostamento non disponibile senza backend.');
+      return;
+    }
+
     this.taskSrv.move(task._id, { phase_id: toPhaseId, position }).subscribe({
       next: (updated) => {
         this.removeFromBoard(task._id);
@@ -229,6 +263,7 @@ export class Dashboard implements OnInit {
     });
   }
 
+  /** Sposta in "done" se esiste una phase con is_done = true */
   markCompleted(task: Task): void {
     const donePhase = this.phases().find((p) => p.is_done);
     if (!donePhase) {
@@ -239,6 +274,14 @@ export class Dashboard implements OnInit {
   }
 
   deleteTask(task: Task): void {
+    if (!this.projectId()) {
+      // rimozione solo lato UI in fallback
+      this.removeFromBoard(task._id);
+      if (this.selectedTask()?._id === task._id) this.closePanel();
+      this.toast.success('Eliminato', 'Task rimosso localmente.');
+      return;
+    }
+
     this.taskSrv.delete(task._id).subscribe({
       next: () => {
         this.removeFromBoard(task._id);
@@ -257,7 +300,8 @@ export class Dashboard implements OnInit {
     this.tasksByPhase.set(map);
   }
 
-  // TRACK BY (usali nel template: track trackByTask / trackByPhase)
-  trackByTask = (_: number, item: Task) => item._id;
-  trackByPhase = (_: number, item: Phase) => item._id;
+  /** ======= Helper trackBy ======= */
+  trackById(_i: number, item: { _id: string }): string {
+    return item._id;
+  }
 }

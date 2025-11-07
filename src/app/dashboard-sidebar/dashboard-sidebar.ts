@@ -24,5 +24,7 @@ export class DashboardSidebar {
     { label: 'Oggi',            path: '/dashboard/today',       icon: 'calendar' },
     { label: 'Scadenze',        path: '/dashboard/expiration',   icon: 'calendar-clock' },
     { label: 'Archivio',        path: '/dashboard/archive',   icon: 'archive' },
+    { label: 'Notifiche',        path: '/dashboard/notification',   icon: 'Bell' },
+    { label: 'Profilo',        path: '/dashboard/profile',   icon: 'UserCircle2' },
   ];
 }

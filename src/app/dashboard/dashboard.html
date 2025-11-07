@@ -5,12 +5,6 @@
   </div>
 
   <div class="nav-right">
-    <button class="icon-btn" title="Notifiche" aria-label="Notifiche">
-      <lucide-icon name="bell"></lucide-icon>
-    </button>
-    <button class="icon-btn" title="Profilo" aria-label="Profilo">
-      <lucide-icon name="user-circle-2"></lucide-icon>
-    </button>
     <button class="icon-btn logout" title="Logout" aria-label="Logout" (click)="logout()">
       <lucide-icon name="log-out"></lucide-icon>
     </button>
@@ -19,28 +13,45 @@
 
 <!-- CONTAINER -->
 <div class="dashboard-container">
-
   <!-- SIDEBAR -->
   <app-dashboard-sidebar (createProject)="openModal('project')"></app-dashboard-sidebar>
 
-  <!-- KANBAN BOARD (dinamico su phases) -->
+  <!-- KANBAN BOARD -->
   <main class="kanban" role="main" aria-label="Bacheca Kanban">
 
     @for (p of phases(); track p._id) {
-    <section class="column" [attr.aria-labelledby]="'col-' + p._id">
-    <div class="column-header">
-        <h2 [attr.id]="'col-' + p._id">{{ p.title }}</h2>
+      <section class="column" [attr.aria-labelledby]="'col-' + p._id">
+        <div class="column-header">
+          <h2 class="column-title" [attr.id]="'col-' + p._id">{{ p.title }}</h2>
 
+          <div class="column-tools">
+            <span
+              class="count-badge"
+              [attr.aria-label]="'Task in ' + p.title + ': ' + tasksFor(p._id).length"
+              role="status"
+            >
+              {{ tasksFor(p._id).length }}
+            </span>
 
-          <!-- Nuovo task nella fase p -->
-          <button class="btn-icon" title="Nuovo task in {{p.title}}" aria-label="Nuovo task"
-                  (click)="openModal('task', p._id); $event.stopPropagation()">
-            <!-- Se hai pickato Plus -->
-            <lucide-icon name="plus"></lucide-icon>
-            <!-- In alternativa usa: ＋ -->
-          </button>
+            <button
+              class="btn-icon add"
+              title="Nuovo task in {{ p.title }}"
+              aria-label="Nuovo task"
+              (click)="openModal('task', p._id); $event.stopPropagation()"
+            >
+              <lucide-icon name="plus"></lucide-icon>
+            </button>
+          </div>
         </div>
 
+        <!-- EMPTY STATE (nessun task nella colonna) -->
+        @if (tasksFor(p._id).length === 0) {
+          <div class="column-empty" aria-live="polite">
+            Nessun task in questa colonna.
+          </div>
+        }
+
+        <!-- TASK LIST -->
         @for (t of tasksFor(p._id); track t._id) {
           <div
             class="task-card"
@@ -109,9 +120,8 @@
 <!-- FLOATING BUTTON (nuovo task veloce: usa la prima colonna se presente) -->
 <button class="fab"
     (click)="openModal('task', phases()[0]?._id)"
-    title="Nuovo Task" aria-label="Nuovo Task">＋
+     title="Nuovo Task" aria-label="Nuovo Task">＋
 </button>
-
 
 <!-- MODALE -->
 @if (modalOpen()) {
@@ -123,7 +133,6 @@
       </h2>
 
       <form (ngSubmit)="onSave($event)">
-        <!-- Se stai creando un task, consenti di scegliere la colonna -->
         @if (modalType() === 'task') {
           <div class="form-group">
             <label for="phase">Colonna</label>
@@ -166,16 +175,14 @@
   </div>
 }
 
-<!-- PANNELLO TASK (dinamico su selectedTask) -->
+<!-- PANNELLO TASK -->
 <div class="task-panel" [class.open]="panelOpen()" role="region" aria-label="Dettagli task">
   <div class="panel-header">
     <div class="panel-title">
       <h2>Dettagli Task</h2>
     </div>
     <div class="panel-actions">
-      <button class="btn-icon" title="Duplica" (click)="$event.stopPropagation()">
-        <lucide-icon name="copy"></lucide-icon>
-      </button>
+      <!-- RIMOSSO 'copy' per evitare errori se l'icona non è pickata -->
       <button class="btn-icon danger" title="Elimina"
               [disabled]="!selectedTask()"
               (click)="selectedTask() && deleteTask(selectedTask()!); $event.stopPropagation()">
@@ -188,13 +195,12 @@
   </div>
 
   <div class="panel-body">
-    <!-- Meta grid -->
     <div class="meta-grid">
       <div class="meta-chip">
         <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
         <div>
           <div class="meta-label">Scadenza</div>
-            <div class="meta-value">{{ selectedTask()?.assignees?.join(', ') || '—' }}</div>
+          <div class="meta-value">{{ selectedTask()?.expiration_date || '—' }}</div>
         </div>
       </div>
 
@@ -218,8 +224,8 @@
       <div class="meta-chip">
         <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
         <div>
-          <div class="meta-label">Assegnato a</div>
-          <div class="meta-value">{{ selectedTask() || '—' }}</div>
+          <div class="meta-label">Assegnatari</div>
+          <div class="meta-value">{{ selectedTask()?.assignees?.join(', ') || '—' }}</div>
         </div>
       </div>
 
@@ -227,25 +233,19 @@
         <lucide-icon name="clock" aria-hidden="true"></lucide-icon>
         <div>
           <div class="meta-label">Stato</div>
-          <div class="meta-value">
-            {{ '—' }}
-          </div>
+          <div class="meta-value">—</div>
         </div>
       </div>
     </div>
 
-    <!-- Descrizione -->
     <section class="panel-section">
       <div class="section-head">
         <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
         <h3>{{ selectedTask()?.title || 'Titolo Task' }}</h3>
       </div>
-      <p>
-        {{ selectedTask()?.description || 'Nessuna descrizione disponibile.' }}
-      </p>
+      <p>{{ selectedTask()?.description || 'Nessuna descrizione disponibile.' }}</p>
     </section>
 
-    <!-- Allegati -->
     <section class="panel-section attachments">
       <div class="section-head">
         <lucide-icon name="paperclip" aria-hidden="true"></lucide-icon>
@@ -260,20 +260,8 @@
             <a href="#" download>{{ att.name }}</a>
           </li>
         }
-        @empty {
-          <li class="file muted">Nessun allegato.</li>
-        }
+        @empty { <li class="file muted">Nessun allegato.</li> }
       </ul>
-    </section>
-
-    <!-- (Se vuoi checklist, aggiungi i tuoi campi reali; ora è placeholder) -->
-    <section class="panel-section">
-      <div class="section-head">
-        <lucide-icon name="message-square" aria-hidden="true"></lucide-icon>
-        <h3>Commenti</h3>
-        <span class="section-badge">0</span>
-      </div>
-      <p class="muted">Ancora nessun commento.</p>
     </section>
   </div>
 
