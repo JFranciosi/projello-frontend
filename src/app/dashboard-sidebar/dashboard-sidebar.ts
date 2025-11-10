@@ -20,11 +20,23 @@ export class DashboardSidebar {
   @Output() createProject = new EventEmitter<void>();
 
   nav: NavItem[] = [
-    { label: 'Tutti i progetti', path: '/dashboard',           icon: 'layout-dashboard' },
-    { label: 'Oggi',            path: '/dashboard/today',       icon: 'calendar' },
-    { label: 'Scadenze',        path: '/dashboard/expiration',   icon: 'calendar-clock' },
-    { label: 'Archivio',        path: '/dashboard/archive',   icon: 'archive' },
-    { label: 'Notifiche',        path: '/dashboard/notification',   icon: 'Bell' },
-    { label: 'Profilo',        path: '/dashboard/profile',   icon: 'UserCircle2' },
+    { label: 'Tutti i progetti', 
+      path: '/dashboard',           
+      icon: 'layout-dashboard' },
+    { label: 'Oggi',            
+      path: '/dashboard/today',       
+      icon: 'calendar' },
+    { label: 'Scadenze',
+      path: '/dashboard/expiration',   
+      icon: 'calendar-clock' },
+    { label: 'Archivio',        
+      path: '/dashboard/archive',   
+      icon: 'archive' },
+    { label: 'Notifiche',        
+      path: '/dashboard/notification',   
+      icon: 'Bell' },
+    { label: 'Profilo',        
+      path: '/profile',   
+      icon: 'UserCircle2' },
   ];
 }
