@@ -1,1 +1,52 @@
-<p>profile works!</p>
+<!-- NAVBAR -->
+<header class="navbar" role="banner">
+  <div class="nav-left">
+    <img src="logoProjello.png" alt="Projello Logo" class="logo" />
+  </div>
+
+  <div class="nav-right">
+    <button class="icon-btn logout" title="Logout" aria-label="Logout" (click)="logout()">
+      <lucide-icon name="log-out"></lucide-icon>
+    </button>
+  </div>
+</header>
+
+<!-- CONTAINER -->
+<div class="profile-container">
+  <!-- SIDEBAR -->
+  <app-dashboard-sidebar></app-dashboard-sidebar>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" role="main" aria-label="Profilo utente">
+    <h1>Profilo utente</h1>
+    <p>Benvenuto nel tuo profilo! Qui puoi modificare le informazioni personali.</p>
+
+    <section class="profile-section">
+      <h2>Dati personali</h2>
+      <!-- esempio di form semplice -->
+      <form (ngSubmit)="saveProfile()">
+        <div class="form-group">
+          <label for="nome">Nome visualizzato</label>
+          <input id="nome" type="text" name="name" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Vecchia password</label>
+          <input id="password" type="password" name="password" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Nuova password</label>
+          <input id="password" type="password" name="password" />
+        </div>
+
+        <button type="submit" class="save-btn">Salva modifiche</button>
+      </form>
+    </section>
+  </main>
+</div>
