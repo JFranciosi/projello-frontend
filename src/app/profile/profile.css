@@ -63,52 +63,118 @@
   color:#b91c1c; 
 }
 
+/* ===== Profile Page ===================================================== */
+
 .profile-container {
   display: grid;
   grid-template-columns: 250px 1fr;
-  min-height: 100vh;
+  min-height: 80vh;
+  background-color: #f9fafb;
 }
 
 .main-content {
-  padding: 2rem;
+  padding: 2.5rem 3rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin: 2rem;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.main-content:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1.5px);
 }
 
 .profile-section {
-  margin-top: 2rem;
+  margin-top: 1rem;
+}
+
+.profile-section h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid rgba(228, 179, 99, 0.4);
+  padding-bottom: 0.4rem;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 1.4rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.4rem;
 }
 
 input[type="text"],
 input[type="email"],
 input[type="password"] {
-  width: 50%;
-  padding: 0.5rem;
+  width: 60%;
+  padding: 0.65rem 0.8rem;
   display: block;
-  margin-bottom: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  font-size: 0.95rem;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: #e4b363;
+  box-shadow: 0 0 0 3px rgba(228, 179, 99, 0.3);
+  outline: none;
 }
 
 .save-btn {
   background-color: #E4B363;
-  color: black;
-  font-weight: 800;
-  font-size: .82rem;
-  padding: 0.5rem 1rem;
+  color: #111;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.4rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.2s ease;
 }
 
 .save-btn:hover {
-  background-color: 2px solid rgba(229, 181, 105, 0.6);
+  background-color: #d9a857;
+  transform: translateY(-1px);
+}
+
+/* ===== Responsive ====================================================== */
+@media (max-width: 1024px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 80%;
+  }
 }
 
 @media (max-width: 768px) {
   .profile-container {
     grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .main-content {
+    margin: 1rem 0;
+    padding: 1.5rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+  }
+
+  .save-btn {
+    width: 100%;
   }
 }
