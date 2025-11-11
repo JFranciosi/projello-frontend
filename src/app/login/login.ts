@@ -41,7 +41,7 @@ export class Login {
       // Toast di successo
       this.toast.success('Accesso effettuato con successo!', 'Benvenuto ', 4000);
 
-      await this.router.navigate(['/dashboard']);
+      await this.router.navigate(['/projects']);
     } catch (err: any) {
       this.errorMessage = err?.error?.message || 'Credenziali non valide';
 

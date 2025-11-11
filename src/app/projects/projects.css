@@ -1,0 +1,80 @@
+/* --- Navbar & container: stessi stili della dashboard --- */
+.navbar{
+  display:flex; justify-content:space-between; align-items:center;
+  background:#E4B363; padding:.9rem 1.6rem;
+  box-shadow:0 2px 8px rgba(0,0,0,.08); position:sticky; top:0; z-index:100;
+}
+.nav-left{ display:flex; align-items:center; gap:1rem; }
+.logo{ height:38px; width:auto; display:block; }
+.nav-right{ display:flex; align-items:center; }
+.icon-btn{ background:transparent; border:none; margin-left:1rem; padding:.4rem; border-radius:8px; cursor:pointer;
+  transition:transform .18s, background-color .2s, opacity .2s; }
+.icon-btn:hover{ background:rgba(255,255,255,.32); transform:scale(1.06); opacity:.92; }
+.icon-btn lucide-icon{ width:22px; height:22px; stroke-width:1.8; color:#000; }
+.logout lucide-icon{ color:#b91c1c; }
+
+.dashboard-container{
+  display:flex; min-height:calc(100vh - 70px); overflow:hidden;
+}
+
+/* --- Area content della pagina progetti --- */
+.projects-main{
+  flex:1 1 auto; padding:2rem; overflow-y:auto; background:#f7f9fc;
+}
+.projects-header{
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem;
+}
+.projects-header h1{
+  font-size:1.4rem; font-weight:800; color:#111; margin:0;
+}
+
+/* --- Grid & card --- */
+.projects-grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:1.4rem;
+}
+.project-card{
+  background:#fff; border-radius:12px; padding:1.1rem 1rem 1rem;
+  border-left:5px solid #E4B363; box-shadow:0 4px 12px rgba(0,0,0,.06);
+  cursor:pointer; transition:transform .18s, box-shadow .22s;
+}
+.project-card:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(0,0,0,.12); }
+
+.project-card-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.4rem; }
+.project-title{ font-size:1.05rem; font-weight:800; color:#111; margin:0; }
+.project-phase-count{ background:#FFF4DA; color:#111; font-weight:700; font-size:.82rem; padding:.28rem .6rem; border-radius:999px; }
+
+.project-desc{ color:#333; font-size:.95rem; margin:0 0 .6rem; line-height:1.45; }
+.project-meta{ display:flex; gap:1rem; font-size:.86rem; color:#555; }
+.meta-item{ display:inline-flex; align-items:center; gap:.35rem; }
+.meta-item lucide-icon{ width:16px; height:16px; stroke-width:1.8; }
+
+/* --- Empty state --- */
+.empty-state{
+  text-align:center; color:#666; font-size:1rem;
+  padding:3rem 1rem; background:#FAFAFA; border:1px dashed #E6E6E6; border-radius:12px;
+}
+
+/* --- Modale: riuso stile dashboard --- */
+.modal{ position:fixed; inset:0; display:flex; justify-content:center; align-items:center;
+  background:rgba(0,0,0,.45); backdrop-filter:blur(5px); z-index:110; animation:fadeIn .22s ease; }
+.modal-content{ position:relative; width:560px; max-width:92vw; background:#fff; border-radius:14px;
+  box-shadow:0 18px 50px rgba(0,0,0,.28); overflow:hidden; padding:0; animation:scaleIn .18s ease; }
+.modal-content::before{ content:""; position:absolute; left:0; top:0; height:5px; width:100%; background:#E4B363; }
+.modal-content>h2{ margin:0; padding:1.1rem 1.2rem .9rem; font-size:1.2rem; font-weight:800; color:#111; border-bottom:1px solid #f0f0f0; }
+.modal-content .close{ position:absolute; top:.7rem; right:.8rem; width:32px; height:32px; display:grid; place-items:center;
+  background:#fff; color:#111; border:1px solid #E9E9E9; border-radius:8px; font-size:18px; line-height:0; cursor:pointer;
+  transition:transform .15s, background-color .2s, opacity .2s, border-color .2s; }
+.modal-content .close:hover{ background:#F5F5F5; border-color:#D9D9D9; transform:scale(1.06); opacity:.95; }
+.modal-content form{ padding:1.1rem 1.2rem 1.3rem; display:block; }
+.form-group{ margin-bottom:1rem; }
+.form-group label{ display:block; margin:0 0 .35rem; font-size:.9rem; font-weight:600; color:#333; }
+input, textarea{ width:100%; padding:.75rem .8rem; border:1px solid #CCC; border-radius:10px; background:#fff; color:#111; font-size:1rem; outline:none;
+  transition:border-color .2s, box-shadow .2s; }
+textarea{ min-height:110px; resize:vertical; }
+input:focus, textarea:focus{ border-color:#E4B363; box-shadow:0 0 0 3px rgba(228,179,99,.25); }
+.save-btn{ margin-top:.5rem; width:100%; background:#111; color:#fff; border:none; border-radius:10px; padding:.9rem 1.1rem; font-weight:800; letter-spacing:.2px; cursor:pointer;
+  transition:background-color .25s, transform .12s, box-shadow .2s; }
+.save-btn:hover{ background:#222; box-shadow:0 8px 22px rgba(0,0,0,.16); }
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{transform:scale(.96);opacity:.6}to{transform:scale(1);opacity:1}}

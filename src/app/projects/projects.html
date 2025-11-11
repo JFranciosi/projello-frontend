@@ -1,0 +1,85 @@
+<!-- NAVBAR -->
+<header class="navbar" role="banner">
+  <div class="nav-left">
+    <img src="logoProjello.png" alt="Projello Logo" class="logo" />
+  </div>
+
+  <div class="nav-right">
+    <button class="icon-btn logout" title="Logout" aria-label="Logout" (click)="logout()">
+      <lucide-icon name="log-out"></lucide-icon>
+    </button>
+  </div>
+</header>
+
+<!-- CONTAINER (stesso layout della dashboard) -->
+<div class="dashboard-container">
+  <!-- SIDEBAR -->
+  <app-dashboard-sidebar (createProject)="openModal('project')"></app-dashboard-sidebar>
+
+  <!-- MAIN -->
+  <main class="projects-main" role="main" aria-label="Elenco progetti">
+    <div class="projects-header">
+      <h1>I tuoi progetti</h1>
+    </div>
+
+    <section class="projects-grid" aria-live="polite">
+      @if (loading()) {
+        <div class="empty-state">Caricamento in corso…</div>
+      } @else if (projects().length === 0) {
+        <div class="empty-state">Nessun progetto trovato. Crea un nuovo progetto dalla sidebar.</div>
+      } @else {
+        @for (p of projects(); track p.id) {
+          <article
+            class="project-card"
+            (click)="navigateToProject(p.id)"
+            (keydown.enter)="navigateToProject(p.id)"
+            (keydown.space)="navigateToProject(p.id)"
+            tabindex="0"
+            role="button"
+            aria-label="Apri progetto {{ p.title }}"
+          >
+            <div class="project-card-header">
+              <h2 class="project-title">{{ p.title }}</h2>
+              <span class="project-phase-count">Progetto</span>
+            </div>
+
+            <p class="project-desc">
+              Creato da {{ p.creator?.name || '—' }}
+            </p>
+
+            <div class="project-meta">
+              <span class="meta-item">
+                <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
+                {{ (p.collaborators?.length || 0) + (p.creator ? 1 : 0) }} membri
+              </span>
+            </div>
+          </article>
+        }
+      }
+    </section>
+  </main>
+</div>
+
+<!-- Modale Nuovo Progetto (apre dal bottone della sidebar) -->
+@if (modalOpen() && modalType() === 'project') {
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-content">
+      <span class="close" (click)="closeModal()" role="button" aria-label="Chiudi">&times;</span>
+      <h2 id="modal-title">Nuovo Progetto</h2>
+
+      <form (ngSubmit)="onSaveProject($event)">
+        <div class="form-group">
+          <label for="titolo">Nome progetto</label>
+          <input id="titolo" type="text" placeholder="Inserisci il nome..." required />
+        </div>
+
+        <div class="form-group">
+          <label for="descrizione">Descrizione</label>
+          <textarea id="descrizione" placeholder="Descrivi il progetto..."></textarea>
+        </div>
+
+        <button type="submit" class="save-btn">Crea progetto</button>
+      </form>
+    </div>
+  </div>
+}

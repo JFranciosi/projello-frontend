@@ -21,20 +21,16 @@ export class DashboardSidebar {
 
   nav: NavItem[] = [
     { label: 'Tutti i progetti', 
-      path: '/dashboard',           
+      path: '/projects',           
       icon: 'layout-dashboard' },
       
     { label: 'Oggi',            
-      path: '/dashboard/today',       
+      path: '/dashboard',       
       icon: 'calendar' },
 
     { label: 'Scadenze',
       path: '/dashboard/expiration',   
       icon: 'calendar-clock' },
-
-    { label: 'Archivio',        
-      path: '/dashboard/archive',   
-      icon: 'archive' },
 
     { label: 'Notifiche',        
       path: '/dashboard/notification',   
