@@ -1,21 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Task } from '../models/models';
 
 export type Priority = 'high' | 'medium' | 'low';
-
-export type Task = {
-  _id: string;
-  project_id: string;
-  phase_id: string;
-  title: string;
-  description?: string;
-  assignees?: string[];
-  expiration_date?: string;
-  priority?: Priority;
-  attachments?: { name: string; type?: string }[];
-  position?: number;
-};
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {

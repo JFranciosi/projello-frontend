@@ -1,23 +1,16 @@
 import { Component, OnInit, signal, importProvidersFrom } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ProjectsService, ProjectResponse } from '../services/project.service'; // <-- ok: singolare
+import { ProjectsService } from '../services/project.service';
+import { ProjectResponse } from '../models/models';
 import { DashboardSidebar } from "../dashboard-sidebar/dashboard-sidebar";
-
-// Lucide
 import { LucideAngularModule, LogOut, UserCircle2 } from 'lucide-angular';
-
-// Auth
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [
-    CommonModule,
-    DashboardSidebar,
-    LucideAngularModule
-],
+  imports: [CommonModule,DashboardSidebar,LucideAngularModule],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
 })

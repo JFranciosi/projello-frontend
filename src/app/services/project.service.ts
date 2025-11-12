@@ -1,19 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-
-export interface UserResponse {
-  id: string;
-  email: string;
-  name: string;
-}
-
-export interface ProjectResponse {
-  id: string;
-  title: string;
-  collaborators: UserResponse[];
-  creator: UserResponse;
-}
+import { ProjectResponse } from '../models/models';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +20,7 @@ export class ProjectsService {
     return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
   }
 
-  // 🔹 GET – tutti i progetti
+  // GET – tutti i progetti
   async getProjects(): Promise<ProjectResponse[]> {
     try {
       return await firstValueFrom(
@@ -46,7 +34,7 @@ export class ProjectsService {
     }
   }
 
-  // 🔹 GET – progetto singolo per ID
+  // GET – progetto singolo per ID
   async getProjectById(id: string): Promise<ProjectResponse | null> {
     try {
       return await firstValueFrom(

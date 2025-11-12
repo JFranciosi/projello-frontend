@@ -6,25 +6,15 @@ import { Profile } from './profile/profile';
 import { Projects } from './projects/projects';
 
 export const routes: Routes = [
-  { 
-    path: 'login', 
-    component: Login,
-    title: 'Login'
-  },
-  { 
-    path: '', 
-    redirectTo: 'login', 
-    pathMatch: 'full' 
-  },
-  { 
-    path: 'projects', 
-    component: Projects, 
-    pathMatch: 'full' 
+  {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full'
   },
   {
-    path: 'dashboard',
-    component: Dashboard,
-    title: 'Dashboard'
+    path: 'login',
+    component: Login,
+    title: 'Login'
   },
   {
     path: 'register',
@@ -35,5 +25,15 @@ export const routes: Routes = [
     path: 'profile',
     component: Profile,
     title: 'Profilo'
-  }
+  },
+  {
+    path: 'projects',
+    component: Projects,
+    title: 'Progetti'
+  },
+  {
+    path: 'dashboard/:id',
+    component: Dashboard,
+    title: 'Dashboard Progetto'
+  },
 ];

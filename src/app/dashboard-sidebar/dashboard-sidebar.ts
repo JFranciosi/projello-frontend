@@ -23,17 +23,9 @@ export class DashboardSidebar {
     { label: 'Tutti i progetti', 
       path: '/projects',           
       icon: 'layout-dashboard' },
-      
-    { label: 'Oggi',            
-      path: '/dashboard',       
-      icon: 'calendar' },
-
-    { label: 'Scadenze',
-      path: '/dashboard/expiration',   
-      icon: 'calendar-clock' },
 
     { label: 'Notifiche',        
-      path: '/dashboard/notification',   
+      path: '/notifications',   
       icon: 'Bell' },
 
     { label: 'Profilo',        

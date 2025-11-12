@@ -1,16 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { CreateUserRequestPayload } from '../models/models';
 
 type TokenResponse = { accessToken: string; refreshToken: string };
-
-export interface CreateUserRequestPayload {
-  email: string;
-  password: string;
-  username: string;
-  firstName: string;
-  lastName: string;
-}
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -31,7 +24,7 @@ export class AuthService {
     localStorage.setItem(REFRESH_TOKEN_KEY, res.refreshToken);
   }
 
-  /** REGISTER su /user/register — il backend risponde 200 senza body */
+  /** REGISTER */
   async register(payload: CreateUserRequestPayload): Promise<void> {
     await firstValueFrom(
       this.http.post(`${this.USER_API}/register`, payload, {

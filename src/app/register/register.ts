@@ -4,7 +4,8 @@ import {
   ReactiveFormsModule, FormBuilder, Validators, ValidatorFn, AbstractControl, ValidationErrors
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, CreateUserRequestPayload } from '../services/auth.service';
+import { AuthService } from '../services/auth.service';
+import { CreateUserRequestPayload } from '../models/models';
 import { NgToastService } from 'ng-angular-popup';
 
 @Component({

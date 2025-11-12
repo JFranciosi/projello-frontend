@@ -1,15 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Phase {
-  _id: string;
-  project_id: string;
-  title: string;
-  order: number;
-  is_done?: boolean;
-  wip_limit?: number;
-}
+import { Phase } from '../models/models';
 
 @Injectable({ providedIn: 'root' })
 export class PhaseService {
