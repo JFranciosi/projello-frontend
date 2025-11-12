@@ -1,342 +1,295 @@
-/* ===== Base ============================================================= */
-:host, body{
-  display:block;
-  font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  color:#111111; background:#f9fafb;
-  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+/* Base */
+:host, body {
+  display: block;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #111827;
+  background-color: #F9FAFB;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== Navbar =========================================================== */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #E4B363;
-  padding: .9rem 1.6rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+/* --- Navbar --- */
+.navbar{
+  display:flex; justify-content:space-between; align-items:center;
+  background:#E4B363; padding:.9rem 1.6rem;
+  box-shadow:0 2px 8px #00000014; position:sticky; top:0; z-index:100;
 }
+.nav-left{ display:flex; align-items:center; gap:1rem; }
+.logo{ height:38px; width:auto; display:block; }
+.nav-right{ display:flex; align-items:center; }
+.icon-btn{ background:transparent; border:none; margin-left:1rem; padding:.4rem; border-radius:8px; cursor:pointer;
+  transition:transform .18s, background-color .2s, opacity .2s; }
+.icon-btn:hover{ background:#FFFFFF33; transform:scale(1.06); opacity:.92; }
+.icon-btn lucide-icon{ width:22px; height:22px; stroke-width:1.8; color:#000000; }
+.logout lucide-icon{ color:#B91C1C; }
 
-.nav-left { display: flex; align-items: center; gap: 1rem; }
-.logo { height: 38px; width: auto; display: block; }
-.nav-right { display: flex; align-items: center; }
-
-.icon-btn {
-  background: transparent; border: none; margin-left: 1rem; padding: .4rem;
-  border-radius: 8px; cursor: pointer;
-  transition: transform .18s, background-color .2s, opacity .2s;
-}
-.icon-btn:hover { background: rgba(255, 255, 255, .32); transform: scale(1.06); opacity: .92; }
-.icon-btn lucide-icon { width: 22px; height: 22px; stroke-width: 1.8; color: #000000; }
-.logout lucide-icon { color: #b91c1c; }
-
-/* ===== Layout =========================================================== */
+/* ====== LAYOUT: SIDEBAR + MAIN ====== */
 .dashboard-container {
-  display: flex;
-  min-height: calc(100vh - 70px);
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
 }
 
-.kanban {
-  display: flex;
-  flex: 1 1 auto;
-  gap: 2rem;
-  padding: 2rem;
-  overflow-x: auto;
-  background: #f7f9fc;
-  align-items: flex-start;
-}
+/* Main container accanto alla sidebar */
+.board-container { max-width: 100%; margin: 0; padding: 0.5rem; }
 
-/* ===== Colonne ========================================================== */
-.column {
-  background: #ffffff;
-  border-radius: 12px;
-  min-width: 340px;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .06);
-  padding: 1.2rem;
-  transition: transform .2s, box-shadow .2s;
+/* ===== Topbar progetto (statica) ===== */
+.project-topbar {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 1.9rem 2rem;
+  box-shadow: 0 2px 8px #0000000F;
+  margin: .5rem 0 1rem 0;
 }
-.column:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0, 0, 0, .08); }
+.topbar-left { min-width: 0; }
+.topbar-title { font-size: 1.35rem; line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
+.topbar-sub { margin: .15rem 0 0; color: #6B7280; font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.topbar-right { display: flex; align-items: flex-start; gap: .75rem; }
 
-.column-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: .2rem .2rem .6rem; margin: 0 0 .6rem;
-  border-bottom: 1px solid #f0f0f0;
+/* Collaborator pills */
+.collab-pills { display: flex; flex-wrap: wrap; gap: .35rem; }
+.pill {
+  display: inline-flex; align-items: center; gap: .35rem;
+  background-color: #F8FAFC;
+  border: 1px solid #E5E7EB;
+  color: #111827;
+  padding: .35rem .55rem;
+  border-radius: 999px;
+  font-size: .85rem;
 }
-.column-title { font-size: .98rem; font-weight: 800; letter-spacing: .2px; color: #111111; }
-.column-tools { display: inline-flex; align-items: center; gap: .5rem; }
+.pill.creator { background-color: #FFF8EE; border-color: #F5DDB7; }
+.pill-x { background: transparent; border: none; padding: 0; margin-left: .15rem; cursor: pointer; display: flex; align-items: center; border-radius: 999px; }
+.pill-x:hover { background: #0000000A; }
 
+/* =============== Griglia Fasi =============== */
+.phases-grid {
+  display: grid;
+  grid-template-columns: repeat( auto-fill, minmax(280px, 1fr) );
+  gap: 1rem; align-items: start;
+}
+.phase-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0000000F;
+  padding: .85rem;
+  display: flex; flex-direction: column;
+  min-height: 120px;
+}
+.phase-card.new-phase { border-style: dashed; }
+
+.phase-head { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; margin-bottom: .4rem; }
+.phase-title { font-size: 1.05rem; margin: 0; }
+.phase-desc  { color: #6B7280; margin: .15rem 0 0; font-size: .92rem; }
 .count-badge {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px;
-  background: #E4B363; color: #000000; font-weight: 800; font-size: .82rem; line-height: 1;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .08) inset; border: 1px solid #DEB056;
+  min-width: 28px; height: 28px; padding: 0 .5rem;
+  background-color: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  color: #111827;
+  border-radius: 999px; font-weight: 600;
 }
 
-/* ===== Icon buttons (base + varianti) ================================== */
-.btn-icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border: 1px solid #D9D9D9; border-radius: 8px;
-  background: #FFFFFF; cursor: pointer;
-  transition: background-color .15s, border-color .15s, box-shadow .2s, transform .08s;
+/* ===== Ghost task card ===== */
+.ghost-task-card {
+  display: flex; align-items: center; gap: .45rem;
+  border: 1px dashed #E5E7EB;
+  background-color: #FCFDFE;
+  padding: .6rem .7rem;
+  border-radius: 12px; cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, transform .06s ease;
+  margin: .2rem 0 .6rem;
 }
-.btn-icon lucide-icon { width: 18px; height: 18px; stroke-width: 2; color: #111111; }
-.btn-icon:hover { background: #FAFAFA; border-color: #CFCFCF; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-.btn-icon:active { transform: translateY(1px); }
-.btn-icon:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(228,179,99,.35); }
-.btn-icon:disabled, .btn-icon[disabled] { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.ghost-task-card:hover { background-color: #F9FAFB; border-color: #D1D5DB; transform: translateY(-1px); }
 
-/* Plus in header */
-.column-header .btn-icon.add {
-  display: grid; place-items: center; width: 28px; height: 28px; padding: 0; line-height: 0;
-  border-color: #E7D4B2; background: #F5F5F5;
-}
-.column-header .btn-icon.add:hover { background: #FFF3D6; border-color: #E4B363; box-shadow: 0 2px 10px rgba(228,179,99,.25); }
-.column-header .btn-icon.add:active { background: #FFE7AD; border-color: #D7A459; }
-.column-header .btn-icon.add lucide-icon, .column-header .btn-icon.add svg { width: 28px; height: 28px; }
-
-/* (Opzionale) icona X generica già pronta */
-#nuova-task { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; line-height: 0;
-  border: 1px solid #D9D9D9; border-radius: 8px; background: #FFFFFF; cursor: pointer;
-  transition: background-color .15s, border-color .15s, box-shadow .2s, transform .08s;
-}
-#nuova-task:hover { background: #FAFAFA; border-color: #CFCFCF; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-#nuova-task:active { transform: translateY(1px); }
-#nuova-task:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(228,179,99,.35); }
-#nuova-task lucide-icon, #nuova-task svg { width: 18px; height: 18px; color: #111111; }
-
-/* ===== Stato vuoto colonna ============================================= */
-.column-empty {
-  display: flex; align-items: center; justify-content: center;
-  color: #666666; background: #FAFAFA; border: 1px dashed #E6E6E6;
-  border-radius: 10px; padding: 1rem; height: 72px; font-size: .92rem;
+/* ===== Inline task/phase form (SCOPED dentro le card) ===== */
+.phase-card .inline-task-form,
+.inline-phase-form {
+  border: 1px solid #E5E7EB; border-radius: 12px;
+  padding: .85rem; background-color: #FFFFFF; margin: .2rem 0 .6rem;
+  box-shadow: 0 1px 2px #00000008;
 }
 
-/* ===== Card Task ======================================================== */
-.task-card {
-  position: relative; background: #F9FAFB; border-left: 5px solid #E4B363;
-  border-radius: 10px; padding: 1rem .999rem .9rem 1rem; margin-bottom: 1rem;
-  transition: transform .2s, box-shadow .2s, opacity .2s;
+.phase-card .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.phase-card .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1; gap: .7rem; align-items: end; }
+.phase-card .form-group, .inline-phase-form .form-group { display: flex; flex-direction: column; gap: .35rem; }
+.phase-card .form-group label, .inline-phase-form .form-group label { font-size: .9rem; color: #374151; font-weight: 600; }
+
+/* Input, textarea, select — stile Projello */
+.phase-card input[type="text"], .phase-card input[type="date"], .phase-card select, .phase-card textarea,
+.inline-phase-form input[type="text"], .inline-phase-form textarea {
+  width: 100%; border: 1px solid #E5E7EB; border-radius: 10px;
+  padding: .6rem .7rem; background-color: #FFFFFF; color: #111827; outline: none;
+  transition: border-color .18s, box-shadow .18s, background-color .18s;
 }
-.task-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.08); }
-
-.task-header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .4rem; }
-.task-title { font-size: 1rem; font-weight: 700; color: #1B1B1B; margin: 0; }
-
-.task-actions { display: inline-flex; gap: .25rem; }
-.task-actions .btn-icon { width: 30px; height: 30px; border: 1px solid #EEEEEE; background: #FFFFFF; }
-.task-actions .btn-icon:hover { background: #F6F6F6; }
-.task-actions .btn-icon.more lucide-icon { width: 18px; height: 18px; }
-
-/* Meta */
-.task-meta { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
-.meta-item { display: inline-flex; align-items: center; gap: .35rem; font-size: .88rem; color: #333333; }
-.meta-item lucide-icon { width: 16px; height: 16px; stroke-width: 1.8; color: #555555; }
-.due { font-weight: 600; letter-spacing: .2px; }
-
-.priority {
-  display: inline-block; padding: .25rem .6rem; border-radius: 6px; font-size: .75rem; font-weight: 800; margin-left: auto;
-}
-.priority.high { background: #E74C3C; color: #FFFFFF; }
-.priority.medium { background: #F39C12; color: #FFFFFF; }
-.priority.low { background: #2ECC71; color: #FFFFFF; }
-
-/* Stats */
-.task-stats { display: flex; align-items: center; gap: .75rem; margin-top: .65rem; color: #444444; }
-.stat { display: inline-flex; align-items: center; gap: .35rem; font-size: .86rem; }
-.stat lucide-icon { width: 16px; height: 16px; }
-
-/* ===== Colonna "Aggiungi Fase" (ghost card) ============================ */
-.column.new-phase {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 360px;
-  max-width: 520px;
-  width: 100%;
-  padding: 1.6rem;
-  border: 2px dashed #E4B363;
-  background:
-    linear-gradient(0deg, rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
-    repeating-linear-gradient(45deg, #FFF6E6 0 10px, #FFF0D3 10px 20px);
-  box-shadow: none;
-  margin: 0;                 /* in linea con le altre colonne */
-  align-self: flex-start;    /* allineata in alto come le altre */
-}
-.column.new-phase:hover {
-  border-color: #D7A459;
-  background:
-    linear-gradient(0deg, rgba(255,255,255,0.82), rgba(255,255,255,0.82)),
-    repeating-linear-gradient(45deg, #FFF6E6 0 10px, #FFE7C2 10px 20px);
+.phase-card textarea, .inline-phase-form textarea { resize: vertical; min-height: 90px; }
+.phase-card input[type="text"]::placeholder,
+.inline-phase-form input[type="text"]::placeholder,
+.phase-card textarea::placeholder,
+.inline-phase-form textarea::placeholder { color: #9CA3AF; }
+.phase-card input[type="text"]:focus, .phase-card input[type="date"]:focus, .phase-card select:focus, .phase-card textarea:focus,
+.inline-phase-form input[type="text"]:focus, .inline-phase-form textarea:focus {
+  border-color: #E4B363;
+  box-shadow: 0 0 0 3px #E4B36333;
 }
 
-/* ===== Colonna "Aggiungi Fase" (ghost card) ============================ */
-.column.new-phase {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  min-width: 340px;
-  max-width: 400px;
-  width: 100%;
-  height: fit-content;
-  padding: 2rem 1rem;
-  border: 2px dashed #E4B363;
-  background:
-    linear-gradient(0deg, rgba(255,255,255,0.8), rgba(255,255,255,0.8)),
-    repeating-linear-gradient(45deg, #FFF7E8 0 10px, #FFF0D1 10px 20px);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform .18s ease, box-shadow .2s ease, border-color .2s;
+/* ===== Bottoni (Salva / Annulla / Crea fase) ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+  background-color: #111827; color: #FFFFFF; border: 1px solid #0B1220;
+  padding: .55rem .9rem; border-radius: 10px; cursor: pointer;
+  font-weight: 800; letter-spacing: .2px;
+  transition: background-color .18s, box-shadow .2s, transform .06s, opacity .18s, border-color .18s;
 }
+.btn:hover  { background-color: #0F1626; box-shadow: 0 8px 22px #00000029; }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px #E4B36333; }
 
-.column.new-phase:hover {
-  transform: translateY(-2px);
-  border-color: #D7A459;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  background:
-    linear-gradient(0deg, rgba(255,255,255,0.9), rgba(255,255,255,0.9)),
-    repeating-linear-gradient(45deg, #FFF7E8 0 10px, #FFE5B6 10px 20px);
+.btn.primary { background-color: #111827; border-color: #0B1220; }
+.btn.ghost   {
+  background-color: #FFFFFF; color: #111827; border: 1px solid #E5E7EB;
 }
+.btn.ghost:hover { background-color: #F9FAFB; border-color: #D1D5DB; }
+.btn[disabled] { opacity: .6; cursor: not-allowed; box-shadow: none; }
 
-/* Pulsante “Aggiungi colonna” interno */
+.btn.small { padding: .42rem .7rem; font-size: .92rem; border-radius: 9px; }
+.btn.tiny  { padding: .3rem .55rem; font-size: .85rem; border-radius: 8px; }
+
+/* ===== “Aggiungi Fase” CTA ===== */
 .add-phase-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .8rem;
-  padding: 1.2rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #111;
-  font-weight: 800;
-  font-size: 1rem;
-  letter-spacing: .2px;
-  transition: transform .15s ease, opacity .2s ease;
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .95rem; border-radius: 14px; border: 1px dashed #E5E7EB; background-color: #FFFDF7;
+  cursor: pointer; font-weight: 800; letter-spacing: .2px;
+  transition: background-color .18s, border-color .18s, transform .06s, box-shadow .18s;
+}
+.add-phase-btn:hover { background-color: #FFF8EE; border-color: #F5DDB7; box-shadow: 0 4px 12px #00000014; }
+.add-phase-btn:active { transform: translateY(1px); }
+
+.inline-actions {
+  display: flex; gap: 0.6rem; margin-top: 0.6rem;
 }
 
-.add-phase-btn lucide-icon {
-  width: 38px;
-  height: 38px;
-  stroke-width: 2;
-  color: #E4B363;
-  transition: transform .2s ease;
+.form-actions.right {
+  display:flex; gap: 0.6rem; margin-top: 0.6rem;
 }
 
-.add-phase-btn:hover lucide-icon {
-  transform: scale(1.1);
-  color: #D7A459;
+/* ===== PRIORITÀ — pill segmented (Alta / Media / Bassa) ===== */
+.flag-priority {
+  display: inline-flex; align-items: center; gap: 0;
+  border: 1px solid #E5E7EB; border-radius: 999px; padding: .18rem; background-color: #FFFFFF;
+}
+.flag-priority label {
+  position: relative;
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .42rem .9rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer; user-select: none;
+  color: #374151; font-weight: 800; letter-spacing: .2px; font-size: .9rem;
+  transition: background-color .18s, border-color .18s, color .18s, transform .06s;
+}
+.flag-priority label + label { margin-left: .12rem; }
+.flag-priority label:hover { background-color: #F9FAFB; }
+
+.flag-priority label input[type="radio"] {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
 }
 
-.add-phase-btn:hover {
-  transform: translateY(-3px);
-  opacity: 0.9;
+/* bullet decorativo */
+.flag-priority label::before {
+  content: ""; width: 8px; height: 8px; border-radius: 999px;
+  background-color: #D1D5DB; display: inline-block;
+  box-shadow: inset 0 0 0 2px #FFFFFF;
 }
 
-/* ===== FAB ============================================================== */
-.fab {
-  position: fixed; right: 1.8rem; bottom: 1.8rem;
-  width: 64px; height: 64px; border: none; border-radius: 50%;
-  background: #E4B363; color: #000000; font-size: 2rem; font-weight: 700; cursor: pointer;
-  box-shadow: 0 8px 22px rgba(0,0,0,.22); transition: transform .2s, box-shadow .2s; z-index: 90;
+/* Stato selezionato per ciascun livello (usa :has) */
+.flag-priority label:has(input[type="radio"]:checked) {
+  background-color: #FFF4DA; border-color: #F5DDB7; color: #111827;
 }
-.fab:hover { transform: scale(1.06); box-shadow: 0 10px 26px rgba(0,0,0,.28); }
 
-/* ===== Modale (Nuovo Task/Fase/Progetto) =============================== */
-.modal {
-  position: fixed; inset: 0; display: flex; justify-content: center; align-items: center;
-  background: rgba(0,0,0,.45); backdrop-filter: blur(5px); z-index: 110; animation: fadeIn .22s ease;
+/* Colori per livello */
+.flag-priority label:has(input[value="high"]:checked) {
+  background-color: #FEE2E2; border-color: #FECACA; color: #7F1D1D;
 }
-.modal-content {
-  position: relative; width: 560px; max-width: 92vw; background: #FFFFFF; border-radius: 14px;
-  box-shadow: 0 18px 50px rgba(0,0,0,.28); overflow: hidden; padding: 0; animation: scaleIn .18s ease;
+.flag-priority label:has(input[value="medium"]:checked) {
+  background-color: #FEF9C3; border-color: #FDE68A; color: #78350F;
 }
-.modal-content::before {
-  content: ""; position: absolute; left: 0; top: 0; height: 5px; width: 100%; background: #E4B363;
+.flag-priority label:has(input[value="low"]:checked) {
+  background-color: #DCFCE7; border-color: #BBF7D0; color: #064E3B;
 }
-.modal-content>h2 {
-  margin: 0; padding: 1.1rem 1.2rem .9rem 1.2rem; font-size: 1.2rem; font-weight: 800; color: #111111;
-  border-bottom: 1px solid #f0f0f0;
-}
-.modal-content .close {
-  position: absolute; top: .7rem; right: .8rem; width: 32px; height: 32px; display: grid; place-items: center;
-  background: #FFFFFF; color: #111111; border: 1px solid #E9E9E9; border-radius: 8px; font-size: 18px; line-height: 0;
-  cursor: pointer; transition: transform .15s, background-color .2s, opacity .2s, border-color .2s;
-}
-.modal-content .close:hover { background: #F5F5F5; border-color: #D9D9D9; transform: scale(1.06); opacity: .95; }
-.modal-content .close:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(228,179,99,.35); }
 
-.modal-content form { padding: 1.1rem 1.2rem 1.3rem 1.2rem; display: block; }
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; margin: 0 0 .35rem 0; font-size: .9rem; font-weight: 600; color: #333333; }
+/* bullet per livello selezionato */
+.flag-priority label:has(input[value="high"]:checked)::before { background-color: #DC2626; }
+.flag-priority label:has(input[value="medium"]:checked)::before { background-color: #D97706; }
+.flag-priority label:has(input[value="low"]:checked)::before { background-color: #059669; }
 
-input, textarea, select {
-  width: 100%; padding: .75rem .8rem; border: 1px solid #CCCCCC; border-radius: 10px; background: #FFFFFF;
-  color: #111111; font-size: 1rem; outline: none; transition: border-color .2s, box-shadow .2s;
+/* Focus accessibile su radio */
+.flag-priority label:has(input[type="radio"]:focus-visible) {
+  box-shadow: 0 0 0 3px #E4B36333;
 }
-textarea { min-height: 110px; resize: vertical; }
-input:focus, textarea:focus, select:focus { border-color: #E4B363; box-shadow: 0 0 0 3px rgba(228,179,99,.25); }
 
-.save-btn {
-  margin-top: .5rem; width: 100%; background: #111111; color: #FFFFFF; border: none; border-radius: 10px;
-  padding: .9rem 1.1rem; font-weight: 800; letter-spacing: .2px; cursor: pointer;
-  transition: background-color .25s, transform .12s, box-shadow .2s;
+/* ===== Task list ===== */
+.task-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.task-row {
+  border: 1px solid #E5E7EB; border-radius: 12px; padding: .6rem .7rem; background-color: #FFFFFF;
+  transition: box-shadow .15s ease, transform .05s ease, border-color .15s ease, background-color .15s ease;
 }
-.save-btn:hover { background: #222222; box-shadow: 0 8px 22px rgba(0,0,0,.16); }
-.save-btn:active { transform: translateY(1px); }
+.task-row:hover { box-shadow: 0 2px 8px #0000000F; }
+.task-row:active { transform: scale(0.998); }
+.row-main { display: flex; justify-content: space-between; align-items: center; gap: .6rem; }
+.task-title { margin: 0; font-size: .98rem; }
+.badge { display: inline-block; padding: .18rem .45rem; border-radius: 999px; font-size: .78rem; border: 1px solid #E5E7EB; background-color: #F9FAFB; }
+.badge.high   { background-color: #FEE2E2; border-color: #FECACA; color: #7F1D1D; }
+.badge.medium { background-color: #FEF9C3; border-color: #FDE68A; color: #78350F; }
+.badge.low    { background-color: #DCFCE7; border-color: #BBF7D0; color: #064E3B; }
+.row-sub { display: flex; gap: .8rem; margin-top: .25rem; color: #6B7280; font-size: .86rem; }
+.meta { display: inline-flex; align-items: center; gap: .35rem; }
+.task-empty { color: #6B7280; font-style: italic; padding: .4rem; }
 
-/* ===== Pannello Dettaglio ============================================== */
+/* ===== Card "Aggiungi fase" (DOM sempre presente) ===== */
+.is-hidden { display: none !important; }
+.phase-card.new-phase { align-self: start; }
+.inline-phase-form { will-change: contents; }
+
+/* =============== Task panel (slide-in) =============== */
 .task-panel {
-  position: fixed; top: 0; right: -420px; height: 100%; width: 400px; background: #FFFFFF;
-  box-shadow: -2px 0 16px rgba(0,0,0,.1); transition: right .28s ease; overflow-y: auto; z-index: 120;
+  position: fixed; top: 0; right: 0; height: 100dvh; width: 380px; max-width: 90vw;
+  background-color: #FFFFFF; border-left: 1px solid #E5E7EB;
+  box-shadow: -6px 0 16px #00000014;
+  transform: translateX(100%); transition: transform .22s ease;
+  z-index: 200; display: flex; flex-direction: column;
 }
-.task-panel.open { right: 0; }
+.task-panel.open { transform: translateX(0); }
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: .9rem; border-bottom: 1px solid #E5E7EB; }
+.panel-title h2 { margin: 0; font-size: 1.05rem; }
+.panel-actions { display: flex; gap: .5rem; }
+.panel-body { padding: .85rem; overflow: auto; flex: 1; }
+.meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: .8rem; }
+.meta-chip { display: flex; gap: .55rem; align-items: center; padding: .5rem .6rem; border: 1px solid #E5E7EB; border-radius: 12px; background-color: #FAFAFA; }
+.meta-label { font-size: .8rem; color: #6B7280; }
+.meta-value .priority { padding: .1rem .4rem; border-radius: 999px; border: 1px solid #E5E7EB; }
+.panel-section { margin: .9rem 0; }
+.section-head { display: flex; align-items: center; gap: .45rem; margin-bottom: .35rem; }
+.section-badge { margin-left: auto; display: inline-flex; align-items: center; justify-content: center; height: 24px; min-width: 24px; padding: 0 .4rem; background-color: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 999px; font-size: .8rem; }
+.files { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+.file { display: flex; align-items: center; gap: .45rem; }
+.file a { color: #1F2937; text-decoration: none; border-bottom: 1px dashed #D1D5DB; }
+.file a:hover { color: #111827; border-bottom-color: #9CA3AF; }
+.file.muted { color: #6B7280; }
+.panel-footer { padding: .85rem; border-top: 1px solid #E5E7EB; }
 
-.panel-header {
-  display: flex; align-items: center; justify-content: space-between;
-  background: #E4B363; padding: 1rem 1.1rem; font-weight: 700; color: #000000;
+/* =============== Icone =============== */
+lucide-icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; }
+
+/* ====== Responsive ====== */
+@media (max-width: 1024px) {
+  .dashboard-container { grid-template-columns: 1fr; }
+  app-dashboard-sidebar { position: static; max-height: none; }
 }
-.panel-actions { display: inline-flex; gap: .4rem; }
-.panel-actions .btn-icon { width: 28px; height: 28px; border: 1px solid #E9E9E9; background: #FFFFFF; }
-.panel-actions .btn-icon.danger lucide-icon { color: #B91C1C; }
-
-.panel-body { padding: 1.3rem 1.2rem 1.4rem; line-height: 1.55; color: #222222; }
-
-.meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-bottom: 1rem; }
-.meta-chip {
-  display: flex; gap: .6rem; align-items: center; background: #FAFAFA; border: 1px solid #EFEFEF;
-  border-radius: 10px; padding: .6rem .7rem;
+@media (max-width: 720px) {
+  .project-topbar { flex-direction: column; gap: .5rem; }
+  .phase-card .grid-2, .phase-card .grid-3 { grid-template-columns: 1fr; }
 }
-.meta-chip lucide-icon { width: 28px; height: 28px; }
-.meta-label { font-size: .75rem; color: #666666; }
-.meta-value { font-weight: 700; color: #111111; }
-
-.panel-section { margin: 1rem 0; }
-.section-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .4rem; }
-.section-head lucide-icon { width: 28px; height: 28px; }
-.section-badge { background: #F1F1F1; color: #333333; padding: .15rem .5rem; border-radius: 999px; font-size: .75rem; font-weight: 700; }
-
-.files { list-style: none; margin: .4rem 0 0; padding: 0; }
-.file { display: flex; align-items: center; gap: .5rem; padding: .35rem 0; color: #333333; border-bottom: 1px dashed #EFEFEF; }
-.file.muted { color: #777777; border-bottom: none; }
-
-.panel-footer { padding: .9rem 1.1rem 1.2rem; border-top: 1px solid #F0F0F0; }
-.btn.primary {
-  display: inline-flex; align-items: center; gap: .5rem; background: #111111; color: #FFFFFF;
-  border: none; padding: .7rem 1rem; border-radius: 10px; font-weight: 800; cursor: pointer;
-}
-.btn.primary lucide-icon { width: 28px; height: 28px; }
-
-/* ===== Accessibilità e animazioni ====================================== */
-a, button, .task-card[role="button"], .close { outline: none; }
-a:focus-visible, button:focus-visible, .task-card[role="button"]:focus-visible, .close:focus-visible {
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, .2); border-radius: 8px;
-}
-
-@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-@keyframes scaleIn { from { transform: scale(.96); opacity: .6 } to { transform: scale(1); opacity: 1 } }

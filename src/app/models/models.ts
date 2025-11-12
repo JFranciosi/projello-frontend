@@ -11,6 +11,7 @@ export interface UserResponse {
   email: string;
   firstName: string;
   lastName: string;
+  username: string;
 }
 
 export interface ProjectResponse {

@@ -1,332 +1,284 @@
-import {
-  Component,
-  HostListener,
-  OnInit,
-  signal,
-  computed,
-  inject,
-} from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, ActivatedRoute } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
 import { NgToastService } from 'ng-angular-popup';
 
-import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
-import { PhaseService, } from '../services/phase.service';
+import { ProjectsService } from '../services/project.service';
+import { PhaseService } from '../services/phase.service';
 import { TaskService } from '../services/task.service';
-import { Task } from '../models/models';
-import { Phase } from '../models/models';
+import { AuthService } from '../services/auth.service';
+
+import {
+  ProjectResponse,
+  Phase,
+  Task,
+  UserResponse
+} from '../models/models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, DashboardSidebar],
+  imports: [CommonModule, FormsModule, LucideAngularModule, DashboardSidebar],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css'],
+  styleUrls: ['./dashboard.css']
 })
 export class Dashboard implements OnInit {
+  // router/services
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private projectsService = inject(ProjectsService);
+  private phaseService = inject(PhaseService);
+  private taskService = inject(TaskService);
+  private auth = inject(AuthService);
+  private toast = inject(NgToastService);
+
   // UI state
-  modalOpen = signal(false);
-  panelOpen = signal(false);
-  modalType = signal<'task' | 'project' | 'phase'>('task');
   loading = signal(false);
   errorMsg = signal<string | null>(null);
 
-  // Data state
-  projectId = signal<string | null>(null);
-  phases = signal<Phase[]>([]);
-  tasksByPhase = signal<Record<string, Task[]>>({});
+  // Project (topbar)
+  project = signal<ProjectResponse | null>(null);
+  addingCollaborator = signal(false);
+  collabEmail = '';
+
+  // Board data
+  phasesSig = signal<Phase[]>([]);
+  tasksSig = signal<Task[]>([]);
+
+  // Inline Phase
+  addingPhase = signal(false);
+  phaseDraft = signal<{ title: string; description?: string }>({ title: '', description: '' });
+
+  // Inline Task
+  inlineTaskPhaseId = signal<string | null>(null);
+  inlineDraft = signal<{
+    title: string;
+    description?: string;
+    expiration_date?: string;
+    priority: 'high' | 'medium' | 'low';
+    assigneeId?: string;
+  }>({ title: '', description: '', expiration_date: '', priority: 'medium', assigneeId: '' });
+
+  // Panel
+  panelOpen = signal(false);
   selectedTask = signal<Task | null>(null);
-  draftPhaseId = signal<string | null>(null);
 
-  totalCount = computed(() =>
-    Object.values(this.tasksByPhase()).reduce((acc, arr) => acc + (arr?.length || 0), 0)
-  );
-
-  // Services
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
-  private readonly toast = inject(NgToastService);
-  private readonly phaseSrv = inject(PhaseService);
-  private readonly taskSrv = inject(TaskService);
+  // Helpers
+  phases = computed(() => this.phasesSig());
+  tasksFor = (phaseId: string) => this.tasksSig().filter(t => t.phase_id === phaseId);
+  currentProject = () => this.project();
+  inlineTaskForPhase = () => this.inlineTaskPhaseId();
 
   ngOnInit(): void {
-    // project id dalla route o dal localStorage
-    const fromRoute = this.route.snapshot.paramMap.get('id');
-    const fallback = localStorage.getItem('project_id');
-    const pid = fromRoute || fallback;
-
-    if (!pid) {
-      // se non ho un progetto, rimando alla lista progetti
-      this.router.navigateByUrl('/projects');
-      return;
-    }
-
-    this.projectId.set(pid);
-    localStorage.setItem('project_id', pid);
-    this.loadBoard();
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) { this.router.navigateByUrl('/projects'); return; }
+    this.loadProject(id);
   }
 
-  /** Carica fasi e task (ordine: lasciamo quello di creazione) */
-  loadBoard(): void {
-    const pid = this.projectId();
-    if (!pid) return;
-
+  // ===== LOAD via GET /project/:id (Bearer gestito nel service/interceptor) =====
+  private async loadProject(id: string) {
     this.loading.set(true);
     this.errorMsg.set(null);
 
-    this.phaseSrv.list(pid).subscribe({
-      next: (cols) => {
-        const ordered = [...(cols || [])]; // niente sort: l'ordine è quello di creazione
-        this.phases.set(ordered);
-
-        // se non ci sono fasi, resetto e chiudo
-        if (!ordered.length) {
-          this.tasksByPhase.set({});
-          this.loading.set(false);
-          return;
-        }
-
-        // mappa task per ogni fase
-        const map: Record<string, Task[]> = {};
-        ordered.forEach((p) => (map[p._id] = []));
-        this.tasksByPhase.set(map);
-
-        ordered.forEach((p) => this.loadPhaseTasks(p._id));
-      },
-      error: (err) => {
-        console.error('Errore caricamento fasi:', err);
-        this.errorMsg.set('Impossibile caricare le fasi.');
-        this.phases.set([]);
-        this.tasksByPhase.set({});
-        this.loading.set(false);
-      },
-    });
-  }
-
-  private loadPhaseTasks(phase_id: string): void {
-    const pid = this.projectId();
-    if (!pid) return;
-
-    this.taskSrv.list({ project_id: pid, phase_id }).subscribe({
-      next: (items) => {
-        const map = { ...this.tasksByPhase() };
-        map[phase_id] = items ?? [];
-        this.tasksByPhase.set(map);
-      },
-      error: (err) => {
-        console.error('Errore caricamento tasks per fase', phase_id, err);
-        this.toast.danger('Errore', 'Impossibile caricare i task della colonna.');
-      },
-      complete: () => this.loading.set(false),
-    });
-  }
-
-  /** Helpers */
-  tasksFor(phaseId: string): Task[] {
-    return this.tasksByPhase()[phaseId] ?? [];
-  }
-
-  trackById(_i: number, item: { _id: string }): string {
-    return item._id;
-  }
-
-  /** Navbar / Logout */
-  logout(): void {
     try {
-      localStorage.removeItem('auth_token');
-      sessionStorage.removeItem('auth_token');
-    } catch {}
-    this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
-  }
+      const res: any = await this.projectsService.getProjectById(id);
+      // accetto sia wrapper {project, phases, tasks} sia oggetto progetto piatto
+      const proj: ProjectResponse = res.project ?? res;
+      const phases: Phase[] = res.phases ?? res.project?.phases ?? [];
+      const tasks: Task[] = (res.tasks ?? res.project?.tasks ?? []).map((t: any) => ({
+        ...t,
+        phase_id: t.phase_id ?? t.phaseId // normalizza naming
+      }));
 
-  /** Modale */
-  openModal(type: 'task' | 'project' | 'phase' = 'task', phaseId?: string): void {
-    this.modalType.set(type);
-    const target = phaseId || this.phases()[0]?._id || null;
-    this.draftPhaseId.set(target);
-    this.modalOpen.set(true);
-  }
-
-  closeModal(): void {
-    this.modalOpen.set(false);
-  }
-
-  /** Salvataggi */
-  onSave(ev?: Event): void {
-    ev?.preventDefault();
-
-    const pid = this.projectId();
-    const type = this.modalType();
-
-    if (type === 'phase') {
-      if (!pid) return;
-
-      const titleInput = document.getElementById('titolo') as HTMLInputElement | null;
-      const descInput  = document.getElementById('descrizioneFase') as HTMLTextAreaElement | null;
-
-      const title = titleInput?.value?.trim();
-      const description = descInput?.value?.trim() || undefined;
-
-      if (!title) {
-        this.toast.warning('Attenzione', 'Inserisci un nome per la colonna.');
-        return;
-      }
-
-      // crea fase con solo titolo (+ descrizione opzionale), legata al project_id
-      this.phaseSrv.create(pid, { title, ...(description ? { description } : {}) }).subscribe({
-        next: (created) => {
-          // append a destra (ordine di creazione)
-          const updated = [...this.phases(), created];
-          this.phases.set(updated);
-
-          // inizializza colonna vuota nella mappa task
-          const map = { ...this.tasksByPhase() };
-          map[created._id] = [];
-          this.tasksByPhase.set(map);
-
-          this.toast.success('Colonna creata', `"${created.title}" aggiunta con successo.`);
-          this.closeModal();
-        },
-        error: (err) => {
-          console.error('Errore creazione fase:', err);
-          this.toast.danger('Errore', 'Creazione colonna fallita.');
-        },
-      });
-
-      return;
+      this.project.set(proj);
+      this.phasesSig.set(phases);
+      this.tasksSig.set(tasks);
+    } catch (err) {
+      console.error('GET /project/:id error', err);
+      this.errorMsg.set('Impossibile caricare il progetto.');
+      this.toast.danger('Errore', 'Caricamento progetto fallito', 3000);
+    } finally {
+      this.loading.set(false);
     }
-
-    if (type === 'task') {
-      const dest = this.draftPhaseId();
-      if (!pid || !dest) {
-        this.toast.warning('Attenzione', 'Seleziona prima una colonna.');
-        return;
-      }
-
-      const titleInput = document.getElementById('titolo') as HTMLInputElement | null;
-      const descInput  = document.getElementById('descrizione') as HTMLTextAreaElement | null;
-      const dueInput   = document.getElementById('scadenza') as HTMLInputElement | null;
-      const prioSelect = document.getElementById('priorita') as HTMLSelectElement | null;
-
-      const title = (titleInput?.value || 'Nuovo task').trim();
-      const description = descInput?.value?.trim() || '';
-      const expiration_date = dueInput?.value || undefined;
-      const priority = (prioSelect?.value as Task['priority']) || 'medium';
-
-      const payload: { project_id: string; phase_id: string; title: string } & Partial<Task> = {
-        project_id: pid,
-        phase_id: dest,
-        title,
-        description,
-        expiration_date,
-        priority,
-      };
-
-      this.taskSrv.create(payload).subscribe({
-        next: (created) => {
-          const map = { ...this.tasksByPhase() };
-          map[dest] = [created, ...(map[dest] || [])];
-          this.tasksByPhase.set(map);
-          this.toast.success('Creato', 'Task creato con successo.');
-          this.closeModal();
-        },
-        error: (err) => {
-          console.error('Errore creazione task:', err);
-          this.toast.danger('Errore', 'Creazione task fallita.');
-        },
-      });
-
-      return;
-    }
-
-    // project: placeholder
-    this.toast.info('Info', 'Crea progetto: integra la tua API /projects.');
-    this.closeModal();
   }
 
-  /** Pannello task */
-  openPanel(task?: Task): void {
-    this.panelOpen.set(true);
+  // ===== Collaboratori (solo UI) =====
+  addCollaborator() {
+    const email = (this.collabEmail || '').trim();
+    if (!email) return;
 
-    if (!this.projectId() || !task?._id) {
-      this.selectedTask.set(task ?? null);
-      return;
-    }
+    const [local] = email.split('@');
+    const pretty = (local || 'User').replace(/[._-]+/g, ' ').trim();
+    const firstName = pretty.split(' ')[0] || 'User';
+    const lastName = pretty.split(' ').slice(1).join(' ') || '';
 
-    this.taskSrv.getById(task._id).subscribe({
-      next: (full) => this.selectedTask.set(full),
-      error: () => {
-        this.selectedTask.set(task ?? null);
-        this.toast.warning('Attenzione', 'Dettagli non disponibili.');
+    const p = this.project(); if (!p) return;
+    const newC: UserResponse = {
+      id: 'tmp-' + uid(),
+      email,
+      username: pretty || 'user',
+      firstName,
+      lastName
+    };
+    this.project.set({ ...p, collaborators: [...(p.collaborators || []), newC] });
+    this.collabEmail = '';
+    this.addingCollaborator.set(false);
+    this.toast.success('Aggiunto', 'Collaboratore aggiunto (solo UI)', 2000);
+  }
+
+  removeCollaborator(id: string) {
+    const p = this.project(); if (!p) return;
+    this.project.set({ ...p, collaborators: (p.collaborators || []).filter(c => c.id !== id) });
+    this.toast.info('Rimosso', 'Collaboratore rimosso (solo UI)', 2000);
+  }
+
+  // ===== Fasi =====
+  startInlinePhase() {
+    this.addingPhase.set(true);
+    this.phaseDraft.set({ title: '', description: '' });
+  }
+
+  cancelInlinePhase() {
+    this.addingPhase.set(false);
+    this.phaseDraft.set({ title: '', description: '' });
+  }
+
+  saveInlinePhase() {
+    const d = this.phaseDraft();
+    const p = this.project();
+    if (!p || !d.title?.trim()) return;
+
+    // Includo project_id come da tuoi models
+    this.phaseService.create(p.id, {
+      title: d.title.trim(),
+      description: (d.description || '').trim()
+    } as any).subscribe({
+      next: (created: Phase) => {
+        this.phasesSig.set([...this.phasesSig(), created]);
+        this.addingPhase.set(false);
+        this.startInlineTask(created._id);
+        this.toast.success('OK', 'Fase creata', 2000);
       },
+      error: (e) => {
+        console.error('create phase error', e);
+        this.toast.danger('Errore', 'Creazione fase fallita', 3000);
+      }
     });
   }
 
-  closePanel(): void {
-    this.panelOpen.set(false);
-    this.selectedTask.set(null);
-  }
-
-  /** Esc chiude modale/pannello */
-  @HostListener('document:keydown.escape')
-  onEsc(): void {
-    if (this.modalOpen()) this.closeModal();
-    if (this.panelOpen()) this.closePanel();
-  }
-
-  /** Azioni Task */
-  moveTaskToPhase(task: Task, toPhaseId: string, position = 0): void {
-    if (!this.projectId()) {
-      this.toast.warning('Attenzione', 'Spostamento non disponibile senza backend.');
-      return;
-    }
-
-    this.taskSrv.move(task._id, { phase_id: toPhaseId, position }).subscribe({
-      next: (updated) => {
-        this.removeFromBoard(task._id);
-        const map = { ...this.tasksByPhase() };
-        map[toPhaseId] = [updated, ...(map[toPhaseId] || [])];
-        this.tasksByPhase.set(map);
-        this.toast.success('Spostato', 'Task spostato di colonna.');
-      },
-      error: () => this.toast.danger('Errore', 'Spostamento fallito.'),
+  // ===== Task =====
+  startInlineTask(phaseId: string) {
+    const creatorId = this.project()?.creator?.id;
+    this.inlineTaskPhaseId.set(phaseId);
+    this.inlineDraft.set({
+      title: '',
+      description: '',
+      expiration_date: '',
+      priority: 'medium',
+      assigneeId: creatorId
     });
   }
 
-  markCompleted(task: Task): void {
-    // se non c'è una colonna "done" dedicata, manteniamo lo spostamento manuale
-    const donePhase = this.phases().find((p: any) => (p as any).is_done);
-    if (!donePhase) {
-      this.toast.warning('Attenzione', 'Non esiste una colonna "Completato".');
-      return;
-    }
-    this.moveTaskToPhase(task, donePhase._id, 0);
+  cancelInlineTask() {
+    const creatorId = this.project()?.creator?.id;
+    this.inlineTaskPhaseId.set(null);
+    this.inlineDraft.set({
+      title: '',
+      description: '',
+      expiration_date: '',
+      priority: 'medium',
+      assigneeId: creatorId
+    });
   }
 
-  deleteTask(task: Task): void {
-    if (!this.projectId()) {
-      this.removeFromBoard(task._id);
-      if (this.selectedTask()?._id === task._id) this.closePanel();
-      this.toast.success('Eliminato', 'Task rimosso localmente.');
-      return;
-    }
+  setDraftPriority(level: 'high' | 'medium' | 'low') {
+    this.inlineDraft.set({ ...this.inlineDraft(), priority: level });
+  }
 
-    this.taskSrv.delete(task._id).subscribe({
+  saveInlineTask() {
+    const phaseId = this.inlineTaskPhaseId();
+    const d = this.inlineDraft();
+    const p = this.project();
+    if (!phaseId || !d.title?.trim() || !p) return;
+
+    // Etichette assegnatari per UI ("Nome Cognome")
+    const assigneesLabels: string[] = [];
+    const assigneeId = d.assigneeId || p.creator.id;
+    if (assigneeId === p.creator.id) {
+      assigneesLabels.push(`${p.creator.firstName} ${p.creator.lastName}`.trim());
+    }
+    const c = (p.collaborators || []).find(x => x.id === assigneeId);
+    if (c) assigneesLabels.push(`${c.firstName} ${c.lastName}`.trim());
+
+    this.taskService.create({
+      project_id: p.id,
+      phase_id: phaseId,
+      title: d.title.trim(),
+      description: (d.description || '').trim(),
+      expiration_date: d.expiration_date || undefined,
+      priority: d.priority
+    } as any).subscribe({
+      next: (created: Task) => {
+        this.tasksSig.set([...this.tasksSig(), { ...created, assignees: assigneesLabels }]);
+        this.cancelInlineTask();
+        this.toast.success('OK', 'Task creato', 2000);
+      },
+      error: (e) => {
+        console.error('create task error', e);
+        this.toast.danger('Errore', 'Creazione task fallita', 3000);
+      }
+    });
+  }
+
+  // Panel
+  openPanel(t: Task) { this.selectedTask.set(t); this.panelOpen.set(true); }
+  closePanel() { this.panelOpen.set(false); this.selectedTask.set(null); }
+
+  deleteTask(t: Task) {
+    this.taskService.delete(t._id).subscribe({
       next: () => {
-        this.removeFromBoard(task._id);
-        if (this.selectedTask()?._id === task._id) this.closePanel();
-        this.toast.success('Eliminato', 'Task eliminato.');
+        this.tasksSig.set(this.tasksSig().filter(x => x._id !== t._id));
+        this.closePanel();
+        this.toast.success('OK', 'Task eliminato', 2000);
       },
-      error: () => this.toast.danger('Errore', 'Eliminazione fallita.'),
+      error: (e) => {
+        console.error('delete task error', e);
+        this.toast.danger('Errore', 'Eliminazione task fallita', 3000);
+      }
     });
   }
 
-  private removeFromBoard(taskId: string): void {
-    const map = { ...this.tasksByPhase() };
-    Object.keys(map).forEach((pid) => {
-      map[pid] = (map[pid] || []).filter((t) => t._id !== taskId);
+  markCompleted(t: Task) {
+    this.taskService.update(t._id, { status: 'done' } as any).subscribe({
+      next: (upd) => {
+        this.tasksSig.set(this.tasksSig().map(x => x._id === t._id ? { ...x, ...upd } : x));
+        this.closePanel();
+        this.toast.success('OK', 'Task completato', 2000);
+      },
+      error: (e) => {
+        console.error('complete task error', e);
+        this.toast.danger('Errore', 'Aggiornamento task fallito', 3000);
+      }
     });
-    this.tasksByPhase.set(map);
+  }
+
+  // Stub per il template (toglie l’errore "openModal non esiste")
+  openModal(kind: 'project' | 'task') {
+    this.toast.info('Info', `Apro modale: ${kind}`, 1500);
+  }
+
+  logout() { this.auth.logout?.(); }
+}
+
+// helper id
+function uid() {
+  try {
+    const a = new Uint32Array(2); crypto.getRandomValues(a);
+    return Array.from(a).map(n => n.toString(36)).join('');
+  } catch {
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
 }

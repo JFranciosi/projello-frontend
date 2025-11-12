@@ -11,222 +11,167 @@
   </div>
 </header>
 
-<!-- CONTAINER -->
-<div class="dashboard-container">
+<!-- OUTER CONTAINER: SIDEBAR + MAIN -->
+<div class="dashboard-container" (keydown)="null">
   <!-- SIDEBAR -->
   <app-dashboard-sidebar (createProject)="openModal('project')"></app-dashboard-sidebar>
 
-  <!-- KANBAN BOARD -->
-  <main class="kanban" role="main" aria-label="Bacheca Kanban">
+  <!-- MAIN (container dentro al container) -->
+  <div class="board-container">
+    <!-- TOPBAR: titolo + collaboratori (statica) -->
+    @if (currentProject(); as project) {
+      <section class="project-topbar" role="region" aria-label="Intestazione progetto">
+        <div class="topbar-left">
+          <h1 class="topbar-title">{{ project.title }}</h1>
+          @if (project.description) { <p class="topbar-sub">{{ project.description }}</p> }
+        </div>
 
-    @if (phases().length === 0) {
-      <!-- EMPTY STATE: nessuna fase -> mostra SOLO “Aggiungi colonna” centrato -->
-      <section class="column new-phase" role="region" aria-label="Aggiungi nuova colonna">
-        <button class="add-phase-btn" (click)="openModal('phase')">
-          <lucide-icon name="plus"></lucide-icon>
-          <span>Aggiungi colonna</span>
-        </button>
-      </section>
-    } @else {
-      <!-- COLONNE ESISTENTI (in ordine di creazione: append a destra) -->
-      @for (p of phases(); track p._id) {
-        <section class="column" [attr.aria-labelledby]="'col-' + p._id">
-          <div class="column-header">
-            <h2 class="column-title" [attr.id]="'col-' + p._id">{{ p.title }}</h2>
-
-            <div class="column-tools">
-              <span
-                class="count-badge"
-                [attr.aria-label]="'Task in ' + p.title + ': ' + tasksFor(p._id).length"
-                role="status"
-              >
-                {{ tasksFor(p._id).length }}
+        <div class="topbar-right">
+          <div class="collab-pills" aria-label="Collaboratori">
+            <span class="pill creator" title="Creatore">
+              <lucide-icon name="user"></lucide-icon>
+              {{ project.creator.firstName }} {{ project.creator.lastName }}
+            </span>
+            @for (c of project.collaborators; track c.id) {
+              <span class="pill" title="Collaboratore">
+                <lucide-icon name="user"></lucide-icon>
+                {{ c.firstName }} {{ c.lastName }}
+                <button class="pill-x" (click)="removeCollaborator(c.id)" aria-label="Rimuovi collaboratore">
+                  <lucide-icon name="x"></lucide-icon>
+                </button>
               </span>
-
-              <button
-                class="btn-icon add"
-                title="Nuovo task in {{ p.title }}"
-                aria-label="Nuovo task"
-                (click)="openModal('task', p._id); $event.stopPropagation()"
-              >
-                <lucide-icon name="plus"></lucide-icon>
-              </button>
-            </div>
+            }
           </div>
-
-          @if (tasksFor(p._id).length === 0) {
-            <div class="column-empty" aria-live="polite">
-              Nessun task in questa colonna.
-            </div>
-          }
-
-          @for (t of tasksFor(p._id); track t._id) {
-            <div
-              class="task-card"
-              (click)="openPanel(t)"
-              role="button"
-              tabindex="0"
-              aria-label="Apri dettagli task"
-            >
-              <div class="task-header">
-                <h3 class="task-title" title="{{ t.title }}">{{ t.title }}</h3>
-                <div class="task-actions" aria-hidden="true">
-                  <button class="btn-icon" title="Completa" (click)="markCompleted(t); $event.stopPropagation()">
-                    <lucide-icon name="check-square-2"></lucide-icon>
-                  </button>
-                  <button class="btn-icon more" title="Altro" (click)="$event.stopPropagation()">
-                    <lucide-icon name="more-vertical"></lucide-icon>
-                  </button>
-                </div>
-              </div>
-
-              <div class="task-meta">
-                <span class="meta-item" aria-label="Scadenza">
-                  <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
-                  <span class="due">{{ t.expiration_date }}</span>
-                </span>
-
-                <span
-                  class="priority"
-                  [class.high]="t.priority === 'high'"
-                  [class.medium]="t.priority === 'medium'"
-                  [class.low]="t.priority === 'low'"
-                  aria-label="Priorità"
-                >
-                  @if (t.priority === 'high') { Alta priorità }
-                  @else if (t.priority === 'medium') { Media }
-                  @else { Bassa }
-                </span>
-              </div>
-
-              <div class="task-stats">
-                <span class="stat" title="Allegati">
-                  <lucide-icon name="paperclip" aria-hidden="true"></lucide-icon>
-                  <span>{{ t.attachments?.length || 0 }}</span>
-                </span>
-
-                <span class="stat" title="Commenti">
-                  <lucide-icon name="message-square" aria-hidden="true"></lucide-icon>
-                  <span>0</span>
-                </span>
-
-                <span class="assignee" title="Assegnatario">
-                  <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
-                </span>
-              </div>
-            </div>
-          }
-        </section>
-      }
-
-      <!-- GHOST-CARD: Aggiungi un'altra colonna a DESTRA delle esistenti -->
-      <section class="column new-phase" role="region" aria-label="Aggiungi nuova colonna">
-        <button class="add-phase-btn" (click)="openModal('phase')">
-          <lucide-icon name="plus-square"></lucide-icon>
-          <span>Aggiungi colonna</span>
-        </button>
+          <!-- Nessun input qui: la topbar resta uguale -->
+        </div>
       </section>
     }
 
-  </main>
+    <!-- GRID FASI (card stile Trello) -->
+    <main class="phases-grid" role="main" aria-label="Bacheca fasi">
+      @for (p of phases(); track p._id) {
+        <section class="phase-card" [attr.aria-labelledby]="'card-' + p._id">
+          <header class="phase-head">
+            <div>
+              <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
+              @if (p.description) { <p class="phase-desc">{{ p.description }}</p> }
+            </div>
+            <span class="count-badge">{{ tasksFor(p._id).length }}</span>
+          </header>
+
+          <!-- Ghost / Inline new task -->
+          @if (inlineTaskForPhase() !== p._id) {
+            <div class="ghost-task-card" (click)="startInlineTask(p._id)">
+              <lucide-icon name="plus"></lucide-icon>
+              <span>Nuovo task</span>
+            </div>
+          } @else {
+            <form class="inline-task-form" (ngSubmit)="saveInlineTask()">
+              <div class="grid-2">
+                <div class="form-group">
+                  <label>Titolo</label>
+                  <input type="text" required [(ngModel)]="inlineDraft().title" name="title" />
+                </div>
+                <div class="form-group">
+                  <label>Scadenza</label>
+                  <input type="date" [(ngModel)]="inlineDraft().expiration_date" name="date" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Descrizione</label>
+                <textarea [(ngModel)]="inlineDraft().description" name="desc" rows="3"></textarea>
+              </div>
+
+              <div class="grid-3">
+                <div class="form-group">
+                  <label>Priorità</label>
+                  <div class="flag-priority">
+                    <label><input type="radio" name="prio" value="high"
+                                  [checked]="inlineDraft().priority==='high'"
+                                  (change)="setDraftPriority('high')" /> Alta</label>
+                    <label><input type="radio" name="prio" value="medium"
+                                  [checked]="inlineDraft().priority==='medium'"
+                                  (change)="setDraftPriority('medium')" /> Media</label>
+                    <label><input type="radio" name="prio" value="low"
+                                  [checked]="inlineDraft().priority==='low'"
+                                  (change)="setDraftPriority('low')" /> Bassa</label>
+                  </div>
+                </div>
+
+                <div class="form-actions right">
+                  <button type="button" class="btn ghost" (click)="cancelInlineTask()">Annulla</button>
+                  <button type="submit" class="btn">Salva</button>
+                </div>
+              </div>
+            </form>
+          }
+
+          <!-- Task list -->
+          <ul class="task-list">
+            @for (t of tasksFor(p._id); track t._id) {
+              <li class="task-row" (click)="openPanel(t)">
+                <div class="row-main">
+                  <h3 class="task-title">{{ t.title }}</h3>
+                  <span class="badge"
+                        [class.high]="t.priority==='high'"
+                        [class.medium]="t.priority==='medium'"
+                        [class.low]="t.priority==='low'">
+                    @if (t.priority==='high') { Alta } @else if (t.priority==='medium') { Media } @else { Bassa }
+                  </span>
+                </div>
+                <div class="row-sub">
+                  <span class="meta"><lucide-icon name="calendar"></lucide-icon> {{ t.expiration_date || '—' }}</span>
+                  <span class="meta" *ngIf="t.assignees?.length"><lucide-icon name="user"></lucide-icon> {{ t.assignees?.join(', ') }}</span>
+                </div>
+              </li>
+            }
+            @empty { <li class="task-empty">Nessun task nella fase.</li> }
+          </ul>
+        </section>
+      }
+
+      <!-- CARD "AGGIUNGI FASE" (sempre in DOM; visibilità a classi) -->
+      <section class="phase-card new-phase" aria-label="Nuova fase">
+        <!-- Bottone -->
+        <button class="add-phase-btn" (click)="startInlinePhase()" [class.is-hidden]="addingPhase()">
+          <lucide-icon name="plus"></lucide-icon><span>Aggiungi Fase</span>
+        </button>
+
+        <!-- Form inline -->
+        <form class="inline-phase-form"
+              [class.is-hidden]="!addingPhase()"
+              autocomplete="off" novalidate
+              (submit)="$event.preventDefault(); saveInlinePhase()">
+
+          <div class="form-group">
+            <label>Nome della fase</label>
+            <input type="text" required [(ngModel)]="phaseDraft().title" name="p_title"
+                  placeholder="Da fare, In corso, Fatto…"/>
+          </div>
+
+          <div class="form-group">
+            <label>Descrizione (opz.)</label>
+            <textarea rows="3" [(ngModel)]="phaseDraft().description" name="p_desc"
+                      placeholder="Breve descrizione della fase..."></textarea>
+          </div>
+
+          <div class="inline-actions">
+            <button type="button" class="btn ghost" (click)="cancelInlinePhase()">Annulla</button>
+            <button type="submit" class="btn">Crea fase</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
 </div>
 
-<!-- FAB: visibile solo se c’è almeno una fase -->
-@if (phases().length > 0) {
-  <button class="fab"
-      (click)="openModal('task', phases()[0]?._id)"
-      title="Nuovo Task" aria-label="Nuovo Task">＋
-  </button>
-}
-
-<!-- MODALE -->
-@if (modalOpen()) {
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-content">
-      <span class="close" (click)="closeModal()" role="button" aria-label="Chiudi">&times;</span>
-      <h2 id="modal-title">
-        @if (modalType() === 'task') { Nuovo Task }
-        @else if (modalType() === 'phase') { Nuova Fase }
-        @else { Nuovo Progetto }
-      </h2>
-
-      <form (ngSubmit)="onSave($event)">
-        @if (modalType() === 'phase') {
-          <!-- SOLO Titolo + Descrizione -->
-          <div class="form-group">
-            <label for="titolo">Nome della colonna</label>
-            <input id="titolo" type="text" placeholder="Esempio: Da fare, In corso, Fatto…" required />
-          </div>
-
-          <div class="form-group">
-            <label for="descrizioneFase">Descrizione (opzionale)</label>
-            <textarea id="descrizioneFase" placeholder="Breve descrizione della colonna..."></textarea>
-          </div>
-
-          <button type="submit" class="save-btn">Crea fase</button>
-        } @else if (modalType() === 'task') {
-          <div class="form-group">
-            <label for="phase">Colonna</label>
-            <select id="phase" (change)="draftPhaseId.set($any($event.target).value)">
-              @for (p of phases(); track p._id) {
-                <option [value]="p._id" [selected]="p._id === draftPhaseId()">{{ p.title }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="titolo">Titolo</label>
-            <input id="titolo" type="text" placeholder="Inserisci titolo..." required />
-          </div>
-
-          <div class="form-group">
-            <label for="descrizione">Descrizione</label>
-            <textarea id="descrizione" placeholder="Descrivi il task..."></textarea>
-          </div>
-
-          <div class="form-group">
-            <label for="scadenza">Scadenza</label>
-            <input id="scadenza" type="date" />
-          </div>
-
-          <div class="form-group">
-            <label for="priorita">Priorità</label>
-            <select id="priorita">
-              <option value="high">Alta</option>
-              <option value="medium" selected>Media</option>
-              <option value="low">Bassa</option>
-            </select>
-          </div>
-
-          <button type="submit" class="save-btn">Salva</button>
-        } @else {
-          <div class="form-group">
-            <label for="titolo">Nome progetto</label>
-            <input id="titolo" type="text" placeholder="Inserisci il nome..." required />
-          </div>
-
-          <div class="form-group">
-            <label for="descrizione">Descrizione</label>
-            <textarea id="descrizione" placeholder="Descrivi il progetto..."></textarea>
-          </div>
-
-          <button type="submit" class="save-btn">Crea progetto</button>
-        }
-      </form>
-    </div>
-  </div>
-}
-
-<!-- PANNELLO TASK -->
+<!-- PANNELLO TASK (slide-in a destra) -->
 <div class="task-panel" [class.open]="panelOpen()" role="region" aria-label="Dettagli task">
   <div class="panel-header">
-    <div class="panel-title">
-      <h2>Dettagli Task</h2>
-    </div>
+    <div class="panel-title"><h2>Dettagli Task</h2></div>
     <div class="panel-actions">
-      <button class="btn-icon danger" title="Elimina"
-              [disabled]="!selectedTask()"
-              (click)="selectedTask() && deleteTask(selectedTask()!); $event.stopPropagation()">
+      <button class="btn-icon danger" title="Elimina" [disabled]="!selectedTask()" (click)="selectedTask() && deleteTask(selectedTask()!); $event.stopPropagation()">
         <lucide-icon name="trash-2"></lucide-icon>
       </button>
       <button class="btn-icon" title="Chiudi" (click)="closePanel()">
@@ -244,37 +189,22 @@
           <div class="meta-value">{{ selectedTask()?.expiration_date || '—' }}</div>
         </div>
       </div>
-
       <div class="meta-chip">
         <lucide-icon name="flag" aria-hidden="true"></lucide-icon>
         <div>
           <div class="meta-label">Priorità</div>
           <div class="meta-value">
-            <span class="priority"
-                  [class.high]="selectedTask()?.priority === 'high'"
-                  [class.medium]="selectedTask()?.priority === 'medium'"
-                  [class.low]="selectedTask()?.priority === 'low'">
-              @if (selectedTask()?.priority === 'high') { Alta }
-              @else if (selectedTask()?.priority === 'medium') { Media }
-              @else { Bassa }
+            <span class="priority" [class.high]="selectedTask()?.priority === 'high'" [class.medium]="selectedTask()?.priority === 'medium'" [class.low]="selectedTask()?.priority === 'low'">
+              @if (selectedTask()?.priority === 'high') { Alta } @else if (selectedTask()?.priority === 'medium') { Media } @else { Bassa }
             </span>
           </div>
         </div>
       </div>
-
       <div class="meta-chip">
         <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
         <div>
           <div class="meta-label">Assegnatari</div>
           <div class="meta-value">{{ selectedTask()?.assignees?.join(', ') || '—' }}</div>
-        </div>
-      </div>
-
-      <div class="meta-chip">
-        <lucide-icon name="clock" aria-hidden="true"></lucide-icon>
-        <div>
-          <div class="meta-label">Stato</div>
-          <div class="meta-value">—</div>
         </div>
       </div>
     </div>
@@ -293,7 +223,6 @@
         <h3>Allegati</h3>
         <span class="section-badge">{{ selectedTask()?.attachments?.length || 0 }}</span>
       </div>
-
       <ul class="files">
         @for (att of (selectedTask()?.attachments || []); track att.name) {
           <li class="file">
@@ -307,11 +236,8 @@
   </div>
 
   <div class="panel-footer">
-    <button class="btn primary"
-            [disabled]="!selectedTask()"
-            (click)="selectedTask() && markCompleted(selectedTask()!)">
-      <lucide-icon name="check-square-2"></lucide-icon>
-      Segna come completato
+    <button class="btn primary" [disabled]="!selectedTask()" (click)="selectedTask() && markCompleted(selectedTask()!)">
+      <lucide-icon name="check-square-2"></lucide-icon> Segna come completato
     </button>
   </div>
 </div>

@@ -58,7 +58,11 @@ export class Projects implements OnInit {
     this.loadProjects();
   }
 
-  logout(){
-    try { this.auth.logout?.(); } catch {}
+  logout(): void {
+    try {
+      localStorage.removeItem('auth_token');
+      sessionStorage.removeItem('auth_token');
+    } catch {}
+    this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
   }
 }
