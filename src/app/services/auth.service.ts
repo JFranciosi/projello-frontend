@@ -61,4 +61,30 @@ export class AuthService {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   }
+
+async refreshTokens(): Promise<boolean> {
+  const refreshToken = this.getRefreshToken();
+  if (!refreshToken) {
+    this.clearTokens();
+    return false;
+  }
+
+  try {
+    const res = await firstValueFrom(
+      this.http.post<TokenResponse>(
+        `${this.AUTH_API}/refresh`,     // BODY corretto
+        { withCredentials: true },
+        {headers: {
+            Authorization: 'Bearer ' + this.getRefreshToken()
+          }}
+      )
+    );
+
+    this.setTokens(res.accessToken, res.refreshToken);
+    return true;
+  } catch (err) {
+    this.clearTokens();
+    return false;
+  }
+}
 }
