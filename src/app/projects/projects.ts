@@ -1,24 +1,25 @@
-import { Component, OnInit, signal, importProvidersFrom } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProjectsService } from '../services/project.service';
 import { ProjectResponse } from '../models/models';
-import { DashboardSidebar } from "../dashboard-sidebar/dashboard-sidebar";
-import { LucideAngularModule, LogOut, UserCircle2 } from 'lucide-angular';
+import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
+import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule,DashboardSidebar,LucideAngularModule],
+  imports: [CommonModule, DashboardSidebar, LucideAngularModule],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
 })
 export class Projects implements OnInit {
+  /** Lista progetti */
   projects = signal<ProjectResponse[]>([]);
   loading = signal(true);
 
-  // modale aperta dal bottone nella sidebar
+  /** Gestione modale (creazione progetto) */
   modalOpen = signal(false);
   modalType = signal<'project' | null>(null);
 
@@ -28,9 +29,13 @@ export class Projects implements OnInit {
     private auth: AuthService
   ) {}
 
-  ngOnInit() { this.loadProjects(); }
+  /** Al caricamento, ottiene tutti i progetti dell’utente */
+  ngOnInit(): void {
+    this.loadProjects();
+  }
 
-  async loadProjects() {
+  /** Chiama il backend per caricare i progetti */
+  async loadProjects(): Promise<void> {
     this.loading.set(true);
     try {
       const data = await this.projectsService.getProjects();
@@ -43,26 +48,56 @@ export class Projects implements OnInit {
     }
   }
 
-  navigateToProject(id: string) {
-    this.router.navigate(['/dashboard', id]);
+navigateToProject(project: ProjectResponse): void {
+  console.log(' project ricevuto:', project);
+
+  const id =
+    (project as any)?._id?.$oid ??
+    (project as any)?._id ??
+    (project as any)?.id ??
+    '';
+
+  console.log('🆔 id calcolato:', id);
+
+  if (!id) {
+    console.error(' ID progetto non valido:', project);
+    return;
   }
 
-  // eventi dalla sidebar
-  openModal(type: 'project'){ this.modalType.set(type); this.modalOpen.set(true); }
-  closeModal(){ this.modalOpen.set(false); this.modalType.set(null); }
+  this.router.navigate(['/dashboard', id]);
+}
 
-  onSaveProject(ev: Event){
+
+
+  /** Apertura e chiusura modale */
+  openModal(type: 'project'): void {
+    this.modalType.set(type);
+    this.modalOpen.set(true);
+  }
+
+  closeModal(): void {
+    this.modalOpen.set(false);
+    this.modalType.set(null);
+  }
+
+  /** Evento di salvataggio del progetto (TODO: chiamare createProject) */
+  async onSaveProject(ev: Event): Promise<void> {
     ev.preventDefault();
-    // TODO: chiama POST createProject() sul service
+    // TODO: chiamare projectsService.createProject() con i dati del form
     this.closeModal();
-    this.loadProjects();
+    await this.loadProjects();
   }
 
+  /** Logout utente */
   logout(): void {
     try {
-      localStorage.removeItem('auth_token');
-      sessionStorage.removeItem('auth_token');
-    } catch {}
-    this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
+      this.auth.logout();
+    } catch (err) {
+      console.warn('Errore durante il logout:', err);
+    } finally {
+      this.router.navigateByUrl('/login').catch(() => {
+        window.location.href = '/login';
+      });
+    }
   }
 }

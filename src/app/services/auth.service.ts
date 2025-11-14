@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CreateUserRequestPayload } from '../models/models';
 
-type TokenResponse = { accessToken: string; refreshToken: string };
+type TokenResponse = { accessToken: string; refreshToken?: string | null };
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -20,8 +20,7 @@ export class AuthService {
     const res = await firstValueFrom(
       this.http.post<TokenResponse>(`${this.AUTH_API}/login`, { email, password })
     );
-    localStorage.setItem(ACCESS_TOKEN_KEY, res.accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, res.refreshToken);
+    this.setTokens(res.accessToken, res.refreshToken ?? null);
   }
 
   /** REGISTER */
@@ -35,8 +34,7 @@ export class AuthService {
 
   /** LOGOUT */
   logout(): void {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    this.clearTokens();
   }
 
   /** STATO */
@@ -52,39 +50,49 @@ export class AuthService {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
   }
 
-    /** SET/REMOVE token */
-  setTokens(access: string, refresh: string) {
+  /** SET/REMOVE token */
+  setTokens(access: string, refresh: string | null) {
     localStorage.setItem(ACCESS_TOKEN_KEY, access);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+    if (refresh != null) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
+    }
   }
+
   clearTokens() {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
   }
 
-async refreshTokens(): Promise<boolean> {
-  const refreshToken = this.getRefreshToken();
-  if (!refreshToken) {
-    this.clearTokens();
-    return false;
-  }
+  /** REFRESH TOKENS */
+  async refreshTokens(): Promise<boolean> {
+    const currentRefresh = this.getRefreshToken();
+    if (!currentRefresh) {
+      this.clearTokens();
+      return false;
+    }
 
-  try {
-    const res = await firstValueFrom(
-      this.http.post<TokenResponse>(
-        `${this.AUTH_API}/refresh`,     // BODY corretto
-        { withCredentials: true },
-        {headers: {
-            Authorization: 'Bearer ' + this.getRefreshToken()
-          }}
-      )
-    );
+    try {
+      const res = await firstValueFrom(
+        this.http.post<TokenResponse>(
+          `${this.AUTH_API}/refresh`,
+          {}, // corpo vuoto
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${currentRefresh}`,
+            },
+          }
+        )
+      );
 
-    this.setTokens(res.accessToken, res.refreshToken);
-    return true;
-  } catch (err) {
-    this.clearTokens();
-    return false;
+      const newAccess = res.accessToken;
+      const newRefresh = res.refreshToken ?? currentRefresh;
+
+      this.setTokens(newAccess, newRefresh);
+      return true;
+    } catch (err) {
+      this.clearTokens();
+      return false;
+    }
   }
-}
 }

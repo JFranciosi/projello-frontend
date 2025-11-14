@@ -28,12 +28,12 @@
       } @else if (projects().length === 0) {
         <div class="empty-state">Nessun progetto trovato. Crea un nuovo progetto dalla sidebar.</div>
       } @else {
-        @for (p of projects(); track p.id) {
+        @for (p of projects(); track p) {
           <article
             class="project-card"
-            (click)="navigateToProject(p.id)"
-            (keydown.enter)="navigateToProject(p.id)"
-            (keydown.space)="navigateToProject(p.id)"
+            (click)="navigateToProject(p)"
+            (keydown.enter)="navigateToProject(p)"
+            (keydown.space)="navigateToProject(p)"
             tabindex="0"
             role="button"
             aria-label="Apri progetto {{ p.title }}"

@@ -15,7 +15,7 @@ export interface UserResponse {
 }
 
 export interface ProjectResponse {
-  id: string;
+  _id: any; 
   title: string;
   description?: string;
   collaborators: UserResponse[];

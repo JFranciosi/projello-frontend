@@ -77,7 +77,6 @@
   box-shadow: 0 2px 8px #0000000F;
   padding: .85rem;
   display: flex; flex-direction: column;
-  min-height: 120px;
 }
 .phase-card.new-phase { border-style: dashed; }
 

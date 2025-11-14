@@ -152,7 +152,7 @@ export class Dashboard implements OnInit {
     if (!p || !d.title?.trim()) return;
 
     // Includo project_id come da tuoi models
-    this.phaseService.create(p.id, {
+    this.phaseService.create(p._id, {
       title: d.title.trim(),
       description: (d.description || '').trim()
     } as any).subscribe({
@@ -214,7 +214,7 @@ export class Dashboard implements OnInit {
     if (c) assigneesLabels.push(`${c.firstName} ${c.lastName}`.trim());
 
     this.taskService.create({
-      project_id: p.id,
+      project_id: p._id,
       phase_id: phaseId,
       title: d.title.trim(),
       description: (d.description || '').trim(),
