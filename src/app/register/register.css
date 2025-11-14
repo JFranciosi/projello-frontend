@@ -1,6 +1,5 @@
-/* Stile coerente con la pagina di login */
 .login-container {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font);
   display: grid;
   grid-template-columns: 0.6fr 1.4fr;
   height: 100vh;
@@ -8,7 +7,7 @@
 }
 
 .left-column {
-  background-color: #E4B363;
+  background-color: var(--brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,13 +38,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f7f9fc;
+  background-color: var(--bg);
 }
 
 .login-wrapper {
   width: 100%;
   max-width: 600px;
   padding: 2rem;
+  background-color: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
 }
 
 .title {
@@ -53,13 +55,13 @@
   margin-bottom: 0.5rem;
   font-size: 2.5rem;
   font-weight: 900;
-  color: black;
+  color: var(--ink);
 }
 
 .subtitle {
   text-align: center;
   margin-bottom: 2rem;
-  color: #666;
+  color: var(--ink-muted);
 }
 
 /* Form */
@@ -71,6 +73,7 @@ label {
   display: block;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  color: var(--ink-soft);
 }
 
 input[type="text"],
@@ -78,23 +81,25 @@ input[type="email"],
 input[type="password"] {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.3s;
-  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.3s, box-shadow 0.3s;
+  background: var(--bg-panel);
+  color: var(--ink);
 }
 
 input:focus {
-  border-color: #007bff;
+  border-color: var(--brand);
   outline: none;
+  box-shadow: 0 0 0 3px var(--brand-shadow);
 }
 
 input.invalid {
-  border-color: #e74c3c;
+  border-color: var(--danger);
 }
 
 .error-text {
-  color: #e74c3c;
+  color: var(--danger);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
@@ -122,30 +127,33 @@ input.invalid {
 button {
   width: 100%;
   padding: 0.75rem;
-  background-color: #000;
-  color: #fff;
+  background-color: var(--ink);
+  color: var(--bg-panel);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 1rem;
   font-weight: 600;
-  transition: background-color 0.3s, transform 0.2s;
+  letter-spacing: 0.2px;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
 }
 
 button:hover:not(:disabled) {
-  background-color: #333;
+  background-color: #222222;
   transform: scale(1.02);
+  box-shadow: var(--shadow-medium);
 }
 
 button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .error-message {
   margin-top: 1rem;
   text-align: center;
-  color: #e74c3c;
+  color: var(--danger);
   font-weight: 500;
 }
 
@@ -153,11 +161,11 @@ button:disabled {
   margin-top: 1rem;
   text-align: center;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--ink-muted);
 }
 
 .register-anchor {
-  color: #333;
+  color: var(--ink-soft);
   font-weight: 600;
   text-decoration: underline;
   cursor: pointer;
@@ -166,7 +174,7 @@ button:disabled {
 }
 
 .register-anchor:hover {
-  color: #333;
+  color: var(--ink);
   text-decoration: underline;
 }
 
@@ -181,6 +189,6 @@ button:disabled {
   }
 
   .right-column {
-    background-color: #fff;
+    background-color: var(--bg-panel);
   }
 }

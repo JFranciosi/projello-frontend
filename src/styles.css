@@ -1,28 +1,76 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* BRAND */
+  --brand: #E4B363;
+  --brand-light: #FFF4DA;
+  --brand-shadow: rgba(228, 179, 99, 0.35);
+
+  /* BASE */
+  --bg: #F9FAFB;
+  --bg-panel: #FFFFFF;
+  --ink: #111827;
+  --ink-soft: #374151;
+  --ink-muted: #6B7280;
+
+  /* BORDI / UI */
+  --border: #E5E7EB;
+  --border-soft: #D1D5DB;
+
+  /* STATES */
+  --success: #2ecc71;
+  --success-dark: #27ae60;
+
+  --danger: #e74c3c;
+  --danger-dark: #c0392b;
+
+  /* SHADOWS */
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-medium: 0 4px 12px rgba(0,0,0,0.12);
+  --shadow-strong: 0 8px 22px rgba(0,0,0,0.18);
+
+  /* RADIUS */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  /* FONT */
+  --font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f9fafb;
-  color: #111;
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--ink);
   display: block;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* ======================================================================= */
+/* 🔔 TOAST GLOBAL STYLE                                                   */
+/* ======================================================================= */
+
 .ng-toast {
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  color: #fff;
+  padding: 1rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
 }
 
 .ng-toast.success {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
-  color: #fff;
+  background: linear-gradient(135deg, var(--success), var(--success-dark));
 }
 
 .ng-toast.error {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  color: #fff;
+  background: linear-gradient(135deg, var(--danger), var(--danger-dark));
 }
-

@@ -1,20 +1,19 @@
-/* ==== ROOT / CONTAINER ==== */
 :host {
   display: block;
 }
 
 .sidebar {
   width: 260px;
-  background-color: #ffffff;
-  border-right: 1px solid #e4e4e4;
+  background-color: var(--bg-panel);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 2rem 1.5rem;
-  color: #111111;
+  color: var(--ink);
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #e6e6e6 transparent;
+  scrollbar-color: var(--border-soft) transparent;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -24,16 +23,16 @@
   background: transparent;
 }
 .sidebar::-webkit-scrollbar-thumb {
-  background: #e6e6e6;
+  background: var(--border-soft);
   border-radius: 8px;
 }
 
 /* ==== TITLE ==== */
 .sidebar-title {
-  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: var(--font);
   font-weight: 700;
   font-size: 1.1rem;
-  color: #333333;
+  color: var(--ink-soft);
   margin: 0 0 1.2rem 0;
 }
 
@@ -46,7 +45,7 @@
 
 .menu li {
   margin: 0.15rem 0;
-  border-radius: 10px;
+  border-radius: var(--radius);
   transition: 0.2s ease, color 0.2s ease, transform 0.12s ease;
 }
 
@@ -59,7 +58,7 @@
   text-decoration: none;
   color: inherit;
   padding: 0.75rem 0.75rem;
-  border-radius: 10px;
+  border-radius: var(--radius);
   font-weight: 500;
   line-height: 1.2;
 }
@@ -69,25 +68,25 @@
   width: 18px;
   height: 18px;
   stroke-width: 1.8;
-  color: #444444;
+  color: var(--ink-soft);
   flex: 0 0 18px;
 }
 
 /* Hover / Active */
 .menu li:hover {
-  background-color: #fff4da; /* giallo molto chiaro */
+  background-color: var(--brand-light); /* giallo molto chiaro */
 }
 
 .menu li.active,
 .menu li[aria-current='page'] {
-  background-color: #fff4da;
-  color: #000000;
+  background-color: var(--brand-light);
+  color: var(--ink);
   font-weight: 600;
 }
 
 .menu li.active .menu-icon,
 .menu li[aria-current='page'] .menu-icon {
-  color: #000000;
+  color: var(--ink);
 }
 
 /* Focus accessibile */
@@ -104,7 +103,7 @@
 /* Separator opzionale */
 .menu-divider {
   height: 1px;
-  background: #efefef;
+  background: var(--border-soft);
   margin: 0.75rem 0;
   border-radius: 1px;
 }
@@ -114,10 +113,10 @@
   margin-top: 25.6rem;
   padding: 0.9rem;
   width: 100%;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--ink);
+  color: var(--bg-panel);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius);
   cursor: pointer;
   font-weight: 700;
   font-size: 0.95rem;
@@ -127,7 +126,7 @@
 
 .new-project-btn:hover {
   background-color: #222222;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-medium);
 }
 
 .new-project-btn:active {
@@ -142,8 +141,8 @@
 /* Badge numeri (se usi badge nel markup) */
 .menu .badge {
   margin-left: auto;
-  background: #e4b363;
-  color: #000000;
+  background: var(--brand);
+  color: var(--ink);
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
   font-size: 0.75rem;
@@ -156,13 +155,14 @@
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.4px;
-  color: #777777;
+  color: var(--ink-muted);
   text-transform: uppercase;
 }
 
 /* ==== RESPONSIVE ==== */
 @media (max-width: 900px) {
-  :host, .sidebar {
+  :host,
+  .sidebar {
     display: none;
   }
 }
