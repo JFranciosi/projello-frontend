@@ -16,15 +16,30 @@ import { CreateUserRequestPayload } from '../models/models';
   styleUrls: ['./profile.css'],
 })
 export class Profile {
-  profile = signal({ name: '', email: '' });
+  profile = signal({ username: '', email: '' });
 
   newPassword: string = '';
   confirmPassword: string = '';
 
-
   private readonly router = inject(Router);
   private readonly toast = inject(NgToastService);
   private readonly auth = inject(AuthService);
+
+  constructor() {
+    this.loadProfileFromLocalStorage();
+  }
+
+  /** Carica i dati dal localStorage */
+  private loadProfileFromLocalStorage(): void {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      this.profile.set({
+        username: user.username || '',
+        email: user.email || ''
+      });
+    }
+  }
 
   /** Logout */
   logout(): void {
@@ -37,22 +52,28 @@ export class Profile {
 
   /** SALVA PROFILO */
   async saveProfile(): Promise<void> {
-    const payload: CreateUserRequestPayload = {
-      username: this.profile().name,
-      email: this.profile().email,
-      password: this.newPassword || this.confirmPassword || '',
-      firstName: '',
-      lastName: ''
-    };
-
     if (this.newPassword !== this.confirmPassword) {
       this.toast.danger('Errore', 'Le password non coincidono.');
       return;
     }
 
+    const payload: CreateUserRequestPayload = {
+      username: this.profile().username,
+      email: this.profile().email,
+      password: this.newPassword || '',
+      firstName: '',
+      lastName: ''
+    };
 
     try {
       await this.auth.editUser(payload);
+
+      // Aggiorna anche il localStorage
+      localStorage.setItem('user', JSON.stringify({
+        username: payload.username,
+        email: payload.email
+      }));
+
       this.toast.success('Profilo aggiornato', 'I dati sono stati aggiornati correttamente.');
     } catch (err) {
       this.toast.danger('Errore', 'Impossibile aggiornare il profilo.');
