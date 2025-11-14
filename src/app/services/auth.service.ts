@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { CreateUserRequestPayload } from '../models/models';
+import { CreateUserRequestPayload, UserResponse } from '../models/models';
 
-type TokenResponse = { accessToken: string; refreshToken?: string | null };
+type TokenResponse = { accessToken: string; refreshToken?: string | null ; userResponse: UserResponse };
 
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
@@ -20,7 +20,7 @@ export class AuthService {
     const res = await firstValueFrom(
       this.http.post<TokenResponse>(`${this.AUTH_API}/login`, { email, password })
     );
-    this.setTokens(res.accessToken, res.refreshToken ?? null);
+    this.setTokens(res.accessToken, res.refreshToken ?? null, res.userResponse);
   }
 
   /** REGISTER */
@@ -64,11 +64,12 @@ export class AuthService {
   }
 
   /** SET/REMOVE token */
-  setTokens(access: string, refresh: string | null) {
+  setTokens(access: string, refresh: string | null, user: UserResponse) {
     localStorage.setItem(ACCESS_TOKEN_KEY, access);
     if (refresh != null) {
       localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
     }
+    localStorage.setItem('user', JSON.stringify(user));
   }
 
   clearTokens() {
@@ -100,8 +101,9 @@ export class AuthService {
 
       const newAccess = res.accessToken;
       const newRefresh = res.refreshToken ?? currentRefresh;
+      const user = res.userResponse;
 
-      this.setTokens(newAccess, newRefresh);
+      this.setTokens(newAccess, newRefresh, user);
       return true;
     } catch (err) {
       this.clearTokens();

@@ -121,7 +121,8 @@ export class Dashboard implements OnInit {
       email,
       username: pretty || 'user',
       firstName,
-      lastName
+      lastName,
+      notifies: []
     };
     this.project.set({ ...p, collaborators: [...(p.collaborators || []), newC] });
     this.collabEmail = '';
