@@ -13,7 +13,7 @@ export class AuthService {
   private AUTH_API = 'http://localhost:8080/auth';
   private USER_API = 'http://localhost:8080/user';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /** LOGIN */
   async login(email: string, password: string): Promise<void> {
@@ -31,6 +31,19 @@ export class AuthService {
       })
     );
   }
+
+  /** UPDATE USER */
+  async editUser(payload: CreateUserRequestPayload): Promise<void> {
+    await firstValueFrom(
+      this.http.put(`${this.USER_API}/edit`, payload, {
+        responseType: 'text' as 'json',
+        headers: {
+          Authorization: `Bearer ${this.getAccessToken()}`,
+        }
+      })
+    );
+  }
+
 
   /** LOGOUT */
   logout(): void {
