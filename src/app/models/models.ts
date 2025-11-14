@@ -9,13 +9,14 @@ export interface CreateUserRequestPayload {
 export interface UserResponse {
   id: string;
   email: string;
+  username: string;
   firstName: string;
   lastName: string;
-  username: string;
+  notifies: string[];
 }
 
 export interface ProjectResponse {
-  _id: any; 
+  _id: any;
   title: string;
   description?: string;
   collaborators: UserResponse[];

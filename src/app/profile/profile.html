@@ -23,26 +23,53 @@
 
     <section class="profile-section">
       <h2>Dati personali</h2>
-      <!-- esempio di form semplice -->
+
       <form (ngSubmit)="saveProfile()">
+
+        <!-- USERNAME -->
         <div class="form-group">
-          <label for="nome">Nome visualizzato</label>
-          <input id="nome" type="text" name="name" />
+          <label for="displayName">Nuovo username</label>
+          <input
+            id="displayName"
+            type="text"
+            name="displayName"
+            [(ngModel)]="profile().name"
+            required
+          />
         </div>
 
+        <!-- EMAIL -->
         <div class="form-group">
-          <label for="email">Email</label>
-          <input id="email" type="email" name="email" />
+          <label for="email">Nuova email</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="profile().email"
+            required
+          />
         </div>
 
+        <!-- NUOVA PASSWORD -->
         <div class="form-group">
-          <label for="email">Vecchia password</label>
-          <input id="password" type="password" name="password" />
+          <label for="newPassword">Nuova password</label>
+          <input
+            id="newPassword"
+            type="password"
+            name="newPassword"
+            [(ngModel)]="newPassword"
+          />
         </div>
 
+        <!-- CONFERMA NUOVA PASSWORD -->
         <div class="form-group">
-          <label for="email">Nuova password</label>
-          <input id="password" type="password" name="password" />
+          <label for="confirmPassword">Conferma nuova password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+          />
         </div>
 
         <button type="submit" class="save-btn">Salva modifiche</button>

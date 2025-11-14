@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
 import { NgToastService } from 'ng-angular-popup';
+import { AuthService } from '../services/auth.service';
+import { CreateUserRequestPayload } from '../models/models';
 
 @Component({
   selector: 'app-profile',
@@ -16,20 +18,44 @@ import { NgToastService } from 'ng-angular-popup';
 export class Profile {
   profile = signal({ name: '', email: '' });
 
+  newPassword: string = '';
+  confirmPassword: string = '';
+
+
   private readonly router = inject(Router);
   private readonly toast = inject(NgToastService);
+  private readonly auth = inject(AuthService);
 
   /** Logout */
   logout(): void {
     try {
       localStorage.removeItem('auth_token');
       sessionStorage.removeItem('auth_token');
-    } catch {}
+    } catch { }
     this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
   }
 
-  saveProfile(): void {
-    // chiamata API 
-    this.toast.success('Profilo salvato', 'Le modifiche al profilo sono state salvate con successo.');
+  /** SALVA PROFILO */
+  async saveProfile(): Promise<void> {
+    const payload: CreateUserRequestPayload = {
+      username: this.profile().name,
+      email: this.profile().email,
+      password: this.newPassword || this.confirmPassword || '',
+      firstName: '',
+      lastName: ''
+    };
+
+    if (this.newPassword !== this.confirmPassword) {
+      this.toast.danger('Errore', 'Le password non coincidono.');
+      return;
+    }
+
+
+    try {
+      await this.auth.editUser(payload);
+      this.toast.success('Profilo aggiornato', 'I dati sono stati aggiornati correttamente.');
+    } catch (err) {
+      this.toast.danger('Errore', 'Impossibile aggiornare il profilo.');
+    }
   }
 }
