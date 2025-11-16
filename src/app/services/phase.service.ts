@@ -1,30 +1,52 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Phase } from '../models/models';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class PhaseService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080';
+  private apiUrl = 'http://localhost:8080/phase';
 
-  list(project_id: string): Observable<Phase[]> {
-    return this.http.get<Phase[]>(`${this.baseUrl}/projects/${project_id}/phases`);
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  private getAuthHeaders(): { [key: string]: string } {
+    const token = this.authService.getAccessToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
-  create(project_id: string, dto: { title: string; order?: number; is_done?: boolean; wip_limit?: number }): Observable<Phase> {
-    return this.http.post<Phase>(`${this.baseUrl}/projects/${project_id}/phases`, dto);
+  /** GET /phase/{projectId} */
+  getByProject(projectId: string): Observable<Phase[]> {
+    return this.http.get<Phase[]>(`${this.apiUrl}/${projectId}`, {
+      headers: this.getAuthHeaders(),
+      withCredentials: true,
+    });
   }
 
-  update(phase_id: string, dto: Partial<Phase>): Observable<Phase> {
-    return this.http.patch<Phase>(`${this.baseUrl}/phases/${phase_id}`, dto);
+  /** POST /phase */
+  createPhase(body: { title: string; projectId: string }): Observable<Phase> {
+    return this.http.post<Phase>(`${this.apiUrl}`, body, {
+      headers: this.getAuthHeaders(),
+      withCredentials: true,
+    });
   }
 
-  reorder(items: { phase_id: string; order: number }[]): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/phases/reorder`, items);
+  /** PUT /phase/{id} */
+  updateTitle(id: string, title: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, title, {
+      headers: this.getAuthHeaders(),
+      withCredentials: true,
+    });
   }
 
-  delete(phase_id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/phases/${phase_id}`);
+  /** DELETE /phase/{id} */
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, {
+      headers: this.getAuthHeaders(),
+      withCredentials: true,
+    });
   }
 }

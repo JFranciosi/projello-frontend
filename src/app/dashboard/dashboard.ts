@@ -1,11 +1,17 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
 import { NgToastService } from 'ng-angular-popup';
-
+import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
+import { firstValueFrom } from 'rxjs';
 import { ProjectsService } from '../services/project.service';
 import { PhaseService } from '../services/phase.service';
 import { TaskService } from '../services/task.service';
@@ -15,7 +21,8 @@ import {
   ProjectResponse,
   Phase,
   Task,
-  UserResponse
+  UserResponse,
+  CreateTaskRequest
 } from '../models/models';
 
 @Component({
@@ -75,12 +82,14 @@ export class Dashboard implements OnInit {
   panelOpen = signal(false);
   selectedTask = signal<Task | null>(null);
 
-  // Helpers
+  // Helpers per template
   phases = computed(() => this.phasesSig());
   tasksFor = (phaseId: string) =>
-  this.tasksSig().filter((t) => t.phase_id === phaseId);
+    this.tasksSig().filter((t) => t.phase_id === phaseId);
   currentProject = () => this.project();
   inlineTaskForPhase = () => this.inlineTaskPhaseId();
+
+  // ---------------- LIFECYCLE ----------------
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -91,42 +100,132 @@ export class Dashboard implements OnInit {
     this.loadProject(id);
   }
 
-  // ===== LOAD via GET /project/:id (Bearer gestito nel service/interceptor) =====
-  private async loadProject(id: string) {
-    this.loading.set(true);
-    this.errorMsg.set(null);
-
-    try {
-      const res: any = await this.projectsService.getProjectById(id);
-      // accetto sia wrapper {project, phases, tasks} sia oggetto progetto piatto
-      const proj: ProjectResponse = res.project ?? res;
-      const phases: Phase[] = res.phases ?? res.project?.phases ?? [];
-      const tasks: Task[] = (res.tasks ?? res.project?.tasks ?? []).map(
-        (t: any) => ({
-          ...t,
-          phase_id: t.phase_id ?? t.phaseId // normalizza naming
-        })
-      );
-
-      this.project.set(proj);
-      this.phasesSig.set(phases);
-      this.tasksSig.set(tasks);
-    } catch (err) {
-      console.error('GET /project/:id error', err);
-      this.errorMsg.set('Impossibile caricare il progetto.');
-      this.toast.danger('Errore', 'Caricamento progetto fallito', 3000);
-    } finally {
-      this.loading.set(false);
-    }
-  }
-
-  // ===== Collaboratori (per ora solo UI) =====
+  // ---------------- LOAD DATA ----------------
 
   /**
-   * Chiamata dal bottone "+" nella topbar.
-   * Si limita ad abilitare la piccola UI di input (associata a `addingCollaborator`),
-   * resettando l'email ed evitando di procedere se il progetto non è caricato.
+   * Allineato a ProjectResource (+ eventuale risposta aggregata con phases/tasks)
    */
+private async loadProject(id: string) {
+  this.loading.set(true);
+  this.errorMsg.set(null);
+
+  try {
+    // 1️⃣ Carica il progetto
+    const rawProj = await this.projectsService.getProjectById(id);
+    if (!rawProj) throw new Error("Project not found");
+
+    const proj = this.normalizeProject(rawProj);
+    this.project.set(proj);
+
+    // 2️⃣ Carica SOLO LE FASI DAL BACKEND
+    const phases = await firstValueFrom(
+      this.phaseService.getByProject(proj._id as string)
+    );
+
+    const normalizedPhases = phases.map((p) =>
+      this.normalizePhase(p, proj._id as string)
+    );
+
+    this.phasesSig.set(normalizedPhases);
+
+  } catch (err) {
+    console.error("loadProject error:", err);
+    this.toast.danger("Errore", "Caricamento progetto fallito", 3000);
+  } finally {
+    this.loading.set(false);
+  }
+}
+
+
+
+  // ---------------- NORMALIZZAZIONE ----------------
+
+  /**
+   * ProjectResponse FE <-> ProjectResponse BE
+   * Garantisce la presenza di `_id`.
+   */
+  private normalizeProject(raw: any): ProjectResponse {
+    const id = raw._id ?? raw.id;
+    const creator: UserResponse = raw.creator as UserResponse;
+    const collaborators: UserResponse[] = (raw.collaborators ??
+      []) as UserResponse[];
+
+    return {
+      ...(raw as ProjectResponse),
+      _id: id,
+      title: raw.title,
+      description: raw.description,
+      creator,
+      collaborators,
+      createdAt: raw.createdAt ?? raw.created_at,
+      updatedAt: raw.updatedAt ?? raw.updated_at
+    };
+  }
+
+  /**
+   * Phase FE <-> Phase.java (id, title, projectId)
+   */
+  private normalizePhase(raw: any, projectId: string): Phase {
+    const id = raw._id ?? raw.id;
+    const projId = raw.project_id ?? raw.projectId ?? projectId;
+
+    return {
+      _id: String(id),
+      project_id: String(projId),
+      title: raw.title ?? '',
+      description: raw.description, // opzionale, solo FE
+      is_done: raw.is_done ?? raw.isDone,
+      wip_limit: raw.wip_limit ?? raw.wipLimit,
+      createdAt: raw.createdAt ?? raw.created_at,
+      updatedAt: raw.updatedAt ?? raw.updated_at
+    };
+  }
+
+  /**
+   * Task FE <-> Task.java
+   * id, title, description, assignees(List<Identifiable>), expirationDate, phaseId
+   */
+  private normalizeTask(raw: any, projectId: string): Task {
+    const id = raw._id ?? raw.id;
+    const phaseId =
+      raw.phase_id ??
+      raw.phaseId ??
+      raw['phase-id'] ??
+      raw.phase?.id ??
+      raw.phase?._id;
+
+    // expirationDate in BE è LocalDateTime → di solito ISO string
+    const expiration =
+      raw.expiration_date ??
+      raw.expirationDate ??
+      raw['expiration-date'] ??
+      undefined;
+
+    let assignees: any = raw.assignees;
+    if (Array.isArray(assignees)) {
+      // Se il BE restituisce oggetti {id: string} li rendo stringhe
+      if (assignees.length && typeof assignees[0] === 'object') {
+        assignees = assignees.map((a: any) => a.id ?? JSON.stringify(a));
+      }
+    }
+
+    return {
+      _id: String(id),
+      project_id: String(raw.project_id ?? raw.projectId ?? projectId),
+      phase_id: String(phaseId),
+      title: raw.title ?? '',
+      description: raw.description,
+      expiration_date: expiration,
+      priority: raw.priority, // opzionale, solo FE
+      attachments: raw.attachments,
+      assignees,
+      createdAt: raw.createdAt ?? raw.created_at,
+      updatedAt: raw.updatedAt ?? raw.updated_at
+    };
+  }
+
+  // ---------------- COLLABORATORI (solo UI per ora) ----------------
+
   openAddCollaboratorModal(): void {
     const p = this.project();
     if (!p) {
@@ -142,10 +241,6 @@ export class Dashboard implements OnInit {
     this.addingCollaborator.set(true);
   }
 
-  /**
-   * Aggiunge un collaboratore *solo lato UI* partendo da `collabEmail`.
-   * Puoi sostituire questa logica con una chiamata al backend quando avrai l’endpoint.
-   */
   addCollaborator(): void {
     const email = (this.collabEmail || '').trim();
     if (!email) {
@@ -160,11 +255,7 @@ export class Dashboard implements OnInit {
 
     const p = this.project();
     if (!p) {
-      this.toast.danger(
-        'Errore',
-        'Nessun progetto selezionato.',
-        2500
-      );
+      this.toast.danger('Errore', 'Nessun progetto selezionato.', 2500);
       return;
     }
 
@@ -199,7 +290,8 @@ export class Dashboard implements OnInit {
     this.toast.info('Rimosso', 'Collaboratore rimosso (solo UI)', 2000);
   }
 
-  // ===== Fasi =====
+  // ---------------- FASI ----------------
+
   startInlinePhase(): void {
     this.addingPhase.set(true);
     this.phaseDraft.set({ title: '', description: '' });
@@ -210,32 +302,39 @@ export class Dashboard implements OnInit {
     this.phaseDraft.set({ title: '', description: '' });
   }
 
+  /**
+   * POST /phase (o analogo) via PhaseService
+   * NB: sul BE Phase ha solo title + projectId, la descrizione è solo FE.
+   */
   saveInlinePhase(): void {
     const d = this.phaseDraft();
     const p = this.project();
     if (!p || !d.title?.trim()) return;
 
-    // Includo project_id come da tuoi models
-    this.phaseService
-      .create(p._id, {
-        title: d.title.trim(),
-        description: (d.description || '').trim()
-      } as any)
-      .subscribe({
-        next: (created: Phase) => {
-          this.phasesSig.set([...this.phasesSig(), created]);
-          this.addingPhase.set(false);
-          this.startInlineTask(created._id);
-          this.toast.success('OK', 'Fase creata', 3000);
-        },
-        error: (e) => {
-          console.error('create phase error', e);
-          this.toast.danger('Errore', 'Creazione fase fallita', 3000);
-        }
-      });
+this.phaseService
+  .createPhase({ title: d.title.trim(), projectId: p._id as string })
+  .subscribe({
+    next: (created) => {
+      const normalized = this.normalizePhase(created, p._id as string);
+
+      this.phasesSig.set([...this.phasesSig(), normalized]);
+      this.toast.success('OK', 'Fase creata', 3000);
+
+      this.addingPhase.set(false);
+
+      // opzionale: apri subito il form task
+      this.startInlineTask(normalized._id);
+    },
+    error: (err) => {
+      console.error(err);
+      this.toast.danger('Errore', 'Creazione fase fallita', 3000);
+    }
+  });
+
   }
 
-  // ===== Task =====
+  // ---------------- TASK ----------------
+
   startInlineTask(phaseId: string): void {
     const creatorId = this.project()?.creator?.id;
     this.inlineTaskPhaseId.set(phaseId);
@@ -261,9 +360,15 @@ export class Dashboard implements OnInit {
   }
 
   setDraftPriority(level: 'high' | 'medium' | 'low'): void {
-    this.inlineDraft.set({ ...this.inlineDraft(), priority: level });
+    this.inlineDraft.set({
+      ...this.inlineDraft(),
+      priority: level
+    });
   }
 
+  /**
+   * POST /task allineato a CreateTaskRequest (project_id, phase_id, ...)
+   */
   saveInlineTask(): void {
     const phaseId = this.inlineTaskPhaseId();
     const d = this.inlineDraft();
@@ -284,32 +389,40 @@ export class Dashboard implements OnInit {
       assigneesLabels.push(`${c.firstName} ${c.lastName}`.trim());
     }
 
-    this.taskService
-      .create({
-        project_id: p._id,
-        phase_id: phaseId,
-        title: d.title.trim(),
-        description: (d.description || '').trim(),
-        expiration_date: d.expiration_date || undefined,
-        priority: d.priority
-      } as any)
-      .subscribe({
-        next: (created: Task) => {
-          this.tasksSig.set([
-            ...this.tasksSig(),
-            { ...created, assignees: assigneesLabels }
-          ]);
-          this.cancelInlineTask();
-          this.toast.success('OK', 'Task creato', 3000);
-        },
-        error: (e) => {
-          console.error('create task error', e);
-          this.toast.danger('Errore', 'Creazione task fallita', 3000);
-        }
-      });
+    const payload: CreateTaskRequest = {
+      project_id: p._id as string,
+      phase_id: phaseId,
+      title: d.title.trim(),
+      description: (d.description || '').trim() || undefined,
+      expiration_date: d.expiration_date || undefined,
+      priority: d.priority
+    };
+
+    this.taskService.create(payload as any).subscribe({
+      next: (created: Task) => {
+        const normalized = this.normalizeTask(
+          created,
+          p._id as string
+        );
+        this.tasksSig.set([
+          ...this.tasksSig(),
+          {
+            ...normalized,
+            // Per la UI mostrata nelle card/pannello
+            assignees: assigneesLabels,
+            priority: d.priority
+          }
+        ]);
+        this.inlineTaskPhaseId.set(null);
+        this.toast.success('OK', 'Task creato', 3000);
+      },
+      error: (e) => {
+        console.error('create task error', e);
+        this.toast.danger('Errore', 'Creazione task fallita', 3000);
+      }
+    });
   }
 
-  // ===== Task panel =====
   openPanel(t: Task): void {
     this.selectedTask.set(t);
     this.panelOpen.set(true);
@@ -320,12 +433,17 @@ export class Dashboard implements OnInit {
     this.selectedTask.set(null);
   }
 
-  deleteTask(t: Task): void {
-    this.taskService.delete(t._id).subscribe({
+  deleteTask(task: Task): void {
+    if (!task?._id) return;
+
+    this.taskService.delete(task._id).subscribe({
       next: () => {
-        this.tasksSig.set(this.tasksSig().filter((x) => x._id !== t._id));
-        this.closePanel();
-        this.toast.success('OK', 'Task eliminato', 2000);
+        this.tasksSig.set(
+          this.tasksSig().filter((t) => t._id !== task._id)
+        );
+        this.panelOpen.set(false);
+        this.selectedTask.set(null);
+        this.toast.success('OK', 'Task eliminato', 3000);
       },
       error: (e) => {
         console.error('delete task error', e);
@@ -334,43 +452,49 @@ export class Dashboard implements OnInit {
     });
   }
 
-  markCompleted(t: Task): void {
-    this.taskService.update(t._id, { status: 'done' } as any).subscribe({
-      next: (upd) => {
-        this.tasksSig.set(
-          this.tasksSig().map((x) => (x._id === t._id ? { ...x, ...upd } : x))
-        );
-        this.closePanel();
-        this.toast.success('OK', 'Task completato', 3000);
-      },
-      error: (e) => {
-        console.error('complete task error', e);
-        this.toast.danger('Errore', 'Aggiornamento task fallito', 3000);
-      }
-    });
+  /**
+   * Per ora invia solo un update generico (es. status: done).
+   * Sul BE potrai agganciare un campo "status" se/quando lo aggiungi a Task.java.
+   */
+  markCompleted(task: Task): void {
+    if (!task?._id) return;
+
+    this.taskService
+      .update(task._id, { status: 'done' } as any)
+      .subscribe({
+        next: () => {
+          this.toast.success(
+            'Completato',
+            'Task marcato come completato',
+            3000
+          );
+        },
+        error: (e) => {
+          console.error('update task error', e);
+          this.toast.danger(
+            'Errore',
+            'Impossibile aggiornare il task',
+            3000
+          );
+        }
+      });
   }
 
-  // Stub attuale per altri modali (project/task)
-  openModal(kind: 'project' | 'task'): void {
-    this.toast.info('Info', `Apro modale: ${kind}`, 1500);
+  // ---------------- ALTRO ----------------
+
+  openModal(_type: 'project'): void {
+    // placeholder per l'evento (createProject) della sidebar
+    // qui potrai aprire un vero modal di creazione progetto
+    console.debug('openModal', _type);
   }
 
   logout(): void {
-    this.auth.logout?.();
+    this.auth.logout();
+    this.router.navigateByUrl('/login');
   }
 }
 
-// helper id
+// Piccolo helper per ID temporanei lato FE
 function uid(): string {
-  try {
-    const a = new Uint32Array(2);
-    crypto.getRandomValues(a);
-    return Array.from(a)
-      .map((n) => n.toString(36))
-      .join('');
-  } catch {
-    return (
-      Math.random().toString(36).slice(2) + Date.now().toString(36)
-    );
-  }
+  return Math.random().toString(36).slice(2, 10);
 }
