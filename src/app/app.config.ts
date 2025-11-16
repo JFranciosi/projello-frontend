@@ -10,7 +10,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideNgToast } from 'ng-angular-popup';
 import {
-  LucideAngularModule,
+  LucideAngularModule,User,
   Bell, Search, UserCircle2, LogOut,
   LayoutDashboard, Calendar, CalendarClock, Archive,
   Paperclip, MessageSquare, CheckSquare2, Clock, Tag, MoreVertical, Flag,
@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
     // Registra TUTTE le icone usate nel progetto
     importProvidersFrom(
       LucideAngularModule.pick({
-        Bell, Search, UserCircle2, LogOut,
+        Bell, Search, UserCircle2, User, LogOut,
         LayoutDashboard, Calendar, CalendarClock, Archive,
         Paperclip, MessageSquare, CheckSquare2, Clock, Tag, MoreVertical, Flag,
         Copy, Trash2, X, FileText, Square, Plus

@@ -18,35 +18,96 @@
 
   <!-- MAIN (container dentro al container) -->
   <div class="board-container">
-    <!-- TOPBAR: titolo + collaboratori (statica) -->
     @if (currentProject(); as project) {
       <section class="project-topbar" role="region" aria-label="Intestazione progetto">
         <div class="topbar-left">
           <h1 class="topbar-title">{{ project.title }}</h1>
-          @if (project.description) { <p class="topbar-sub">{{ project.description }}</p> }
+          @if (project.description) {
+            <p class="topbar-sub">{{ project.description }}</p>
+          }
         </div>
 
         <div class="topbar-right">
+          <!-- HEADER TEAM + bottone/inline form -->
+          <div class="collab-header">
+
+            @if (!addingCollaborator()) {
+              <!-- Stato normale: solo bottone "+" -->
+              <button
+                type="button"
+                class="add-collab-btn"
+                (click)="openAddCollaboratorModal()"
+                aria-label="Aggiungi collaboratore"
+              >
+                <lucide-icon name="plus"></lucide-icon>
+                <span>Aggiungi</span>
+              </button>
+            } @else {
+              <!-- Stato editing: piccolo form inline -->
+              <form
+                class="add-collab-inline"
+                (ngSubmit)="addCollaborator()"
+                autocomplete="off"
+                novalidate
+              >
+                <input
+                  type="email"
+                  class="add-collab-input"
+                  name="collabEmail"
+                  required
+                  [(ngModel)]="collabEmail"
+                  placeholder="email collaboratore..."
+                />
+
+                <button
+                  type="button"
+                  class="btn ghost tiny"
+                  (click)="addingCollaborator.set(false)"
+                >
+                  Annulla
+                </button>
+
+                <button
+                  type="submit"
+                  class="btn tiny"
+                >
+                  Invita
+                </button>
+              </form>
+            }
+          </div>
+
+          <!-- Pills: creatore + collaboratori -->
           <div class="collab-pills" aria-label="Collaboratori">
             <span class="pill creator" title="Creatore">
-              <lucide-icon name="user"></lucide-icon>
-              {{ project.creator.firstName }} {{ project.creator.lastName }}
+              <lucide-icon name="User"></lucide-icon>
+              <span class="pill-role"></span>
+              <span class="pill-name">
+                {{ project.creator.firstName }} {{ project.creator.lastName }}
+              </span>
             </span>
+
             @for (c of project.collaborators; track c.id) {
               <span class="pill" title="Collaboratore">
-                <lucide-icon name="user"></lucide-icon>
-                {{ c.firstName }} {{ c.lastName }}
-                <button class="pill-x" (click)="removeCollaborator(c.id)" aria-label="Rimuovi collaboratore">
+                <lucide-icon name="User"></lucide-icon>
+                <span class="pill-role"></span>
+                <span class="pill-name">
+                  {{ c.firstName }} {{ c.lastName }}
+                </span>
+                <button
+                  type="button"
+                  class="pill-x"
+                  (click)="removeCollaborator(c.id)"
+                  aria-label="Rimuovi collaboratore"
+                >
                   <lucide-icon name="x"></lucide-icon>
                 </button>
               </span>
             }
           </div>
-          <!-- Nessun input qui: la topbar resta uguale -->
         </div>
       </section>
     }
-
     <!-- GRID FASI (card stile Trello) -->
     <main class="phases-grid" role="main" aria-label="Bacheca fasi">
       @for (p of phases(); track p._id) {
