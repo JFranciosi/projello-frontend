@@ -1,79 +1,214 @@
-<!-- NAVBAR -->
 <header class="navbar" role="banner">
-  <div class="nav-left">
-    <img src="logoProjello.png" alt="Projello Logo" class="logo" />
-  </div>
-
-  <div class="nav-right">
-    <button class="icon-btn logout" title="Logout" aria-label="Logout" (click)="logout()">
-      <lucide-icon name="log-out"></lucide-icon>
-    </button>
-  </div>
+<app-navbar (logout)="logout()"></app-navbar>
 </header>
 
-<!-- CONTAINER -->
-<div class="profile-container">
-  <!-- SIDEBAR -->
+<div class="profile-shell">
   <app-dashboard-sidebar></app-dashboard-sidebar>
 
-  <!-- MAIN CONTENT -->
-  <main class="main-content" role="main" aria-label="Profilo utente">
-    <h1>Profilo utente</h1>
-    <p>Benvenuto nel tuo profilo! Qui puoi modificare le informazioni personali.</p>
+  <main class="profile-main" role="main" aria-label="Profilo utente">
+    <section class="profile-card">
+      <header class="profile-header">
+        <div class="profile-header-left">
+          <div class="avatar-circle" aria-hidden="true">
+            <span>{{ avatarInitials() }}</span>
+          </div>
 
-    <section class="profile-section">
-      <h2>Dati personali</h2>
+          <div class="profile-header-text">
+            <h1>Profilo utente</h1>
+            <p class="profile-subtitle">Gestisci le informazioni del tuo account Projello.</p>
 
-      <form (ngSubmit)="saveProfile()">
+            <p class="profile-name">
+              {{ profile().firstName }} {{ profile().lastName }}
+            </p>
+            <p class="profile-email">
+              {{ profile().email }}
+            </p>
 
-        <!-- USERNAME -->
-        <div class="form-group">
-          <label for="displayName">Username</label>
-          <input
-            id="displayName"
-            type="text"
-            name="displayName"
-            [(ngModel)]="profile().username"
-            required
-          />
+            <span class="role-pill">Utente</span>
+          </div>
         </div>
+      </header>
 
-        <!-- EMAIL -->
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            [(ngModel)]="profile().email"
-            required
-          />
-        </div>
+      <!-- TABS -->
+      <nav
+        class="profile-tabs"
+        role="tablist"
+        aria-label="Sezioni profilo"
+      >
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedTab() === 'personal'"
+          role="tab"
+          aria-selected="{{ selectedTab() === 'personal' }}"
+          (click)="selectTab('personal')"
+        >
+          <lucide-icon name="user"></lucide-icon>
+          <span>Dati personali</span>
+        </button>
 
-        <!-- NUOVA PASSWORD -->
-        <div class="form-group">
-          <label for="newPassword">Nuova password</label>
-          <input
-            id="newPassword"
-            type="password"
-            name="newPassword"
-            [(ngModel)]="newPassword"
-          />
-        </div>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedTab() === 'security'"
+          role="tab"
+          aria-selected="{{ selectedTab() === 'security' }}"
+          (click)="selectTab('security')"
+        >
+          <lucide-icon name="lock"></lucide-icon>
+          <span>Sicurezza</span>
+        </button>
+      </nav>
 
-        <!-- CONFERMA NUOVA PASSWORD -->
-        <div class="form-group">
-          <label for="confirmPassword">Conferma nuova password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            name="confirmPassword"
-            [(ngModel)]="confirmPassword"
-          />
-        </div>
+      <!-- TAB: DATI PERSONALI -->
+      @if (selectedTab() === 'personal') {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Dati personali"
+        >
+          <h2>Dati personali</h2>
 
-        <button type="submit" class="save-btn">Salva modifiche</button>
-      </form>
+          <form class="profile-form" (ngSubmit)="saveProfile()">
+            <!-- NOME + COGNOME -->
+            <div class="form-grid-2">
+              <div class="field-row">
+                <label class="field-label" for="firstName">Nome</label>
+                <div class="field-block" [class.is-editing]="editing.firstName">
+                  <input
+                    id="firstName"
+                    type="text"
+                    name="firstName"
+                    [(ngModel)]="profile().firstName"
+                    [readonly]="!editing.firstName"
+                  />
+                  <button
+                    type="button"
+                    class="field-edit-btn"
+                    (click)="toggleFieldEdit('firstName')"
+                    [attr.aria-label]="editing.firstName ? 'Blocca modifica nome' : 'Modifica nome'"
+                  >
+                    <lucide-icon name="pencil"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <label class="field-label" for="lastName">Cognome</label>
+                <div class="field-block" [class.is-editing]="editing.lastName">
+                  <input
+                    id="lastName"
+                    type="text"
+                    name="lastName"
+                    [(ngModel)]="profile().lastName"
+                    [readonly]="!editing.lastName"
+                  />
+                  <button
+                    type="button"
+                    class="field-edit-btn"
+                    (click)="toggleFieldEdit('lastName')"
+                    [attr.aria-label]="editing.lastName ? 'Blocca modifica cognome' : 'Modifica cognome'"
+                  >
+                    <lucide-icon name="pencil"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- USERNAME -->
+            <div class="field-row">
+              <label class="field-label" for="displayName">Username</label>
+              <div class="field-block" [class.is-editing]="editing.username">
+                <input
+                  id="displayName"
+                  type="text"
+                  name="displayName"
+                  [(ngModel)]="profile().username"
+                  required
+                  [readonly]="!editing.username"
+                />
+                <button
+                  type="button"
+                  class="field-edit-btn"
+                  (click)="toggleFieldEdit('username')"
+                  [attr.aria-label]="editing.username ? 'Blocca modifica username' : 'Modifica username'"
+                >
+                  <lucide-icon name="pencil"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <!-- EMAIL -->
+            <div class="field-row">
+              <label class="field-label" for="email">Email</label>
+              <div class="field-block" [class.is-editing]="editing.email">
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  [(ngModel)]="profile().email"
+                  required
+                  [readonly]="!editing.email"
+                />
+                <button
+                  type="button"
+                  class="field-edit-btn"
+                  (click)="toggleFieldEdit('email')"
+                  [attr.aria-label]="editing.email ? 'Blocca modifica email' : 'Modifica email'"
+                >
+                  <lucide-icon name="pencil"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="save-btn">
+              Salva modifiche
+            </button>
+          </form>
+        </section>
+      }
+
+      <!-- TAB: SICUREZZA / CAMBIA PASSWORD -->
+      @if (selectedTab() === 'security') {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Sicurezza"
+        >
+          <h2>Cambia password</h2>
+          <p class="panel-subtitle">
+            Imposta una nuova password per il tuo account.
+          </p>
+
+          <form class="profile-form" (ngSubmit)="saveProfile()">
+            <div class="field-row">
+              <label class="field-label" for="newPassword">Nuova password</label>
+              <input
+                id="newPassword"
+                class="simple-input"
+                type="password"
+                name="newPassword"
+                [(ngModel)]="newPassword"
+              />
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="confirmPassword">Conferma nuova password</label>
+              <input
+                id="confirmPassword"
+                class="simple-input"
+                type="password"
+                name="confirmPassword"
+                [(ngModel)]="confirmPassword"
+              />
+            </div>
+
+            <button type="submit" class="save-btn">
+              Aggiorna password
+            </button>
+          </form>
+        </section>
+      }
     </section>
   </main>
 </div>

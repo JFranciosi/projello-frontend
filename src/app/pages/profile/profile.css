@@ -1,56 +1,25 @@
-:host,body {
+:host {
   display: block;
-  font-family: var(--font);
+  min-height: 100vh;
+  background-color: var(--bg);
   color: var(--ink);
-  background: var(--bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ===== Navbar =========================================================== */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--brand);
-  padding: .9rem 1.6rem;
-  box-shadow: var(--shadow-soft);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.logo {
-  height: 38px;
-  width: auto;
-  display: block;
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
+  font-family: var(--font);
 }
 
 .icon-btn {
   background: transparent;
   border: none;
   margin-left: 1rem;
-  padding: .4rem;
+  padding: 0.4rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: transform .18s, background-color .2s, opacity .2s;
+  transition: transform 0.18s, background-color 0.2s, opacity 0.2s;
 }
 
 .icon-btn:hover {
-  background: rgba(255, 255, 255, .32);
+  background: rgba(255, 255, 255, 0.3);
   transform: scale(1.06);
-  opacity: .92;
+  opacity: 0.92;
 }
 
 .icon-btn lucide-icon {
@@ -64,119 +33,315 @@
   color: #b91c1c;
 }
 
-/* ===== Profile Page ===================================================== */
+lucide-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
-.profile-container {
+.profile-shell {
   display: grid;
-  grid-template-columns: 250px 1fr;
-  min-height: 80vh;
-  background-color: var(--bg);
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 1.6rem;
 }
 
-.main-content {
-  padding: 2.5rem 3rem;
-  background: var(--bg-panel);
-  border-radius: 16px;
+.profile-main {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.profile-card {
+  width: 100%;
+  max-width: 960px;
+  background-color: var(--bg-panel);
+  border-radius: 18px;
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-soft);
-  margin: 2rem;
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  padding: 2.3rem 2.6rem 2.2rem;
+  margin: 2rem 2rem 2rem 0rem;
 }
 
-.main-content:hover {
-  box-shadow: var(--shadow-medium);
-  transform: translateY(-1.5px);
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.7rem;
 }
 
-.profile-section {
-  margin-top: 1rem;
+.profile-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
 }
 
-.profile-section h2 {
-  font-size: 1.4rem;
+.avatar-circle {
+  width: 75px;
+  height: 75px;
+  border-radius: 999px;
+  background: var(--brand-light);
+  border: 2px solid var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.avatar-circle span {
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+
+.profile-header-text h1 {
+  font-size: 1.9rem;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.profile-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.96rem;
+  color: var(--ink-muted);
+}
+
+.profile-name {
+  margin-top: 0.45rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.profile-email {
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.role-pill {
+  margin-top: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #e0edff;
+  color: #1d4ed8;
+}
+
+.profile-tabs {
+  margin: -0.8rem 0 1.6rem;
+  display: inline-flex;
+  gap: 0.4rem;
+  padding: 0.2rem;
+  background-color: #f3f4f6;
+  border-radius: 999px;
+}
+
+.tab-btn {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.06s ease;
+}
+
+.tab-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.tab-btn.active {
+  background-color: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.tab-btn.active lucide-icon {
+  color: var(--brand);
+}
+
+.tab-panel {
+  margin-top: -0.8rem;
+}
+
+.tab-panel h2 {
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--ink-soft);
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid rgba(228, 179, 99, 0.4); /* brand soft */
-  padding-bottom: 0.4rem;
+  margin-bottom: 0.6rem;
 }
 
-.form-group {
-  margin-bottom: 1.4rem;
+.panel-subtitle {
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+  margin-bottom: 1.1rem;
 }
 
-label {
-  display: block;
+.profile-form {
+  margin-top: 0.4rem;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1.4rem;
+}
+
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field-label {
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--ink-soft);
-  margin-bottom: 0.4rem;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-  width: 60%;
-  padding: 0.65rem 0.8rem;
-  display: block;
-  border-radius: 8px;
-  border: 1px solid var(--border-soft);
-  background-color: var(--bg-panel);
-  color: var(--ink);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  font-size: 0.95rem;
+.field-block {
+  display: flex;
+  align-items: center;
+  background-color: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 0.08rem 0.2rem 0.08rem 0.7rem;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.06s ease;
 }
 
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus {
+.field-block.is-editing {
+  background-color: #ffffff;
   border-color: var(--brand);
   box-shadow: 0 0 0 3px var(--brand-shadow);
+}
+
+.field-block input[type='text'],
+.field-block input[type='email'] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.3rem 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.field-block input:focus {
   outline: none;
 }
 
-.save-btn {
-  background-color: var(--brand);
-  color: var(--ink);
-  font-weight: 700;
-  font-size: 0.9rem;
-  padding: 0.6rem 1.4rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.25s ease, transform 0.2s ease;
+.field-block input[readonly] {
+  color: var(--ink-muted);
+  cursor: default;
 }
 
-.save-btn:hover {
-  background-color: #d9a857; /* brand leggermente più scuro */
+/* matita */
+
+.field-edit-btn {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.3rem;
+  margin-left: 0.2rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 0.18s ease,
+    transform 0.08s ease;
+}
+
+.field-edit-btn lucide-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.8;
+  color: var(--ink-soft);
+}
+
+.field-edit-btn:hover {
+  background-color: rgba(15, 23, 42, 0.06);
   transform: translateY(-1px);
 }
 
-/* ===== Responsive ====================================================== */
-@media (max-width: 1024px) {
-  input[type="text"],
-  input[type="email"],
-  input[type="password"] {
-    width: 80%;
-  }
+.field-block.is-editing .field-edit-btn lucide-icon {
+  color: var(--brand);
 }
 
-@media (max-width: 768px) {
-  .profile-container {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-  }
+.simple-input {
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.9rem;
+  background-color: #f9fafb;
+  color: var(--ink);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
 
-  .main-content {
-    margin: 1rem 0;
-    padding: 1.5rem;
-  }
+.simple-input:focus-visible {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-shadow);
+}
 
-  input[type="text"],
-  input[type="email"],
-  input[type="password"] {
-    width: 100%;
-  }
+.save-btn {
+  margin-top: 0.8rem;
+  align-self: flex-start;
 
-  .save-btn {
-    width: 100%;
-  }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+
+  background-color: var(--ink);
+  color: var(--bg-panel);
+  border-radius: 10px;
+  border: 1px solid #0b1220;
+  padding: 0.55rem 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.2s ease,
+    transform 0.06s ease,
+    opacity 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.save-btn:hover {
+  background-color: #0f1626;
+  box-shadow: var(--shadow-strong);
+}
+
+.save-btn:active {
+  transform: translateY(1px);
+}
+
+.save-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--brand-shadow);
 }

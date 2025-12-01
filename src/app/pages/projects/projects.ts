@@ -6,20 +6,18 @@ import { ProjectResponse } from '../../models/models';
 import { DashboardSidebar } from '../../layout/dashboard-sidebar/dashboard-sidebar';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
+import { Navbar } from '../../components/navbar/navbar';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, DashboardSidebar, LucideAngularModule],
+  imports: [CommonModule, DashboardSidebar, LucideAngularModule,Navbar],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
 })
 export class Projects implements OnInit {
-  /** Lista progetti */
   projects = signal<ProjectResponse[]>([]);
   loading = signal(true);
-
-  /** Gestione modale (creazione progetto) */
   modalOpen = signal(false);
   modalType = signal<'project' | null>(null);
 
@@ -29,12 +27,10 @@ export class Projects implements OnInit {
     private auth: AuthService
   ) {}
 
-  /** Al caricamento, ottiene tutti i progetti dell’utente */
   ngOnInit(): void {
     this.loadProjects();
   }
 
-  /** Chiama il backend per caricare i progetti */
   async loadProjects(): Promise<void> {
     this.loading.set(true);
     try {
@@ -67,9 +63,6 @@ navigateToProject(project: ProjectResponse): void {
   this.router.navigate(['/dashboard', id]);
 }
 
-
-
-  /** Apertura e chiusura modale */
   openModal(type: 'project'): void {
     this.modalType.set(type);
     this.modalOpen.set(true);
@@ -80,7 +73,6 @@ navigateToProject(project: ProjectResponse): void {
     this.modalType.set(null);
   }
 
-  /** Evento di salvataggio del progetto (TODO: chiamare createProject) */
   async onSaveProject(ev: Event): Promise<void> {
     ev.preventDefault();
     // TODO: chiamare projectsService.createProject() con i dati del form
@@ -88,7 +80,6 @@ navigateToProject(project: ProjectResponse): void {
     await this.loadProjects();
   }
 
-  /** Logout utente */
   logout(): void {
     try {
       this.auth.logout();

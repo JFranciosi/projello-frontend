@@ -7,21 +7,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- Navbar --- */
-.navbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:var(--brand);
-  padding:.9rem 1.6rem;
-  box-shadow:var(--shadow-soft);
-  position:sticky;
-  top:0;
-  z-index:100;
-}
-.nav-left{ display:flex; align-items:center; gap:1rem; }
-.logo{ height:38px; width:auto; display:block; }
-.nav-right{ display:flex; align-items:center; }
 .icon-btn{
   background:transparent;
   border:none;
@@ -35,7 +20,6 @@
 .icon-btn lucide-icon{ width:22px; height:22px; stroke-width:1.8; color:var(--ink); }
 .logout lucide-icon{ color:#B91C1C; }
 
-/* ====== LAYOUT: SIDEBAR + MAIN ====== */
 .dashboard-container {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
@@ -43,14 +27,12 @@
   align-items: start;
 }
 
-/* Main container accanto alla sidebar */
 .board-container {
   max-width: 100%;
   padding: 1rem 1rem 0rem 0rem;
   margin-right: 2.4rem;
 }
 
-/* ===== Topbar progetto (statica) ===== */
 .project-topbar {
   display: flex;
   justify-content: space-between;
@@ -120,7 +102,6 @@
   box-shadow: 0 0 0 3px #E4B36333;
 }
 
-/* Header sezione collaboratori (label + pulsante +) */
 .collab-header {
   display: flex;
   align-items: center;
@@ -136,7 +117,6 @@
   color: var(--ink-muted);
 }
 
-/* Pulsante "Aggiungi" */
 .add-collab-btn {
   display: inline-flex;
   align-items: center;
@@ -177,7 +157,6 @@
   box-shadow: 0 0 0 3px #E4B36333;
 }
 
-/* Pills collaboratori */
 .collab-pills {
   display: flex;
   gap: 0.4rem;
@@ -210,7 +189,6 @@
   color: var(--ink-muted);
 }
 
-/* Bottone X rimane come ce l'hai già */
 .pill-x {
   background: transparent;
   border: none;
@@ -250,7 +228,6 @@
 }
 .pill-x:hover { background: #0000000A; }
 
-/* =============== Griglia Fasi =============== */
 .phases-grid {
   display: flex;
   flex-direction: row;
@@ -307,7 +284,6 @@
   font-weight: 600;
 }
 
-/* ===== Ghost task card ===== */
 .ghost-task-card {
   display: flex;
   align-items: center;
@@ -326,7 +302,6 @@
   transform: translateY(-1px);
 }
 
-/* ===== Inline task/phase form (SCOPED dentro le card) ===== */
 .phase-card .inline-task-form,
 .inline-phase-form {
   border: 1px solid var(--border);
@@ -361,7 +336,6 @@
   font-weight: 600;
 }
 
-/* Input, textarea, select — stile Projello */
 .phase-card input[type="text"],
 .phase-card input[type="date"],
 .phase-card select,
@@ -398,7 +372,6 @@
   box-shadow: 0 0 0 3px #E4B36333;
 }
 
-/* ===== Bottoni (Salva / Annulla / Crea fase) ===== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -446,7 +419,6 @@
 .btn.small { padding: .42rem .7rem; font-size: .92rem; border-radius: 9px; }
 .btn.tiny  { padding: .3rem .55rem; font-size: .85rem; border-radius: 8px; }
 
-/* ===== “Aggiungi Fase” CTA ===== */
 .add-phase-btn {
   width: 100%;
   display: flex;
@@ -481,7 +453,6 @@
   margin-top: 0.6rem;
 }
 
-/* ===== PRIORITÀ — pill segmented (Alta / Media / Bassa) ===== */
 .flag-priority {
   display: inline-flex;
   align-items: center;
@@ -517,7 +488,6 @@
   pointer-events: none;
 }
 
-/* bullet decorativo */
 .flag-priority label::before {
   content: "";
   width: 8px;
@@ -528,14 +498,12 @@
   box-shadow: inset 0 0 0 2px #FFFFFF;
 }
 
-/* Stato selezionato per ciascun livello (usa :has) */
 .flag-priority label:has(input[type="radio"]:checked) {
   background-color: var(--brand-light);
   border-color: #F5DDB7;
   color: var(--ink);
 }
 
-/* Colori per livello */
 .flag-priority label:has(input[value="high"]:checked) {
   background-color: #FEE2E2;
   border-color: #FECACA;
@@ -552,17 +520,14 @@
   color: #064E3B;
 }
 
-/* bullet per livello selezionato */
 .flag-priority label:has(input[value="high"]:checked)::before { background-color: #DC2626; }
 .flag-priority label:has(input[value="medium"]:checked)::before { background-color: #D97706; }
 .flag-priority label:has(input[value="low"]:checked)::before { background-color: #059669; }
 
-/* Focus accessibile su radio */
 .flag-priority label:has(input[type="radio"]:focus-visible) {
   box-shadow: 0 0 0 3px #E4B36333;
 }
 
-/* ===== Task list ===== */
 .task-list {
   list-style: none;
   margin: 0;
@@ -612,12 +577,10 @@
   padding: .4rem;
 }
 
-/* ===== Card "Aggiungi fase" (DOM sempre presente) ===== */
 .is-hidden { display: none !important; }
 .phase-card.new-phase { align-self: start; }
 .inline-phase-form { will-change: contents; }
 
-/* =============== Task panel (slide-in) =============== */
 .task-panel {
   position: fixed;
   top: 0;
@@ -718,7 +681,6 @@
   border-top: 1px solid var(--border);
 }
 
-/* =============== Icone =============== */
 lucide-icon {
   width: 18px;
   height: 18px;

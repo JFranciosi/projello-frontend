@@ -14,7 +14,7 @@ import {
   Bell, Search, UserCircle2, LogOut,
   LayoutDashboard, Calendar, CalendarClock, Archive,
   Paperclip, MessageSquare, CheckSquare2, Clock, Tag, MoreVertical, Flag,
-  Copy, Trash2, X, FileText, Square, Plus
+  Copy, Trash2, X, FileText, Square, Plus,Pencil,Lock
 } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
@@ -31,7 +31,7 @@ export const appConfig: ApplicationConfig = {
         Bell, Search, UserCircle2, User, LogOut,
         LayoutDashboard, Calendar, CalendarClock, Archive,
         Paperclip, MessageSquare, CheckSquare2, Clock, Tag, MoreVertical, Flag,
-        Copy, Trash2, X, FileText, Square, Plus
+        Copy, Trash2, X, FileText, Square, Plus,Pencil,Lock
       })
     ),
   ],

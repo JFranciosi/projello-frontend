@@ -24,11 +24,12 @@ import {
   UserResponse,
   CreateTaskRequest
 } from '../../models/models';
+import { Navbar } from "../../components/navbar/navbar";
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DashboardSidebar],
+  imports: [CommonModule, FormsModule, LucideAngularModule, DashboardSidebar, Navbar],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })

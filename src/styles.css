@@ -40,6 +40,9 @@
 
   /* FONT */
   --font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* OVERFLOW BLOCCATO */
+   overflow-y: hidden !important;
 }
 
 body {
@@ -51,9 +54,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ======================================================================= */
-/* 🔔 TOAST GLOBAL STYLE                                                   */
-/* ======================================================================= */
+/* TOAST */
 
 .ng-toast {
   border-radius: var(--radius-lg);

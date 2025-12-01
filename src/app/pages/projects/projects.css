@@ -7,30 +7,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* --- Navbar & container: stessi stili della dashboard --- */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--brand);
-  padding: .9rem 1.6rem;
-  box-shadow: var(--shadow-soft);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.nav-left { display: flex; align-items: center; gap: 1rem; }
-.logo { height: 38px; width: auto; display: block; }
-.nav-right { display: flex; align-items: center; }
-.icon-btn {
-  background: transparent;
-  border: none;
-  margin-left: 1rem;
-  padding: .4rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: transform .18s, background-color .2s, opacity .2s;
-}
 .icon-btn:hover {
   background: rgba(255, 255, 255, .32);
   transform: scale(1.06);
@@ -50,7 +26,6 @@
   overflow: hidden;
 }
 
-/* --- Area content della pagina progetti --- */
 .projects-main {
   flex: 1 1 auto;
   padding: 2rem;
@@ -70,7 +45,6 @@
   margin: 0;
 }
 
-/* --- Grid & card --- */
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -134,7 +108,6 @@
   stroke-width: 1.8;
 }
 
-/* --- Empty state --- */
 .empty-state {
   text-align: center;
   color: var(--ink-muted);
@@ -145,7 +118,6 @@
   border-radius: 12px;
 }
 
-/* --- Modale: riuso stile dashboard --- */
 .modal {
   position: fixed;
   inset: 0;
@@ -262,7 +234,6 @@ textarea:focus {
   box-shadow: var(--shadow-medium);
 }
 
-/* --- Animazioni --- */
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }

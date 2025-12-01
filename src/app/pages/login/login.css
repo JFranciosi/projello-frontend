@@ -34,7 +34,6 @@
   object-fit: contain;
 }
 
-/* Colonna destra (login) */
 .right-column {
   display: flex;
   align-items: center;
