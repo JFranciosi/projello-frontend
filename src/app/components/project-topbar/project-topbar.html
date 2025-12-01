@@ -1,0 +1,80 @@
+<section class="project-topbar" role="region" aria-label="Intestazione progetto">
+  <div class="topbar-left">
+    <h1 class="topbar-title">{{ project.title }}</h1>
+    @if (project.description) {
+      <p class="topbar-sub">{{ project.description }}</p>
+    }
+  </div>
+  <div class="topbar-right">
+    <div class="collab-header">
+      @if (!addingCollaborator()) {
+        <button
+          type="button"
+          class="add-collab-btn"
+          (click)="startInlineAdd()"
+          aria-label="Aggiungi collaboratore"
+        >
+          <lucide-icon name="plus"></lucide-icon>
+          <span>Aggiungi</span>
+        </button>
+      } @else {
+        <form
+          class="add-collab-inline"
+          (ngSubmit)="submitInlineAdd()"
+          autocomplete="off"
+          novalidate
+        >
+          <input
+            type="email"
+            class="add-collab-input"
+            name="collabEmail"
+            required
+            [(ngModel)]="collabEmail"
+            placeholder="email collaboratore..."
+          />
+
+          <button
+            type="button"
+            class="btn ghost tiny"
+            (click)="cancelInlineAdd()"
+          >
+            Annulla
+          </button>
+
+          <button
+            type="submit"
+            class="btn tiny"
+          >
+            Invita
+          </button>
+        </form>
+      }
+    </div>
+    <div class="collab-pills" aria-label="Collaboratori">
+      <span class="pill creator" title="Creatore">
+        <lucide-icon name="User"></lucide-icon>
+        <span class="pill-role"></span>
+        <span class="pill-name">
+          {{ project.creator.firstName }} {{ project.creator.lastName }}
+        </span>
+      </span>
+      @for (c of project.collaborators; track c.id) {
+        <span class="pill" title="Collaboratore">
+          <lucide-icon name="User"></lucide-icon>
+          <span class="pill-role"></span>
+          <span class="pill-name">
+            {{ c.firstName }} {{ c.lastName }}
+          </span>
+          <button
+            type="button"
+            class="pill-x"
+            (click)="onRemoveCollaborator(c.id)"
+            aria-label="Rimuovi collaboratore"
+          >
+            <lucide-icon name="x"></lucide-icon>
+          </button>
+        </span>
+      }
+    </div>
+  </div>
+</section>

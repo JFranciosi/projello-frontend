@@ -25,16 +25,16 @@ import {
   CreateTaskRequest
 } from '../../models/models';
 import { Navbar } from "../../components/navbar/navbar";
+import { ProjectTopbar } from '../../components/project-topbar/project-topbar';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DashboardSidebar, Navbar],
+  imports: [CommonModule, FormsModule, LucideAngularModule, DashboardSidebar, Navbar,ProjectTopbar],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
 export class Dashboard implements OnInit {
-  // router/services
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private projectsService = inject(ProjectsService);
@@ -42,28 +42,19 @@ export class Dashboard implements OnInit {
   private taskService = inject(TaskService);
   private auth = inject(AuthService);
   private toast = inject(NgToastService);
-
-  // UI state
+  
   loading = signal(false);
   errorMsg = signal<string | null>(null);
-
-  // Project (topbar)
   project = signal<ProjectResponse | null>(null);
   addingCollaborator = signal(false);
   collabEmail = '';
-
-  // Board data
   phasesSig = signal<Phase[]>([]);
   tasksSig = signal<Task[]>([]);
-
-  // Inline Phase
   addingPhase = signal(false);
   phaseDraft = signal<{ title: string; description?: string }>({
     title: '',
     description: ''
   });
-
-  // Inline Task
   inlineTaskPhaseId = signal<string | null>(null);
   inlineDraft = signal<{
     title: string;
@@ -78,20 +69,14 @@ export class Dashboard implements OnInit {
     priority: 'medium',
     assigneeId: ''
   });
-
-  // Panel
   panelOpen = signal(false);
   selectedTask = signal<Task | null>(null);
-
-  // Helpers per template
   phases = computed(() => this.phasesSig());
   tasksFor = (phaseId: string) =>
     this.tasksSig().filter((t) => t.phase_id === phaseId);
   currentProject = () => this.project();
   inlineTaskForPhase = () => this.inlineTaskPhaseId();
-
-  // ---------------- LIFECYCLE ----------------
-
+  
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -101,24 +86,18 @@ export class Dashboard implements OnInit {
     this.loadProject(id);
   }
 
-  // ---------------- LOAD DATA ----------------
-
-  /**
-   * Allineato a ProjectResource (+ eventuale risposta aggregata con phases/tasks)
-   */
 private async loadProject(id: string) {
   this.loading.set(true);
   this.errorMsg.set(null);
 
   try {
-    // 1️⃣ Carica il progetto
     const rawProj = await this.projectsService.getProjectById(id);
     if (!rawProj) throw new Error("Project not found");
 
     const proj = this.normalizeProject(rawProj);
     this.project.set(proj);
 
-    // 2️⃣ Carica SOLO LE FASI DAL BACKEND
+    // Carica SOLO LE FASI DAL BACKEND
     const phases = await firstValueFrom(
       this.phaseService.getByProject(proj._id as string)
     );
@@ -137,14 +116,6 @@ private async loadProject(id: string) {
   }
 }
 
-
-
-  // ---------------- NORMALIZZAZIONE ----------------
-
-  /**
-   * ProjectResponse FE <-> ProjectResponse BE
-   * Garantisce la presenza di `_id`.
-   */
   private normalizeProject(raw: any): ProjectResponse {
     const id = raw._id ?? raw.id;
     const creator: UserResponse = raw.creator as UserResponse;
@@ -163,9 +134,6 @@ private async loadProject(id: string) {
     };
   }
 
-  /**
-   * Phase FE <-> Phase.java (id, title, projectId)
-   */
   private normalizePhase(raw: any, projectId: string): Phase {
     const id = raw._id ?? raw.id;
     const projId = raw.project_id ?? raw.projectId ?? projectId;
@@ -182,10 +150,6 @@ private async loadProject(id: string) {
     };
   }
 
-  /**
-   * Task FE <-> Task.java
-   * id, title, description, assignees(List<Identifiable>), expirationDate, phaseId
-   */
   private normalizeTask(raw: any, projectId: string): Task {
     const id = raw._id ?? raw.id;
     const phaseId =
@@ -195,7 +159,7 @@ private async loadProject(id: string) {
       raw.phase?.id ??
       raw.phase?._id;
 
-    // expirationDate in BE è LocalDateTime → di solito ISO string
+    // expirationDate in BE è LocalDateTime
     const expiration =
       raw.expiration_date ??
       raw.expirationDate ??
@@ -217,7 +181,7 @@ private async loadProject(id: string) {
       title: raw.title ?? '',
       description: raw.description,
       expiration_date: expiration,
-      priority: raw.priority, // opzionale, solo FE
+      priority: raw.priority,
       attachments: raw.attachments,
       assignees,
       createdAt: raw.createdAt ?? raw.created_at,
@@ -225,7 +189,7 @@ private async loadProject(id: string) {
     };
   }
 
-  // ---------------- COLLABORATORI (solo UI per ora) ----------------
+  // COLLABORATORI
 
   openAddCollaboratorModal(): void {
     const p = this.project();
@@ -291,8 +255,7 @@ private async loadProject(id: string) {
     this.toast.info('Rimosso', 'Collaboratore rimosso (solo UI)', 2000);
   }
 
-  // ---------------- FASI ----------------
-
+  // FASI
   startInlinePhase(): void {
     this.addingPhase.set(true);
     this.phaseDraft.set({ title: '', description: '' });
@@ -303,10 +266,7 @@ private async loadProject(id: string) {
     this.phaseDraft.set({ title: '', description: '' });
   }
 
-  /**
-   * POST /phase (o analogo) via PhaseService
-   * NB: sul BE Phase ha solo title + projectId, la descrizione è solo FE.
-   */
+  //Salva fasi
   saveInlinePhase(): void {
     const d = this.phaseDraft();
     const p = this.project();
@@ -317,13 +277,9 @@ this.phaseService
   .subscribe({
     next: (created) => {
       const normalized = this.normalizePhase(created, p._id as string);
-
       this.phasesSig.set([...this.phasesSig(), normalized]);
       this.toast.success('OK', 'Fase creata', 3000);
-
       this.addingPhase.set(false);
-
-      // opzionale: apri subito il form task
       this.startInlineTask(normalized._id);
     },
     error: (err) => {
@@ -334,7 +290,7 @@ this.phaseService
 
   }
 
-  // ---------------- TASK ----------------
+  // TASK 
 
   startInlineTask(phaseId: string): void {
     const creatorId = this.project()?.creator?.id;
@@ -367,16 +323,13 @@ this.phaseService
     });
   }
 
-  /**
-   * POST /task allineato a CreateTaskRequest (project_id, phase_id, ...)
-   */
+
   saveInlineTask(): void {
     const phaseId = this.inlineTaskPhaseId();
     const d = this.inlineDraft();
     const p = this.project();
     if (!phaseId || !d.title?.trim() || !p) return;
 
-    // Etichette assegnatari per UI ("Nome Cognome")
     const assigneesLabels: string[] = [];
     const assigneeId = d.assigneeId || p.creator.id;
 
@@ -409,7 +362,6 @@ this.phaseService
           ...this.tasksSig(),
           {
             ...normalized,
-            // Per la UI mostrata nelle card/pannello
             assignees: assigneesLabels,
             priority: d.priority
           }
@@ -481,11 +433,7 @@ this.phaseService
       });
   }
 
-  // ---------------- ALTRO ----------------
-
   openModal(_type: 'project'): void {
-    // placeholder per l'evento (createProject) della sidebar
-    // qui potrai aprire un vero modal di creazione progetto
     console.debug('openModal', _type);
   }
 
