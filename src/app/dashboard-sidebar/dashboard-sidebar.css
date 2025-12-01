@@ -27,7 +27,6 @@
   border-radius: 8px;
 }
 
-/* ==== TITLE ==== */
 .sidebar-title {
   font-family: var(--font);
   font-weight: 700;
@@ -36,7 +35,6 @@
   margin: 0 0 1.2rem 0;
 }
 
-/* ==== MENU ==== */
 .menu {
   list-style: none;
   margin: 0;
@@ -63,7 +61,6 @@
   line-height: 1.2;
 }
 
-/* Icone */
 .menu-icon {
   width: 18px;
   height: 18px;
@@ -72,9 +69,8 @@
   flex: 0 0 18px;
 }
 
-/* Hover / Active */
 .menu li:hover {
-  background-color: var(--brand-light); /* giallo molto chiaro */
+  background-color: var(--brand-light);
 }
 
 .menu li.active,
@@ -89,18 +85,15 @@
   color: var(--ink);
 }
 
-/* Focus accessibile */
 .menu .menu-link:focus-visible {
-  outline: 2px solid rgba(228, 179, 99, 0.6); /* #E4B363 trasparente */
+  outline: 2px solid rgba(228, 179, 99, 0.6);
   outline-offset: 2px;
 }
 
-/* Micro feedback */
 .menu li:active {
   transform: translateY(1px);
 }
 
-/* Separator opzionale */
 .menu-divider {
   height: 1px;
   background: var(--border-soft);
@@ -108,10 +101,9 @@
   border-radius: 1px;
 }
 
-/* ==== CTA NUOVO PROGETTO ==== */
 .new-project-btn {
-  margin-top: 33.6rem;
-  padding: 0.9rem;
+  padding: 1rem 1rem 1rem 1rem;
+  margin-top: 20.4rem;
   width: 100%;
   background-color: var(--ink);
   color: var(--bg-panel);
@@ -138,7 +130,6 @@
   outline-offset: 2px;
 }
 
-/* Badge numeri (se usi badge nel markup) */
 .menu .badge {
   margin-left: auto;
   background: var(--brand);
@@ -149,7 +140,6 @@
   font-weight: 700;
 }
 
-/* Piccolo sottotitolo (se metti categorie) */
 .menu .section-label {
   margin: 1rem 0 0.5rem 0.2rem;
   font-size: 0.78rem;

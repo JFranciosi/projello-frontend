@@ -46,8 +46,8 @@
 /* Main container accanto alla sidebar */
 .board-container {
   max-width: 100%;
-  margin: 0;
-  padding: 0.5rem;
+  padding: 1rem 1rem 0rem 0rem;
+  margin-right: 2.4rem;
 }
 
 /* ===== Topbar progetto (statica) ===== */
@@ -120,17 +120,6 @@
   box-shadow: 0 0 0 3px #E4B36333;
 }
 
-@media (max-width: 720px) {
-  .add-collab-inline {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-
-  .add-collab-input {
-    min-width: 100%;
-  }
-}
-
 /* Header sezione collaboratori (label + pulsante +) */
 .collab-header {
   display: flex;
@@ -191,7 +180,6 @@
 /* Pills collaboratori */
 .collab-pills {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.4rem;
   justify-content: flex-end;
 }
@@ -238,8 +226,6 @@
   background: #0000000A;
 }
 
-/* Collaborator pills */
-.collab-pills { display: flex; flex-wrap: wrap; gap: .35rem; }
 .pill {
   display: inline-flex;
   align-items: center;
@@ -266,19 +252,31 @@
 
 /* =============== Griglia Fasi =============== */
 .phases-grid {
-  display: grid;
-  grid-template-columns: repeat( auto-fill, minmax(280px, 1fr) );
+  display: flex;
+  flex-direction: row;
   gap: 1rem;
-  align-items: start;
+  align-items: flex-start;
+  overflow-x: visible;
+  overflow-y: hidden;
+  padding-bottom: 1rem;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+
+.phases-grid::-webkit-scrollbar {
+  display: none;
+}
+
 .phase-card {
   background-color: var(--bg-panel);
   border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: var(--shadow-soft);
   padding: .85rem;
-  display: flex;
-  flex-direction: column;
+  flex: 0 0 340px;
+  max-height: calc(100vh - 240px); 
+  overflow-y: auto;
 }
 .phase-card.new-phase { border-style: dashed; }
 
@@ -727,15 +725,4 @@ lucide-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
-
-/* ====== Responsive ====== */
-@media (max-width: 1024px) {
-  .dashboard-container { grid-template-columns: 1fr; }
-  app-dashboard-sidebar { position: static; max-height: none; }
-}
-@media (max-width: 720px) {
-  .project-topbar { flex-direction: column; gap: .5rem; }
-  .phase-card .grid-2,
-  .phase-card .grid-3 { grid-template-columns: 1fr; }
 }
