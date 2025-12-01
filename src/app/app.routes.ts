@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { Login } from './login/login';
-import { Dashboard } from './dashboard/dashboard';
-import { Register } from './register/register';
-import { Profile } from './profile/profile';
-import { Projects } from './projects/projects';
+import { Login } from './pages/login/login';
+import { Dashboard } from './pages/dashboard/dashboard';
+import { Register } from './pages/register/register';
+import { Profile } from './pages/profile/profile';
+import { Projects } from './pages/projects/projects';
 
 export const routes: Routes = [
   {

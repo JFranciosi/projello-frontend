@@ -1,11 +1,11 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { ProjectsService } from '../services/project.service';
-import { ProjectResponse } from '../models/models';
-import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
+import { ProjectsService } from '../../services/project.service';
+import { ProjectResponse } from '../../models/models';
+import { DashboardSidebar } from '../../layout/dashboard-sidebar/dashboard-sidebar';
 import { LucideAngularModule } from 'lucide-angular';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-projects',

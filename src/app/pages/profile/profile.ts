@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
+import { DashboardSidebar } from '../../layout/dashboard-sidebar/dashboard-sidebar';
 import { NgToastService } from 'ng-angular-popup';
-import { AuthService } from '../services/auth.service';
-import { CreateUserRequestPayload } from '../models/models';
+import { AuthService } from '../../services/auth.service';
+import { CreateUserRequestPayload } from '../../models/models';
 
 @Component({
   selector: 'app-profile',

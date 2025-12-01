@@ -10,12 +10,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgToastService } from 'ng-angular-popup';
-import { DashboardSidebar } from '../dashboard-sidebar/dashboard-sidebar';
+import { DashboardSidebar } from '../../layout/dashboard-sidebar/dashboard-sidebar';
 import { firstValueFrom } from 'rxjs';
-import { ProjectsService } from '../services/project.service';
-import { PhaseService } from '../services/phase.service';
-import { TaskService } from '../services/task.service';
-import { AuthService } from '../services/auth.service';
+import { ProjectsService } from '../../services/project.service';
+import { PhaseService } from '../../services/phase.service';
+import { TaskService } from '../../services/task.service';
+import { AuthService } from '../../services/auth.service';
 
 import {
   ProjectResponse,
@@ -23,7 +23,7 @@ import {
   Task,
   UserResponse,
   CreateTaskRequest
-} from '../models/models';
+} from '../../models/models';
 
 @Component({
   selector: 'app-dashboard',
