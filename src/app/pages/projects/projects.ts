@@ -92,7 +92,7 @@ navigateToProject(project: ProjectResponse): void {
       if (created) {
         this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
       } else {
-        this.toast.danger('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
+        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
       }
 
       this.projectModalOpen.set(false);

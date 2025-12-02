@@ -1,9 +1,15 @@
 <header class="navbar" role="banner">
-<app-navbar (logout)="logout()"></app-navbar>
+  <app-navbar (logout)="logout()"></app-navbar>
 </header>
 
-<div class="profile-shell">
-  <app-dashboard-sidebar (createProject)="openModal('project')"></app-dashboard-sidebar>
+<div
+  class="profile-shell"
+  [class.sidebar-collapsed]="sidebarCollapsed"
+>
+  <app-dashboard-sidebar
+    (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse($event)"
+  ></app-dashboard-sidebar>
 
   <main class="profile-main" role="main" aria-label="Profilo utente">
     <section class="profile-card">
@@ -203,6 +209,7 @@
     </section>
   </main>
 </div>
+
 <app-project-modal
   [open]="projectModalOpen()"
   (close)="closeModal()"

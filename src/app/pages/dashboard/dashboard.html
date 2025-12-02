@@ -1,8 +1,17 @@
 <header class="navbar" role="banner">
   <app-navbar (logout)="logout()"></app-navbar>
 </header>
-<div class="dashboard-container" (keydown)="null">
-  <app-dashboard-sidebar (createProject)="openModal('project')"></app-dashboard-sidebar>
+
+<div
+  class="dashboard-container"
+  (keydown)="null"
+  [class.sidebar-collapsed]="sidebarCollapsed"
+>
+  <app-dashboard-sidebar
+    (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse()"
+  ></app-dashboard-sidebar>
+
   <div class="board-container">
     @if (currentProject(); as project) {
       <app-project-topbar
@@ -205,6 +214,7 @@
     </button>
   </div>
 </div>
+
 <app-project-modal
   [open]="projectModalOpen()"
   (close)="closeModal()"

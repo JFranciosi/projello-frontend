@@ -53,6 +53,7 @@ export class Dashboard implements OnInit {
   private toast = inject(NgToastService);
 
   projectModalOpen = signal(false);
+  sidebarCollapsed = false;
 
   loading = signal(false);
   errorMsg = signal<string | null>(null);
@@ -456,6 +457,10 @@ export class Dashboard implements OnInit {
       console.error('Errore creazione progetto (dashboard):', err);
       this.toast.danger('Errore', 'Creazione progetto fallita', 3000);
     }
+  }
+
+  onSidebarCollapse() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
   logout(): void {

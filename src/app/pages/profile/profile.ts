@@ -44,6 +44,7 @@ export class Profile {
     lastName: false,
   };
 
+  sidebarCollapsed = false;
   projectModalOpen = signal(false);
   avatarInitials = computed(() => {
     const { firstName, lastName, username } = this.profile();
@@ -134,6 +135,10 @@ export class Profile {
     } catch {
       this.toast.danger('Errore', 'Impossibile aggiornare il profilo.');
     }
+  }
+
+    onSidebarCollapse(collapsed: boolean): void {
+    this.sidebarCollapsed = collapsed;
   }
 
   openModal(_type: 'project'): void {

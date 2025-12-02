@@ -1,5 +1,24 @@
-<aside class="sidebar" role="complementary" aria-label="Menu laterale">
-  <div>
+<aside
+  class="sidebar"
+  role="complementary"
+  aria-label="Menu laterale"
+  [class.is-collapsed]="collapsed"
+>
+  <div class="sidebar-body">
+    <button
+      type="button"
+      class="collapse-toggle"
+      (click)="toggleCollapse()"
+      [attr.aria-label]="collapsed ? 'Espandi menu laterale' : 'Comprimi menu laterale'"
+      [attr.aria-expanded]="!collapsed"
+    >
+      <lucide-icon
+        [name]="collapsed ? 'ChevronRight' : 'ChevronLeft'"
+        class="collapse-icon"
+        aria-hidden="true"
+      ></lucide-icon>
+    </button>
+
     <ul class="menu">
       @for (link of nav; track link.path) {
         <li
@@ -7,8 +26,12 @@
           [routerLinkActiveOptions]="{ exact: link.path === '/dashboard' }"
         >
           <a [routerLink]="link.path" class="menu-link">
-            <lucide-icon [name]="link.icon" class="menu-icon" aria-hidden="true"></lucide-icon>
-            <span>{{ link.label }}</span>
+            <lucide-icon
+              [name]="link.icon"
+              class="menu-icon"
+              aria-hidden="true"
+            ></lucide-icon>
+            <span class="menu-label">{{ link.label }}</span>
           </a>
         </li>
       } @empty {
@@ -17,5 +40,12 @@
     </ul>
   </div>
 
-  <button class="new-project-btn" (click)="createProject.emit()">＋ Nuovo progetto</button>
+  <button
+    type="button"
+    class="new-project-btn"
+    (click)="createProject.emit()"
+  >
+    <lucide-icon name="plus" class="new-project-plus"></lucide-icon>
+    <span class="new-project-label">Nuovo progetto</span>
+  </button>
 </aside>

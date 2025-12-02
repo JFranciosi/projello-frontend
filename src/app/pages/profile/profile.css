@@ -44,7 +44,12 @@ lucide-icon {
 .profile-shell {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
-  gap: 1.6rem;
+  align-items: stretch;
+  width: 100%;
+}
+
+.profile-shell.sidebar-collapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
 }
 
 .profile-main {
