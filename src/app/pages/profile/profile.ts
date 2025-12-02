@@ -8,13 +8,22 @@ import { NgToastService } from 'ng-angular-popup';
 import { AuthService } from '../../services/auth.service';
 import { CreateUserRequestPayload } from '../../models/models';
 import { Navbar } from "../../components/navbar/navbar";
+import { ProjectModal } from "../../components/project-modal/project-modal";
+import { ProjectsService } from '../../services/project.service';
 
 type ProfileTab = 'personal' | 'security';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DashboardSidebar, Navbar],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    DashboardSidebar,
+    Navbar,
+    ProjectModal
+  ],
   templateUrl: './profile.html',
   styleUrls: ['./profile.css'],
 })
@@ -35,7 +44,7 @@ export class Profile {
     lastName: false,
   };
 
-  /** iniziali avatar (es. "JF") */
+  projectModalOpen = signal(false);
   avatarInitials = computed(() => {
     const { firstName, lastName, username } = this.profile();
     if (firstName || lastName) {
@@ -53,12 +62,11 @@ export class Profile {
   private readonly router = inject(Router);
   private readonly toast = inject(NgToastService);
   private readonly auth = inject(AuthService);
-
+  private readonly projectsService = inject(ProjectsService);
   constructor() {
     this.loadProfileFromLocalStorage();
   }
 
-  /** Carica i dati dal localStorage */
   private loadProfileFromLocalStorage(): void {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -72,30 +80,23 @@ export class Profile {
     }
   }
 
-  /** Cambia tab (Dati personali / Sicurezza) */
   selectTab(tab: ProfileTab): void {
     this.selectedTab.set(tab);
   }
 
-  /** Toggle matitina */
   toggleFieldEdit(field: 'username' | 'email' | 'firstName' | 'lastName'): void {
     this.editing[field] = !this.editing[field];
   }
 
-  /** Logout */
   logout(): void {
     try {
       localStorage.removeItem('auth_token');
       sessionStorage.removeItem('auth_token');
-    } catch {
-      // ignore
-    }
+    } catch {}
     this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
   }
 
-  /** SALVA PROFILO / PASSWORD */
   async saveProfile(): Promise<void> {
-    // valida password solo se scrivi qualcosa
     if (this.newPassword || this.confirmPassword) {
       if (this.newPassword !== this.confirmPassword) {
         this.toast.danger('Errore', 'Le password non coincidono.');
@@ -116,7 +117,6 @@ export class Profile {
     try {
       await this.auth.editUser(payload);
 
-      // aggiorna localStorage completo
       localStorage.setItem(
         'user',
         JSON.stringify({
@@ -127,13 +127,47 @@ export class Profile {
         }),
       );
 
-      // reset password dopo salvataggio
       this.newPassword = '';
       this.confirmPassword = '';
 
       this.toast.success('Profilo aggiornato', 'I dati sono stati aggiornati correttamente.');
     } catch {
       this.toast.danger('Errore', 'Impossibile aggiornare il profilo.');
+    }
+  }
+
+  openModal(_type: 'project'): void {
+    this.projectModalOpen.set(true);
+  }
+
+  closeModal(): void {
+    this.projectModalOpen.set(false);
+  }
+
+  async onCreateProject(data: { title: string; collaborators: string[] }): Promise<void> {
+    const title = data.title.trim();
+    if (!title) {
+      this.toast.info('Info', 'Inserisci un titolo per il progetto.', 3000);
+      return;
+    }
+
+    try {
+      const created = await this.projectsService.createProject({
+        title,
+        collaborators: []
+      });
+
+      if (created) {
+        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
+      } else {
+        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
+      }
+
+      this.projectModalOpen.set(false);
+
+    } catch (err) {
+      console.error('Errore creazione progetto (profile):', err);
+      this.toast.danger('Errore', 'Creazione progetto fallita', 3000);
     }
   }
 }

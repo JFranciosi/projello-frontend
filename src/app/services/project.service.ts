@@ -97,10 +97,16 @@ export class ProjectsService {
   }
 
   /**  Crea un nuovo progetto */
-  async createProject(payload: { title: string; description?: string }): Promise<ProjectResponse | null> {
+  async createProject(payload: { title: string; description?: string; collaborators?: string[] }): Promise<ProjectResponse | null> {
+    const safePayload = {
+      title: payload.title,
+      description: payload.description,
+      collaborators: payload.collaborators ?? []
+    };
+
     try {
       return await firstValueFrom(
-        this.http.post<ProjectResponse>(this.apiUrl, payload, {
+        this.http.post<ProjectResponse>(this.apiUrl, safePayload, {
           withCredentials: true,
           headers: this.getAuthHeaders(),
         })

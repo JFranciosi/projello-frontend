@@ -3,7 +3,7 @@
 </header>
 
 <div class="profile-shell">
-  <app-dashboard-sidebar></app-dashboard-sidebar>
+  <app-dashboard-sidebar (createProject)="openModal('project')"></app-dashboard-sidebar>
 
   <main class="profile-main" role="main" aria-label="Profilo utente">
     <section class="profile-card">
@@ -203,3 +203,8 @@
     </section>
   </main>
 </div>
+<app-project-modal
+  [open]="projectModalOpen()"
+  (close)="closeModal()"
+  (create)="onCreateProject($event)"
+></app-project-modal>

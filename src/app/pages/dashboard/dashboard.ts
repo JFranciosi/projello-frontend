@@ -24,13 +24,22 @@ import {
   UserResponse,
   CreateTaskRequest
 } from '../../models/models';
-import { Navbar } from "../../components/navbar/navbar";
+import { Navbar } from '../../components/navbar/navbar';
 import { ProjectTopbar } from '../../components/project-topbar/project-topbar';
+import { ProjectModal } from '../../components/project-modal/project-modal';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DashboardSidebar, Navbar,ProjectTopbar],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    DashboardSidebar,
+    Navbar,
+    ProjectTopbar,
+    ProjectModal
+  ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
@@ -42,7 +51,9 @@ export class Dashboard implements OnInit {
   private taskService = inject(TaskService);
   private auth = inject(AuthService);
   private toast = inject(NgToastService);
-  
+
+  projectModalOpen = signal(false);
+
   loading = signal(false);
   errorMsg = signal<string | null>(null);
   project = signal<ProjectResponse | null>(null);
@@ -71,12 +82,13 @@ export class Dashboard implements OnInit {
   });
   panelOpen = signal(false);
   selectedTask = signal<Task | null>(null);
+
   phases = computed(() => this.phasesSig());
   tasksFor = (phaseId: string) =>
     this.tasksSig().filter((t) => t.phase_id === phaseId);
   currentProject = () => this.project();
   inlineTaskForPhase = () => this.inlineTaskPhaseId();
-  
+
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
@@ -86,41 +98,39 @@ export class Dashboard implements OnInit {
     this.loadProject(id);
   }
 
-private async loadProject(id: string) {
-  this.loading.set(true);
-  this.errorMsg.set(null);
+  private async loadProject(id: string) {
+    this.loading.set(true);
+    this.errorMsg.set(null);
 
-  try {
-    const rawProj = await this.projectsService.getProjectById(id);
-    if (!rawProj) throw new Error("Project not found");
+    try {
+      const rawProj = await this.projectsService.getProjectById(id);
+      if (!rawProj) throw new Error('Project not found');
 
-    const proj = this.normalizeProject(rawProj);
-    this.project.set(proj);
+      const proj = this.normalizeProject(rawProj);
+      this.project.set(proj);
 
-    // Carica SOLO LE FASI DAL BACKEND
-    const phases = await firstValueFrom(
-      this.phaseService.getByProject(proj._id as string)
-    );
+      const phases = await firstValueFrom(
+        this.phaseService.getByProject(proj._id as string)
+      );
 
-    const normalizedPhases = phases.map((p) =>
-      this.normalizePhase(p, proj._id as string)
-    );
+      const normalizedPhases = phases.map((p) =>
+        this.normalizePhase(p, proj._id as string)
+      );
 
-    this.phasesSig.set(normalizedPhases);
-
-  } catch (err) {
-    console.error("loadProject error:", err);
-    this.toast.danger("Errore", "Caricamento progetto fallito", 3000);
-  } finally {
-    this.loading.set(false);
+      this.phasesSig.set(normalizedPhases);
+    } catch (err) {
+      console.error('loadProject error:', err);
+      this.toast.danger('Errore', 'Caricamento progetto fallito', 3000);
+    } finally {
+      this.loading.set(false);
+    }
   }
-}
 
   private normalizeProject(raw: any): ProjectResponse {
     const id = raw._id ?? raw.id;
     const creator: UserResponse = raw.creator as UserResponse;
-    const collaborators: UserResponse[] = (raw.collaborators ??
-      []) as UserResponse[];
+    const collaborators: UserResponse[] =
+      (raw.collaborators ?? []) as UserResponse[];
 
     return {
       ...(raw as ProjectResponse),
@@ -142,7 +152,7 @@ private async loadProject(id: string) {
       _id: String(id),
       project_id: String(projId),
       title: raw.title ?? '',
-      description: raw.description, // opzionale, solo FE
+      description: raw.description,
       is_done: raw.is_done ?? raw.isDone,
       wip_limit: raw.wip_limit ?? raw.wipLimit,
       createdAt: raw.createdAt ?? raw.created_at,
@@ -159,7 +169,6 @@ private async loadProject(id: string) {
       raw.phase?.id ??
       raw.phase?._id;
 
-    // expirationDate in BE è LocalDateTime
     const expiration =
       raw.expiration_date ??
       raw.expirationDate ??
@@ -168,7 +177,6 @@ private async loadProject(id: string) {
 
     let assignees: any = raw.assignees;
     if (Array.isArray(assignees)) {
-      // Se il BE restituisce oggetti {id: string} li rendo stringhe
       if (assignees.length && typeof assignees[0] === 'object') {
         assignees = assignees.map((a: any) => a.id ?? JSON.stringify(a));
       }
@@ -188,8 +196,6 @@ private async loadProject(id: string) {
       updatedAt: raw.updatedAt ?? raw.updated_at
     };
   }
-
-  // COLLABORATORI
 
   openAddCollaboratorModal(): void {
     const p = this.project();
@@ -255,7 +261,6 @@ private async loadProject(id: string) {
     this.toast.info('Rimosso', 'Collaboratore rimosso (solo UI)', 2000);
   }
 
-  // FASI
   startInlinePhase(): void {
     this.addingPhase.set(true);
     this.phaseDraft.set({ title: '', description: '' });
@@ -266,31 +271,27 @@ private async loadProject(id: string) {
     this.phaseDraft.set({ title: '', description: '' });
   }
 
-  //Salva fasi
   saveInlinePhase(): void {
     const d = this.phaseDraft();
     const p = this.project();
     if (!p || !d.title?.trim()) return;
 
-this.phaseService
-  .createPhase({ title: d.title.trim(), projectId: p._id as string })
-  .subscribe({
-    next: (created) => {
-      const normalized = this.normalizePhase(created, p._id as string);
-      this.phasesSig.set([...this.phasesSig(), normalized]);
-      this.toast.success('OK', 'Fase creata', 3000);
-      this.addingPhase.set(false);
-      this.startInlineTask(normalized._id);
-    },
-    error: (err) => {
-      console.error(err);
-      this.toast.danger('Errore', 'Creazione fase fallita', 3000);
-    }
-  });
-
+    this.phaseService
+      .createPhase({ title: d.title.trim(), projectId: p._id as string })
+      .subscribe({
+        next: (created) => {
+          const normalized = this.normalizePhase(created, p._id as string);
+          this.phasesSig.set([...this.phasesSig(), normalized]);
+          this.toast.success('OK', 'Fase creata', 3000);
+          this.addingPhase.set(false);
+          this.startInlineTask(normalized._id);
+        },
+        error: (err) => {
+          console.error(err);
+          this.toast.danger('Errore', 'Creazione fase fallita', 3000);
+        }
+      });
   }
-
-  // TASK 
 
   startInlineTask(phaseId: string): void {
     const creatorId = this.project()?.creator?.id;
@@ -323,7 +324,6 @@ this.phaseService
     });
   }
 
-
   saveInlineTask(): void {
     const phaseId = this.inlineTaskPhaseId();
     const d = this.inlineDraft();
@@ -354,10 +354,7 @@ this.phaseService
 
     this.taskService.create(payload as any).subscribe({
       next: (created: Task) => {
-        const normalized = this.normalizeTask(
-          created,
-          p._id as string
-        );
+        const normalized = this.normalizeTask(created, p._id as string);
         this.tasksSig.set([
           ...this.tasksSig(),
           {
@@ -405,36 +402,60 @@ this.phaseService
     });
   }
 
-  /**
-   * Per ora invia solo un update generico (es. status: done).
-   * Sul BE potrai agganciare un campo "status" se/quando lo aggiungi a Task.java.
-   */
   markCompleted(task: Task): void {
     if (!task?._id) return;
 
-    this.taskService
-      .update(task._id, { status: 'done' } as any)
-      .subscribe({
-        next: () => {
-          this.toast.success(
-            'Completato',
-            'Task marcato come completato',
-            3000
-          );
-        },
-        error: (e) => {
-          console.error('update task error', e);
-          this.toast.danger(
-            'Errore',
-            'Impossibile aggiornare il task',
-            3000
-          );
-        }
-      });
+    this.taskService.update(task._id, { status: 'done' } as any).subscribe({
+      next: () => {
+        this.toast.success(
+          'Completato',
+          'Task marcato come completato',
+          3000
+        );
+      },
+      error: (e) => {
+        console.error('update task error', e);
+        this.toast.danger(
+          'Errore',
+          'Impossibile aggiornare il task',
+          3000
+        );
+      }
+    });
   }
 
   openModal(_type: 'project'): void {
-    console.debug('openModal', _type);
+    this.projectModalOpen.set(true);
+  }
+
+  closeModal(): void {
+    this.projectModalOpen.set(false);
+  }
+
+  async onCreateProject(data: { title: string; collaborators: string[] }): Promise<void> {
+    const title = data.title.trim();
+    if (!title) {
+      this.toast.info('Info', 'Inserisci un titolo per il progetto.', 3000);
+      return;
+    }
+
+    try {
+      const created = await this.projectsService.createProject({
+        title,
+        collaborators: []
+      });
+
+      if (created) {
+        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
+      } else {
+        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
+      }
+
+      this.projectModalOpen.set(false);
+    } catch (err) {
+      console.error('Errore creazione progetto (dashboard):', err);
+      this.toast.danger('Errore', 'Creazione progetto fallita', 3000);
+    }
   }
 
   logout(): void {
@@ -443,7 +464,6 @@ this.phaseService
   }
 }
 
-// Piccolo helper per ID temporanei lato FE
 function uid(): string {
   return Math.random().toString(36).slice(2, 10);
 }

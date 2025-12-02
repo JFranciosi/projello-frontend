@@ -12,7 +12,7 @@
       ></app-project-topbar>
     }
     
-    <!-- GRID FASI (card stile Trello) -->
+    <!-- GRID FASI -->
     <main class="phases-grid" role="main" aria-label="Bacheca fasi">
       @for (p of phases(); track p._id) {
         <section class="phase-card" [attr.aria-labelledby]="'card-' + p._id">
@@ -205,3 +205,8 @@
     </button>
   </div>
 </div>
+<app-project-modal
+  [open]="projectModalOpen()"
+  (close)="closeModal()"
+  (create)="onCreateProject($event)"
+></app-project-modal>

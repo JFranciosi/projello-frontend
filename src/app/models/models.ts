@@ -15,6 +15,12 @@ export interface UserResponse {
   notifies: string[];
 }
 
+export interface CreateProjectRequest {
+  title: string;
+  description?: string;
+  collaboratorsEmails?: string[];
+}
+
 export interface ProjectResponse {
   _id: any;
   title: string;
