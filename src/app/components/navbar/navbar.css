@@ -51,5 +51,5 @@
 }
 
 .logout lucide-icon {
-  color: #b91c1c;
+  color: var(--ink);
 }

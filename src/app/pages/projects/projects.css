@@ -31,91 +31,133 @@
   padding: 2rem;
   overflow-y: auto;
   background: var(--bg);
+  min-height: calc(100vh - 70px);
 }
+
 .projects-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.2rem;
+  margin-bottom: 2rem;
 }
+
 .projects-header h1 {
-  font-size: 1.4rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--ink);
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.4rem;
+  gap: 1.5rem;
 }
+
 .project-card {
   background: var(--bg-panel);
-  border-radius: 12px;
-  padding: 1.1rem 1rem 1rem;
-  border: 1.4px solid var(--brand);
-  box-shadow: var(--shadow-medium);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
   cursor: pointer;
-  transition: transform .18s, box-shadow .22s;
+  transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.18s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 160px;
 }
+
 .project-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-strong);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--brand);
+}
+
+.project-card:active {
+  transform: translateY(-2px);
 }
 
 .project-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: .4rem;
+  margin-bottom: 0.75rem;
+  gap: 0.75rem;
 }
+
 .project-title {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--ink);
   margin: 0;
+  line-height: 1.3;
+  flex: 1;
+  letter-spacing: -0.01em;
 }
+
 .project-phase-count {
   background: var(--brand-light);
   color: var(--ink);
   font-weight: 700;
-  font-size: .82rem;
-  padding: .28rem .6rem;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .project-desc {
   color: var(--ink-soft);
-  font-size: .95rem;
-  margin: 0 0 .6rem;
-  line-height: 1.45;
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+  flex: 1;
 }
+
 .project-meta {
+  position: absolute;
+  top: 7rem;
+  left: 1.5rem;
   display: flex;
   gap: 1rem;
-  font-size: .86rem;
-  color: var(--ink-muted);
+  align-items: center;
+  height: 32px;
 }
+
 .meta-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.7rem;
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1;
+  height: 32px;
 }
+
 .meta-item lucide-icon {
-  width: 16px;
-  height: 16px;
-  stroke-width: 1.8;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  color: var(--ink);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty-state {
   text-align: center;
   color: var(--ink-muted);
   font-size: 1rem;
-  padding: 3rem 1rem;
-  background: #FAFAFA;
+  padding: 4rem 2rem;
+  background: var(--bg-panel);
   border: 1px dashed var(--border-soft);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
+  grid-column: 1 / -1;
+  line-height: 1.6;
 }
 
 .modal {
@@ -235,10 +277,41 @@ textarea:focus {
 }
 
 .delete-project {
+  position: absolute;
+  top: 7rem;
+  right: 1.5rem;
   display: flex;
-  align-items: end;
-  justify-content: end;
-  margin: 0px 0px 0px 0px;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  z-index: 10;
+  opacity: 0.5;
+}
+
+.delete-project:hover {
+  opacity: 1;
+}
+
+.delete-project:active {
+  transform: scale(0.95);
+}
+
+.delete-project lucide-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  color: var(--ink);
+  transition: color 0.15s ease;
+}
+
+.delete-project:hover lucide-icon {
+  color: var(--danger);
 }
 
 @keyframes fadeIn {
