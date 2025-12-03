@@ -426,6 +426,31 @@ export class Dashboard implements OnInit {
     });
   }
 
+  deletePhase(phase: Phase): void {
+    if (!phase?._id) return;
+
+    const confirmed = confirm(`Sei sicuro di voler eliminare la fase "${phase.title}"?`);
+    if (!confirmed) return;
+
+    this.phaseService.delete(phase._id).subscribe({
+      next: () => {
+        // Rimuovi la fase dalla lista
+        this.phasesSig.set(
+          this.phasesSig().filter((p) => p._id !== phase._id)
+        );
+        // Rimuovi anche tutti i task associati a questa fase
+        this.tasksSig.set(
+          this.tasksSig().filter((t) => t.phase_id !== phase._id)
+        );
+        this.toast.success('OK', 'Fase eliminata', 3000);
+      },
+      error: (e) => {
+        console.error('delete phase error', e);
+        this.toast.danger('Errore', 'Eliminazione fase fallita', 3000);
+      }
+    });
+  }
+
   markCompleted(task: Task): void {
     if (!task?._id) return;
 

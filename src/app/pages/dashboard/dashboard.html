@@ -27,8 +27,19 @@
       @for (p of phases(); track p._id) {
         <section class="phase-card" [attr.aria-labelledby]="'card-' + p._id">
           <header class="phase-head">
-            <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
-            <span class="count-badge">{{ tasksFor(p._id).length }}</span>
+            <div class="phase-title-wrapper">
+              <span class="count-badge">{{ tasksFor(p._id).length }}</span>
+              <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
+            </div>
+            <button 
+              type="button" 
+              class="delete-phase-btn" 
+              (click)="deletePhase(p)"
+              [attr.aria-label]="'Elimina fase ' + p.title"
+              title="Elimina fase"
+            >
+              <lucide-icon name="x" aria-hidden="true"></lucide-icon>
+            </button>
           </header>
 
           <!-- Ghost / Inline new task -->

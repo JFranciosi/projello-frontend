@@ -101,12 +101,21 @@
   padding-bottom: 0.75rem;
   border-bottom: 1px solid var(--border);
 }
+
+.phase-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
 .phase-title { 
   font-size: 1.1rem; 
   font-weight: 700;
   margin: 0; 
   color: var(--ink);
 }
+
 .count-badge {
   display: inline-flex;
   align-items: center;
@@ -114,11 +123,49 @@
   min-width: 28px;
   height: 28px;
   padding: 0 .5rem;
-  background-color: #F3F4F6;
+  background-color: var(--bg);
   border: 1px solid var(--border);
   color: var(--ink);
   border-radius: 999px;
   font-weight: 600;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.delete-phase-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.delete-phase-btn:hover {
+  background-color: var(--bg);
+  opacity: 1;
+}
+
+.delete-phase-btn:active {
+  transform: scale(0.95);
+}
+
+.delete-phase-btn lucide-icon {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
+  color: var(--ink);
+  transition: color 0.15s ease;
+}
+
+.delete-phase-btn:hover lucide-icon {
+  color: var(--danger);
 }
 
 .ghost-task-card {
