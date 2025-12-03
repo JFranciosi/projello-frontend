@@ -1,17 +1,6 @@
 <section class="project-topbar" role="region" aria-label="Intestazione progetto">
-  <div class="topbar-left">
+  <header class="topbar-head">
     <h1 class="topbar-title">{{ project.title }}</h1>
-    <div class="topbar-header">
-      <button type="button" class="back-to-projects-btn" (click)="goToProjects()" aria-label="Torna ai progetti">
-        <lucide-icon name="ChevronLeft" aria-hidden="true"></lucide-icon>
-        <span>Progetti</span>
-      </button>
-    </div>
-    @if (project.description) {
-      <p class="topbar-sub">{{ project.description }}</p>
-    }
-  </div>
-  <div class="topbar-right">
     <div class="collab-header">
       @if (!addingCollaborator()) {
         <button
@@ -56,31 +45,47 @@
         </form>
       }
     </div>
-    <div class="collab-pills" aria-label="Collaboratori">
-      <span class="pill creator" title="Creatore">
-        <lucide-icon name="User"></lucide-icon>
-        <span class="pill-role"></span>
-        <span class="pill-name">
-          {{ project.creator.firstName }} {{ project.creator.lastName }}
-        </span>
-      </span>
-      @for (c of project.collaborators; track c.id) {
-        <span class="pill" title="Collaboratore">
+  </header>
+  
+  <div class="topbar-body">
+    <div class="topbar-left">
+      <div class="topbar-header">
+        <button type="button" class="back-to-projects-btn" (click)="goToProjects()" aria-label="Torna ai progetti">
+          <lucide-icon name="ChevronLeft" aria-hidden="true"></lucide-icon>
+          <span>Progetti</span>
+        </button>
+      </div>
+      @if (project.description) {
+        <p class="topbar-sub">{{ project.description }}</p>
+      }
+    </div>
+    <div class="topbar-right">
+      <div class="collab-pills" aria-label="Collaboratori">
+        <span class="pill creator" title="Creatore">
           <lucide-icon name="User"></lucide-icon>
           <span class="pill-role"></span>
           <span class="pill-name">
-            {{ c.firstName }} {{ c.lastName }}
+            {{ project.creator.firstName }} {{ project.creator.lastName }}
           </span>
-          <button
-            type="button"
-            class="pill-x"
-            (click)="onRemoveCollaborator(c.id)"
-            aria-label="Rimuovi collaboratore"
-          >
-            <lucide-icon name="x"></lucide-icon>
-          </button>
         </span>
-      }
+        @for (c of project.collaborators; track c.id) {
+          <span class="pill" title="Collaboratore">
+            <lucide-icon name="User"></lucide-icon>
+            <span class="pill-role"></span>
+            <span class="pill-name">
+              {{ c.firstName }} {{ c.lastName }}
+            </span>
+            <button
+              type="button"
+              class="pill-x"
+              (click)="onRemoveCollaborator(c.id)"
+              aria-label="Rimuovi collaboratore"
+            >
+              <lucide-icon name="x"></lucide-icon>
+            </button>
+          </span>
+        }
+      </div>
     </div>
   </div>
 </section>

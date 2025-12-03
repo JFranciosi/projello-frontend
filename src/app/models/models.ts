@@ -54,6 +54,31 @@ export interface TaskAttachment {
   url?: string;
 }
 
+// Interfacce per il database (con trattini come nel JSON del backend)
+export interface TaskFromDB {
+  _id: string;
+  'project-id'?: string;
+  'phase-id': string;
+  title: string;
+  description?: string;
+  'expiration-date'?: string;
+  priority?: TaskPriority;
+  attachments?: TaskAttachment[];
+  assignees?: string[] | UserResponse[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateTaskRequestToDB {
+  'phase-id': string;
+  title: string;
+  description?: string;
+  'expiration-date'?: string;
+  priority?: TaskPriority;
+  assignees?: string[];
+}
+
+// Interfacce per l'applicazione (con underscore per compatibilità)
 export interface Task {
   _id: string;
   project_id: string;
@@ -75,6 +100,7 @@ export interface CreateTaskRequest {
   description?: string;
   expiration_date?: string;
   priority?: TaskPriority;
+  assignees?: string[];
 }
 
 export interface MoveTaskRequest {

@@ -76,10 +76,10 @@ export class Dashboard implements OnInit {
     assigneeId?: string;
   }>({
     title: '',
-    description: '',
-    expiration_date: '',
+    description: undefined,
+    expiration_date: undefined,
     priority: 'medium',
-    assigneeId: ''
+    assigneeId: undefined
   });
   panelOpen = signal(false);
   selectedTask = signal<Task | null>(null);
@@ -322,8 +322,8 @@ export class Dashboard implements OnInit {
     this.inlineTaskPhaseId.set(phaseId);
     this.inlineDraft.set({
       title: '',
-      description: '',
-      expiration_date: '',
+      description: undefined,
+      expiration_date: undefined,
       priority: 'medium',
       assigneeId: creatorId
     });
@@ -334,8 +334,8 @@ export class Dashboard implements OnInit {
     this.inlineTaskPhaseId.set(null);
     this.inlineDraft.set({
       title: '',
-      description: '',
-      expiration_date: '',
+      description: undefined,
+      expiration_date: undefined,
       priority: 'medium',
       assigneeId: creatorId
     });
@@ -372,11 +372,12 @@ export class Dashboard implements OnInit {
       phase_id: phaseId,
       title: d.title.trim(),
       description: (d.description || '').trim() || undefined,
-      expiration_date: d.expiration_date || undefined,
-      priority: d.priority
+      expiration_date: (d.expiration_date && d.expiration_date.trim()) ? d.expiration_date.trim() : undefined,
+      priority: d.priority,
+      assignees: [] // Array vuoto come richiesto dal backend
     };
 
-    this.taskService.create(payload as any).subscribe({
+    this.taskService.create(payload).subscribe({
       next: (created: Task) => {
         const normalized = this.normalizeTask(created, p._id as string);
         this.tasksSig.set([
