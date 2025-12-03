@@ -17,15 +17,12 @@
   inset: 0;
   z-index: 901;
   margin: auto;
-
   width: 480px;
   max-height: 60vh;
-
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1.6rem 1.8rem 1.3rem;
-
   background:
     radial-gradient(circle at top right, rgba(228,179,99,0.08), transparent 55%),
     radial-gradient(circle at bottom left, rgba(255,244,218,0.09), transparent 55%),
@@ -135,14 +132,11 @@
 .field input[type='email'] {
   width: 100%;
   border-radius: 12px;
-
   border: 1px solid rgba(228, 179, 99, 0.6);
-
   padding: 0.55rem 0.78rem;
   font-size: 0.92rem;
-
   background: #fdfbf7;
-
+  color: var(--ink);
   transition:
     border-color 0.16s ease,
     background-color 0.16s ease,
@@ -155,11 +149,10 @@
 }
 
 .field input:focus {
+  outline: none;
   background: #ffffff;
   border-color: var(--brand);
-  box-shadow:
-    0 0 0 3px var(--brand-shadow),
-    var(--shadow-soft);
+  box-shadow: 0 0 0 3px #E4B36333;
   transform: translateY(-1px);
 }
 
@@ -292,10 +285,4 @@
 
 .btn-primary:hover {
   background: #d39c4f;
-}
-
-.btn-primary:active,
-.btn-secondary:active,
-.btn-ghost:active {
-  transform: translateY(1px);
 }
