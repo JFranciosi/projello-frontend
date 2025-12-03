@@ -1,4 +1,4 @@
-<aside class="sidebar" role="complementary" aria-label="Menu laterale" [class.is-collapsed]="collapsed">
+<aside class="sidebar" role="complementary" aria-label="Menu laterale" [class.is-collapsed]="collapsed" [class.no-transition]="noTransition">
   <div class="sidebar-body">
     <button type="button" class="collapse-toggle" (click)="toggleCollapse()"
       [attr.aria-label]="collapsed ? 'Espandi menu laterale' : 'Comprimi menu laterale'"

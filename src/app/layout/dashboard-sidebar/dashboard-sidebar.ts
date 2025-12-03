@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -16,11 +16,23 @@ interface NavItem {
   templateUrl: './dashboard-sidebar.html',
   styleUrl: './dashboard-sidebar.css',
 })
-export class DashboardSidebar {
+export class DashboardSidebar implements OnInit {
   @Output() createProject = new EventEmitter<void>();
   @Output() collapseChanged = new EventEmitter<boolean>();
   @Input() collapsed:boolean = false;
+  noTransition = true;
 
+  ngOnInit(): void {
+    // Carica lo stato dalla localStorage
+    const saved = localStorage.getItem('sidebarCollapsed');
+    if (saved !== null) {
+      this.collapsed = JSON.parse(saved);
+    }
+    // Disabilita la transizione solo al caricamento iniziale
+    setTimeout(() => {
+      this.noTransition = false;
+    }, 10);
+  }
 
   nav: NavItem[] = [
     {
@@ -42,6 +54,8 @@ export class DashboardSidebar {
 
   toggleCollapse(): void {
     this.collapsed = !this.collapsed;
+    // Salva lo stato nella localStorage
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(this.collapsed));
     this.collapseChanged.emit(this.collapsed);
   }
 }

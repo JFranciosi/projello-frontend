@@ -17,6 +17,10 @@
   transition: width 0.2s ease;
 }
 
+.sidebar.no-transition {
+  transition: none;
+}
+
 .sidebar::-webkit-scrollbar {
   width: 8px;
 }

@@ -5,11 +5,11 @@
 <div
   class="dashboard-container"
   (keydown)="null"
-  [class.sidebar-collapsed]="sidebarCollapsed"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
 >
   <app-dashboard-sidebar
     (createProject)="openModal('project')"
-    (collapseChanged)="onSidebarCollapse()"
+    (collapseChanged)="onSidebarCollapse($event)"
   ></app-dashboard-sidebar>
 
   <div class="board-container">
