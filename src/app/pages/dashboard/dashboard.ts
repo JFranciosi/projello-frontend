@@ -250,16 +250,33 @@ export class Dashboard implements OnInit {
     this.toast.success('Aggiunto', 'Collaboratore aggiunto (solo UI)', 2000);
   }
 
-  removeCollaborator(id: string): void {
+  async removeCollaborator(id: string): Promise<void> {
     const p = this.project();
-    if (!p) return;
+    if (!p) {
+      this.toast.danger('Errore', 'Nessun progetto selezionato.', 2500);
+      return;
+    }
 
-    this.project.set({
-      ...p,
-      collaborators: (p.collaborators || []).filter((c) => c.id !== id)
-    });
+    const confirmed = confirm('Sei sicuro di voler rimuovere questo collaboratore dal progetto?');
+    if (!confirmed) return;
 
-    this.toast.info('Rimosso', 'Collaboratore rimosso (solo UI)', 2000);
+    try {
+      const projectId = p._id as string;
+      const success = await this.projectsService.removeCollaborator(projectId, id);
+
+      if (success) {
+        this.project.set({
+          ...p,
+          collaborators: (p.collaborators || []).filter((c) => c.id !== id)
+        });
+        this.toast.success('Rimosso', 'Collaboratore rimosso dal progetto', 2000);
+      } else {
+        this.toast.danger('Errore', 'Impossibile rimuovere il collaboratore', 2500);
+      }
+    } catch (error) {
+      console.error('Errore nella rimozione del collaboratore:', error);
+      this.toast.danger('Errore', 'Rimozione collaboratore fallita', 2500);
+    }
   }
 
   startInlinePhase(): void {

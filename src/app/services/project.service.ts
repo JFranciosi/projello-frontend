@@ -147,4 +147,24 @@ export class ProjectsService {
       return false;
     }
   }
+
+  async removeCollaborator(projectId: string, userId: string): Promise<boolean> {
+    console.log('Chiamata a removeCollaborator con projectId:', projectId, 'e userId:', userId);  
+    try {
+      await firstValueFrom(
+        this.http.put(
+          `${this.apiUrl}/leave/${projectId}?userId=${userId}`,
+          {},
+          {
+            withCredentials: true,
+            headers: this.getAuthHeaders(),
+          }
+        )
+      );
+      return true;
+    } catch (error) {
+      console.error(`Errore nella rimozione del collaboratore dal progetto ${projectId}:`, error);
+      return false;
+    }
+  }
 }
