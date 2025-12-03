@@ -24,7 +24,7 @@ export class DashboardSidebar {
 
   nav: NavItem[] = [
     {
-      label: 'Tutti i progetti',
+      label: 'Progetti',
       path: '/projects',
       icon: 'layout-dashboard',
     },

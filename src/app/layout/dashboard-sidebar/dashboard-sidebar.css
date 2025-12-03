@@ -4,17 +4,17 @@
 
 .sidebar {
   width: 260px;
+  height: 100vh;
   background-color: var(--bg-panel);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   padding: 2rem 1.5rem;
   color: var(--ink);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border-soft) transparent;
-  transition: width 0.24s ease, padding 0.24s ease;
+  transition: width 0.2s ease;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -50,7 +50,7 @@
 .menu li {
   margin: 0.15rem 0;
   border-radius: var(--radius);
-  transition: 0.2s ease, color 0.2s ease, transform 0.12s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .menu .menu-link {
@@ -110,8 +110,7 @@
 .new-project-btn {
   width: 100%;
   padding: 0.75rem 1rem;
-  margin-top: 18.8rem;
-
+  margin-top: 26rem;
   background: linear-gradient(
     135deg,
     rgba(228, 179, 99, 0.75) 0%,
@@ -119,18 +118,14 @@
   );
   border: 1px solid rgba(228, 179, 99, 0.7);
   border-radius: var(--radius);
-
   color: #1a1a1a;
   font-weight: 700;
   font-size: 0.95rem;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 1.74rem;
-
   cursor: pointer;
-
   box-shadow: 0 4px 12px rgba(228, 179, 99, 0.25);
   transition: 
     box-shadow 0.22s ease,
@@ -189,8 +184,7 @@
   align-self: flex-start;
   width: 32px;
   height: 32px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
+  border: none;
   background-color: transparent;
   display: inline-flex;
   align-items: center;
@@ -217,9 +211,6 @@
 .sidebar.is-collapsed {
   width: 72px;
   padding-inline: 0.75rem;
-  justify-content: center;
-  display: flex;
-  align-items: center;
 }
 
 .sidebar.is-collapsed .menu .menu-link {
