@@ -73,6 +73,61 @@
   box-shadow: 0 0 0 3px #E4B36333;
 }
 
+/* ===== BUTTON STYLES ===== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background-color: var(--ink);
+  color: var(--bg-panel);
+  border: 1px solid #0B1220;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  transition: background-color 0.18s, box-shadow 0.2s, transform 0.06s, opacity 0.18s, border-color 0.18s;
+}
+
+.btn:hover {
+  background-color: #0F1626;
+  box-shadow: var(--shadow-strong);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #E4B36333;
+}
+
+.btn.ghost {
+  background-color: var(--bg-panel);
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.btn.ghost:hover {
+  background-color: var(--bg);
+  border-color: var(--border-soft);
+}
+
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn.tiny {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
 .collab-header {
   display: flex;
   align-items: center;
