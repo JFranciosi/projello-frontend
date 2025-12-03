@@ -4,9 +4,10 @@
 
 <div
   class="profile-shell"
-  [class.sidebar-collapsed]="sidebarCollapsed"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
 >
   <app-dashboard-sidebar
+    [collapsed]="sidebarCollapsed()"
     (createProject)="openModal('project')"
     (collapseChanged)="onSidebarCollapse($event)"
   ></app-dashboard-sidebar>

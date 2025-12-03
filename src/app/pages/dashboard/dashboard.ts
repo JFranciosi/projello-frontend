@@ -91,6 +91,12 @@ export class Dashboard implements OnInit {
   inlineTaskForPhase = () => this.inlineTaskPhaseId();
 
   ngOnInit(): void {
+    // Carica lo stato della sidebar dalla localStorage
+    const saved = localStorage.getItem('sidebarCollapsed');
+    if (saved !== null) {
+      this.sidebarCollapsed.set(JSON.parse(saved));
+    }
+    
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigateByUrl('/projects');

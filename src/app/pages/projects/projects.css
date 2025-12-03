@@ -21,9 +21,16 @@
 .logout lucide-icon { color: #b91c1c; }
 
 .dashboard-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
   min-height: calc(100vh - 70px);
   overflow: hidden;
+}
+
+.dashboard-container.sidebar-collapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
 }
 
 .projects-main {

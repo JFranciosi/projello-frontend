@@ -44,7 +44,7 @@ export class Profile {
     lastName: false,
   };
 
-  sidebarCollapsed = false;
+  sidebarCollapsed = signal(false);
   projectModalOpen = signal(false);
   avatarInitials = computed(() => {
     const { firstName, lastName, username } = this.profile();
@@ -65,6 +65,12 @@ export class Profile {
   private readonly auth = inject(AuthService);
   private readonly projectsService = inject(ProjectsService);
   constructor() {
+    // Carica lo stato della sidebar dalla localStorage
+    const saved = localStorage.getItem('sidebarCollapsed');
+    if (saved !== null) {
+      this.sidebarCollapsed.set(JSON.parse(saved));
+    }
+    
     this.loadProfileFromLocalStorage();
   }
 
@@ -138,7 +144,7 @@ export class Profile {
   }
 
     onSidebarCollapse(collapsed: boolean): void {
-    this.sidebarCollapsed = collapsed;
+    this.sidebarCollapsed.set(collapsed);
   }
 
   openModal(_type: 'project'): void {

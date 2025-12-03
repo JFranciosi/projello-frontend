@@ -1,8 +1,12 @@
 <header class="navbar" role="banner">
 <app-navbar (logout)="logout()"></app-navbar>
 </header>
-<div class="dashboard-container">
-  <app-dashboard-sidebar (createProject)="openModal('project')"></app-dashboard-sidebar>
+<div class="dashboard-container" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <app-dashboard-sidebar 
+    [collapsed]="sidebarCollapsed()"
+    (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse($event)"
+  ></app-dashboard-sidebar>
   <main class="projects-main" role="main" aria-label="Elenco progetti">
     <div class="projects-header">
       <h1>I tuoi progetti</h1>

@@ -23,6 +23,7 @@ export class Projects implements OnInit {
   projects = signal<ProjectResponse[]>([]);
   loading = signal(true);
   projectModalOpen = signal(false);
+  sidebarCollapsed = signal(false);
 
   constructor(
     private router: Router,
@@ -31,7 +32,17 @@ export class Projects implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Carica lo stato della sidebar dalla localStorage
+    const saved = localStorage.getItem('sidebarCollapsed');
+    if (saved !== null) {
+      this.sidebarCollapsed.set(JSON.parse(saved));
+    }
+    
     this.loadProjects();
+  }
+
+  onSidebarCollapse(collapsed: boolean) {
+    this.sidebarCollapsed.set(collapsed);
   }
 
   private normalizeProject(project: any): ProjectResponse {

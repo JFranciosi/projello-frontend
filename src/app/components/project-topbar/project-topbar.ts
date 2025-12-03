@@ -1,6 +1,7 @@
 import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProjectResponse } from '../../models/models';
 import { ProjectsService } from '../../services/project.service';
@@ -19,6 +20,7 @@ export class ProjectTopbar {
   @Output() removeCollaborator = new EventEmitter<string>(); // id
 
   private readonly projectsService = inject(ProjectsService);
+  private readonly router = inject(Router);
   addingCollaborator = signal(false);
   collabEmail = '';
   private toast = inject(NgToastService);
@@ -50,6 +52,9 @@ export class ProjectTopbar {
     } else {
       this.toast.danger('Errore durante la rimozione del collaboratore.', 'Operazione fallita', 4000);
     }
-    
+  }
+
+  goToProjects(): void {
+    this.router.navigate(['/projects']);
   }
 }

@@ -1,6 +1,12 @@
 <section class="project-topbar" role="region" aria-label="Intestazione progetto">
   <div class="topbar-left">
     <h1 class="topbar-title">{{ project.title }}</h1>
+    <div class="topbar-header">
+      <button type="button" class="back-to-projects-btn" (click)="goToProjects()" aria-label="Torna ai progetti">
+        <lucide-icon name="ChevronLeft" aria-hidden="true"></lucide-icon>
+        <span>Progetti</span>
+      </button>
+    </div>
     @if (project.description) {
       <p class="topbar-sub">{{ project.description }}</p>
     }
