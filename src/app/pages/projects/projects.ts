@@ -7,7 +7,7 @@ import { DashboardSidebar } from '../../layout/dashboard-sidebar/dashboard-sideb
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { Navbar } from '../../components/navbar/navbar';
-import { ProjectModal } from "../../components/project-modal/project-modal";
+import { ProjectModal } from '../../components/project-modal/project-modal';
 import { NgToastService } from 'ng-angular-popup';
 
 @Component({
@@ -18,12 +18,10 @@ import { NgToastService } from 'ng-angular-popup';
   styleUrl: './projects.css',
 })
 export class Projects implements OnInit {
-  private readonly toast = inject(NgToastService); 
+  private readonly toast = inject(NgToastService);
+
   projects = signal<ProjectResponse[]>([]);
   loading = signal(true);
-  modalOpen = signal(false);
-  modalType = signal<'project' | null>(null);
-
   projectModalOpen = signal(false);
 
   constructor(
@@ -36,11 +34,34 @@ export class Projects implements OnInit {
     this.loadProjects();
   }
 
+  private normalizeProject(project: any): ProjectResponse {
+    let rawId: any;
+
+    if (project?._id && typeof project._id === 'object' && '$oid' in project._id) {
+      rawId = project._id.$oid;
+    } else if (project?._id) {
+      rawId = project._id;
+    } else if (project?.id) {
+      rawId = project.id;
+    } else {
+      rawId = '';
+    }
+
+    const id = typeof rawId === 'string' ? rawId.trim() : String(rawId ?? '').trim();
+    console.log('🔧 normalizeProject – rawId:', rawId, '→ id:', id);
+
+    return {
+      ...project,
+      _id: id,
+    } as ProjectResponse;
+  }
+
   async loadProjects(): Promise<void> {
     this.loading.set(true);
     try {
       const data = await this.projectsService.getProjects();
-      this.projects.set(data || []);
+      const normalized = (data || []).map((p: any) => this.normalizeProject(p));
+      this.projects.set(normalized);
     } catch (e) {
       console.error('Errore nel caricamento dei progetti:', e);
       this.projects.set([]);
@@ -49,25 +70,16 @@ export class Projects implements OnInit {
     }
   }
 
-navigateToProject(project: ProjectResponse): void {
-  console.log(' project ricevuto:', project);
+  navigateToProject(project: ProjectResponse): void {
+    const id = project._id;
+    if (!id) {
+      console.error('ID progetto non valido per navigate:', project);
+      this.toast.danger('Errore', 'ID progetto non valido.', 3000);
+      return;
+    }
 
-  const id =
-    (project as any)?._id?.$oid ??
-    (project as any)?._id ??
-    (project as any)?.id ??
-    '';
-
-  console.log('🆔 id calcolato:', id);
-
-  if (!id) {
-    console.error(' ID progetto non valido:', project);
-    return;
+    this.router.navigate(['/dashboard', id]);
   }
-
-  this.router.navigate(['/dashboard', id]);
-}
-
 
   openModal(_type: 'project'): void {
     this.projectModalOpen.set(true);
@@ -91,8 +103,9 @@ navigateToProject(project: ProjectResponse): void {
 
       if (created) {
         this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
+        await this.loadProjects();
       } else {
-        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
+        this.toast.danger('Errore', 'Creazione progetto fallita.', 3000);
       }
 
       this.projectModalOpen.set(false);
@@ -102,9 +115,33 @@ navigateToProject(project: ProjectResponse): void {
     }
   }
 
+  async onDeleteProject(p: ProjectResponse, event: Event): Promise<void> {
+    event.stopPropagation();
+
+    const confirmed = confirm(`Sei sicuro di voler eliminare "${p.title}"?`);
+    if (!confirmed) return;
+
+    const projectId = p._id;
+
+    if (!projectId || projectId.length !== 24) {
+      this.toast.danger('Errore', 'ID progetto non valido per eliminazione.', 3000);
+      return;
+    }
+
+    const ok = await this.projectsService.deleteProject(projectId);
+
+    if (ok) {
+      this.projects.update((list) =>
+        list.filter((prj) => prj._id !== projectId)
+      );
+      this.toast.success('Progetto eliminato', 'Il progetto è stato eliminato correttamente.', 3000);
+    } else {
+      this.toast.danger('Errore', 'Eliminazione progetto fallita.', 3000);
+    }
+  }
+
   async onSaveProject(ev: Event): Promise<void> {
     ev.preventDefault();
-    // TODO: chiamare projectsService.createProject() con i dati del form
     this.closeModal();
     await this.loadProjects();
   }
@@ -115,9 +152,11 @@ navigateToProject(project: ProjectResponse): void {
     } catch (err) {
       console.warn('Errore durante il logout:', err);
     } finally {
-      this.router.navigateByUrl('/login').catch(() => {
-        window.location.href = '/login';
-      });
+      this.router
+        .navigateByUrl('/login')
+        .catch(() => {
+          window.location.href = '/login';
+        });
     }
   }
 }
