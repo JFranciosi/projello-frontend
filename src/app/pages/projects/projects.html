@@ -39,6 +39,16 @@
                 {{ (p.collaborators.length || 0) + (p.creator ? 1 : 0) }} membri
               </span>
             </div>
+              <div
+              class="delete-project"
+              (click)="onDeleteProject(p, $event)"
+              (keydown.enter)="onDeleteProject(p, $event)"
+              tabindex="0"
+              role="button"
+              aria-label="Elimina progetto {{ p.title }}"
+            >
+              <lucide-icon name="trash-2" aria-hidden="true"></lucide-icon>
+            </div>
           </article>
         }
       }

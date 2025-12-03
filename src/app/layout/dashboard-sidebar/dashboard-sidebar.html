@@ -1,50 +1,32 @@
-<aside
-  class="sidebar"
-  role="complementary"
-  aria-label="Menu laterale"
-  [class.is-collapsed]="collapsed"
->
+<aside class="sidebar" role="complementary" aria-label="Menu laterale" [class.is-collapsed]="collapsed" [class.no-transition]="noTransition">
   <div class="sidebar-body">
-    <button
-      type="button"
-      class="collapse-toggle"
-      (click)="toggleCollapse()"
+    <button type="button" class="collapse-toggle" (click)="toggleCollapse()"
       [attr.aria-label]="collapsed ? 'Espandi menu laterale' : 'Comprimi menu laterale'"
-      [attr.aria-expanded]="!collapsed"
-    >
-      <lucide-icon
-        [name]="collapsed ? 'ChevronRight' : 'ChevronLeft'"
-        class="collapse-icon"
-        aria-hidden="true"
-      ></lucide-icon>
+      [attr.aria-expanded]="!collapsed">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        class="lucide lucide-menu-icon lucide-menu collapse-icon" aria-hidden="true">
+        <path d="M4 5h16" />
+        <path d="M4 12h16" />
+        <path d="M4 19h16" />
+      </svg>
     </button>
 
     <ul class="menu">
       @for (link of nav; track link.path) {
-        <li
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: link.path === '/dashboard' }"
-        >
-          <a [routerLink]="link.path" class="menu-link">
-            <lucide-icon
-              [name]="link.icon"
-              class="menu-icon"
-              aria-hidden="true"
-            ></lucide-icon>
-            <span class="menu-label">{{ link.label }}</span>
-          </a>
-        </li>
+      <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: link.path === '/dashboard' }">
+        <a [routerLink]="link.path" class="menu-link">
+          <lucide-icon [name]="link.icon" class="menu-icon" aria-hidden="true"></lucide-icon>
+          <span class="menu-label">{{ link.label }}</span>
+        </a>
+      </li>
       } @empty {
-        <li class="muted">Nessuna voce di menu</li>
+      <li class="muted">Nessuna voce di menu</li>
       }
     </ul>
   </div>
 
-  <button
-    type="button"
-    class="new-project-btn"
-    (click)="createProject.emit()"
-  >
+  <button type="button" class="new-project-btn" (click)="createProject.emit()">
     <lucide-icon name="plus" class="new-project-plus"></lucide-icon>
     <span class="new-project-label">Nuovo progetto</span>
   </button>
