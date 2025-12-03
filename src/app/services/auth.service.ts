@@ -35,7 +35,7 @@ export class AuthService {
   /** UPDATE USER */
   async editUser(payload: CreateUserRequestPayload): Promise<void> {
     await firstValueFrom(
-      this.http.put(`${this.USER_API}/edit`, payload, {
+      this.http.put(`${this.USER_API}`, payload, {
         responseType: 'text' as 'json',
         headers: {
           Authorization: `Bearer ${this.getAccessToken()}`,
