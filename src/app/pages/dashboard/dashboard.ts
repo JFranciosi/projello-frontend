@@ -53,7 +53,7 @@ export class Dashboard implements OnInit {
   private toast = inject(NgToastService);
 
   projectModalOpen = signal(false);
-  sidebarCollapsed = false;
+  sidebarCollapsed = signal(false);
 
   loading = signal(false);
   errorMsg = signal<string | null>(null);
@@ -459,8 +459,8 @@ export class Dashboard implements OnInit {
     }
   }
 
-  onSidebarCollapse() {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
+  onSidebarCollapse(collapsed: boolean) {
+    this.sidebarCollapsed.set(collapsed);
   }
 
   logout(): void {
