@@ -4,6 +4,7 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Register } from './pages/register/register';
 import { Profile } from './pages/profile/profile';
 import { Projects } from './pages/projects/projects';
+import { Notifies } from './pages/notifies/notifies';
 
 export const routes: Routes = [
   {
@@ -36,4 +37,9 @@ export const routes: Routes = [
     component: Dashboard,
     title: 'Dashboard Progetto'
   },
+  {
+    path: 'notifications',
+    component: Notifies,
+    title: 'Notifiche'
+  }
 ];

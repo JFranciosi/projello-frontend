@@ -1,0 +1,12 @@
+<header class="navbar" role="banner">
+    <app-navbar (logout)="logout()"></app-navbar>
+</header>
+
+<div
+  class="profile-shell"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
+>    
+<app-dashboard-sidebar (createProject)="openModal('project')" (collapseChanged)="onSidebarCollapse($event)">
+    </app-dashboard-sidebar>
+<app-project-modal [open]="projectModalOpen()" (close)="closeModal()" (create)="onCreateProject($event)"></app-project-modal>
+
