@@ -11,7 +11,7 @@ export class ProjectsService {
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
   private getAuthHeaders(): { [key: string]: string } {
     const token = this.authService.getAccessToken();
@@ -149,13 +149,14 @@ export class ProjectsService {
   }
 
   async removeCollaborator(projectId: string, userId: string): Promise<boolean> {
-    console.log('Chiamata a removeCollaborator con projectId:', projectId, 'e userId:', userId);  
+    console.log('Chiamata a removeCollaborator con projectId:', projectId, 'e userId:', userId);
     try {
       await firstValueFrom(
         this.http.put(
           `${this.apiUrl}/leave/${projectId}?userId=${userId}`,
           {},
           {
+            observe: 'response',
             withCredentials: true,
             headers: this.getAuthHeaders(),
           }

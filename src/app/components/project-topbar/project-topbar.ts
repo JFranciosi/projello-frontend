@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProjectResponse } from '../../models/models';
 import { ProjectsService } from '../../services/project.service';
+import { NgToastService } from 'ng-angular-popup';
 
 @Component({
   selector: 'app-project-topbar',
@@ -20,6 +21,7 @@ export class ProjectTopbar {
   private readonly projectsService = inject(ProjectsService);
   addingCollaborator = signal(false);
   collabEmail = '';
+  private toast = inject(NgToastService);
 
   startInlineAdd(): void {
     this.addingCollaborator.set(true);
@@ -39,8 +41,15 @@ export class ProjectTopbar {
     this.addingCollaborator.set(false);
   }
 
-  onRemoveCollaborator(id: string): void {
-    this.projectsService.removeCollaborator(this.project._id, id)  ;
-    console.log('Rimuovi collaboratore con ID:', id);
+  async onRemoveCollaborator(id: string): Promise<void> {
+    const res = await this.projectsService.removeCollaborator(this.project._id, id);
+
+    if (res){
+      this.toast.success('Collaboratore rimosso con successo!', 'Operazione completata', 4000);
+      window.location.reload();
+    } else {
+      this.toast.danger('Errore durante la rimozione del collaboratore.', 'Operazione fallita', 4000);
+    }
+    
   }
 }
