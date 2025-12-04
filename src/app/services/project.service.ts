@@ -104,17 +104,81 @@ export class ProjectsService {
       collaborators: payload.collaborators ?? []
     };
 
-    try {
-      return await firstValueFrom(
-        this.http.post<ProjectResponse>(this.apiUrl, safePayload, {
+    const doRequest = async () => {
+      const response = await firstValueFrom(
+        this.http.post<any>(this.apiUrl, safePayload, {
           withCredentials: true,
           headers: this.getAuthHeaders(),
         })
       );
+      console.log('✅ createProject - Risposta dal backend:', response);
+      // Normalizza la risposta
+      const normalized = this.normalizeProjectResponse(response);
+      console.log('✅ createProject - Risposta normalizzata:', normalized);
+      return normalized;
+    };
+
+    try {
+      const result = await doRequest();
+      console.log('✅ createProject - Risultato finale:', result);
+      return result;
     } catch (error) {
-      console.error('Errore nella creazione del progetto:', error);
+      console.error('❌ Errore nella creazione del progetto:', error);
+      
+      // Se è un errore 401, prova a fare refresh del token
+      if (error instanceof HttpErrorResponse && error.status === 401) {
+        console.warn('Token scaduto durante la creazione, provo il refresh...');
+        const refreshed = await this.authService.refreshTokens();
+        if (refreshed) {
+          try {
+            return await doRequest();
+          } catch (retryErr) {
+            console.error('Errore dopo refresh nella creazione:', retryErr);
+            return null;
+          }
+        }
+      }
+
       return null;
     }
+  }
+
+  private normalizeProjectResponse(raw: any): ProjectResponse {
+    if (!raw) {
+      console.warn('normalizeProjectResponse: raw è null o undefined');
+      return null as any;
+    }
+
+    let rawId: any;
+
+    if (raw?._id && typeof raw._id === 'object' && '$oid' in raw._id) {
+      rawId = raw._id.$oid;
+    } else if (raw?._id) {
+      rawId = raw._id;
+    } else if (raw?.id) {
+      rawId = raw.id;
+    } else {
+      // Se non c'è _id, prova a vedere se c'è un campo id in altri formati
+      console.warn('normalizeProjectResponse: nessun _id trovato, raw:', raw);
+      rawId = '';
+    }
+
+    const id = typeof rawId === 'string' ? rawId.trim() : String(rawId ?? '').trim();
+    
+    console.log('🔧 normalizeProjectResponse – rawId:', rawId, '→ id:', id, 'raw:', raw);
+
+    const normalized: ProjectResponse = {
+      ...raw,
+      _id: id || rawId || raw.id || '',
+      title: raw.title || '',
+      description: raw.description,
+      collaborators: raw.collaborators || [],
+      creator: raw.creator || raw.creatorId || null,
+      createdAt: raw.createdAt || raw.created_at,
+      updatedAt: raw.updatedAt || raw.updated_at
+    };
+
+    return normalized;
   }
 
   /** Aggiorna un progetto esistente */
