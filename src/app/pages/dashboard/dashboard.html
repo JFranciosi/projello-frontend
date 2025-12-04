@@ -10,8 +10,7 @@
     @if (currentProject(); as project) {
       <app-project-topbar 
         [project]="project" 
-        (removeCollaborator)="removeCollaborator($event)"
-        (filterChange)="updateFilter($event)">
+        (filterChange)="updateFilter($event)"> 
       </app-project-topbar>
     }
 
@@ -247,17 +246,6 @@
 
 <app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
   (create)="onCreateProject($event)"></app-project-modal>
-
-<app-confirm-modal
-  [open]="removeCollabConfirmOpen()"
-  [title]="'Rimuovi collaboratore'"
-  [message]="'Sei sicuro di voler rimuovere questo collaboratore dal progetto?'"
-  [confirmText]="'Rimuovi'"
-  [cancelText]="'Annulla'"
-  [isDangerous]="true"
-  (confirm)="confirmRemoveCollaborator()"
-  (close)="removeCollabConfirmOpen.set(false)"
-></app-confirm-modal>
 
 <app-confirm-modal
   [open]="deletePhaseConfirmOpen()"

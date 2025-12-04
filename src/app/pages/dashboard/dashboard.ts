@@ -56,8 +56,6 @@ export class Dashboard implements OnInit {
 
   assigneeFilter = signal('');
   projectModalOpen = signal(false);
-  removeCollabConfirmOpen = signal(false);
-  collabToRemoveId = signal<string | null>(null);
   deletePhaseConfirmOpen = signal(false);
   phaseToDelete = signal<Phase | null>(null);
   sidebarCollapsed = signal(false);
@@ -65,8 +63,6 @@ export class Dashboard implements OnInit {
   loading = signal(false);
   errorMsg = signal<string | null>(null);
   project = signal<ProjectResponse | null>(null);
-  addingCollaborator = signal(false);
-  collabEmail = '';
   phasesSig = signal<Phase[]>([]);
   tasksSig = signal<Task[]>([]);
   addingPhase = signal(false);
@@ -271,43 +267,6 @@ export class Dashboard implements OnInit {
       createdAt: raw.createdAt ?? raw.created_at,
       updatedAt: raw.updatedAt ?? raw.updated_at
     };
-  }
-
-  removeCollaborator(id: string): void {
-    this.collabToRemoveId.set(id);
-    this.removeCollabConfirmOpen.set(true);
-  }
-
-  async confirmRemoveCollaborator(): Promise<void> {
-    const p = this.project();
-    if (!p) {
-      this.toast.danger('Errore', 'Nessun progetto selezionato.', 2500);
-      return;
-    }
-
-    const id = this.collabToRemoveId();
-    if (!id) return;
-
-    try {
-      const projectId = p._id as string;
-      const success = await this.projectsService.removeCollaborator(projectId, id);
-
-      if (success) {
-        this.project.set({
-          ...p,
-          collaborators: (p.collaborators || []).filter((c) => c.id !== id)
-        });
-        this.toast.success('Rimosso', 'Collaboratore rimosso dal progetto', 2000);
-      } else {
-        this.toast.danger('Errore', 'Impossibile rimuovere il collaboratore', 2500);
-      }
-    } catch (error) {
-      console.error('Errore nella rimozione del collaboratore:', error);
-      this.toast.danger('Errore', 'Rimozione collaboratore fallita', 2500);
-    } finally {
-      this.removeCollabConfirmOpen.set(false);
-      this.collabToRemoveId.set(null);
-    }
   }
 
   startInlinePhase(): void {

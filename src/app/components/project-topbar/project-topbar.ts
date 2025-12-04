@@ -16,8 +16,6 @@ import { NgToastService } from 'ng-angular-popup';
 })
 export class ProjectTopbar {
   @Input({ required: true }) project!: ProjectResponse;
-  @Output() addCollaborator = new EventEmitter<string>();   // email
-  @Output() removeCollaborator = new EventEmitter<string>(); // id
   @Output() filterChange = new EventEmitter<string>();
 
   private readonly projectsService = inject(ProjectsService);
