@@ -60,14 +60,14 @@ export class TaskService {
     let q = new HttpParams().set('project_id', params.project_id);
     if (params.phase_id) q = q.set('phase_id', params.phase_id);
     if (params.q) q = q.set('q', params.q);
-    return this.http.get<TaskFromDB[]>(`${this.baseUrl}/tasks`, { params: q })
+    return this.http.get<TaskFromDB[]>(`${this.baseUrl}/task`, { params: q })
       .pipe(
         map(tasks => tasks.map(t => this.taskFromDBToApp(t, params.project_id)))
       );
   }
 
   getById(id: string): Observable<Task> {
-    return this.http.get<TaskFromDB>(`${this.baseUrl}/tasks/${id}`)
+    return this.http.get<TaskFromDB>(`${this.baseUrl}/task/${id}`)
       .pipe(
         map(task => this.taskFromDBToApp(task))
       );
@@ -75,7 +75,7 @@ export class TaskService {
 
   create(dto: CreateTaskRequest): Observable<Task> {
     const dbPayload = this.createTaskRequestToDB(dto);
-    return this.http.post<TaskFromDB>(`${this.baseUrl}/tasks`, dbPayload)
+    return this.http.post<TaskFromDB>(`${this.baseUrl}/task`, dbPayload)
       .pipe(
         map(task => this.taskFromDBToApp(task, dto.project_id))
       );
@@ -95,7 +95,7 @@ export class TaskService {
     if (dto.priority !== undefined) dbDto.priority = dto.priority;
     if (dto.assignees !== undefined) dbDto.assignees = dto.assignees;
 
-    return this.http.put<TaskFromDB>(`${this.baseUrl}/tasks/${id}`, dbDto)
+    return this.http.put<TaskFromDB>(`${this.baseUrl}/task/${id}`, dbDto)
       .pipe(
         map(task => this.taskFromDBToApp(task))
       );
@@ -106,13 +106,13 @@ export class TaskService {
       'phase-id': payload.phase_id,
       position: payload.position
     };
-    return this.http.patch<TaskFromDB>(`${this.baseUrl}/tasks/${id}/move`, dbPayload)
+    return this.http.patch<TaskFromDB>(`${this.baseUrl}/task/${id}/move`, dbPayload)
       .pipe(
         map(task => this.taskFromDBToApp(task))
       );
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/tasks/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/task/${id}`);
   }
 }

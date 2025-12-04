@@ -540,7 +540,7 @@ export class Dashboard implements OnInit {
     try {
       const created = await this.projectsService.createProject({
         title,
-        collaborators: []
+        collaborators: data.collaborators
       });
 
       if (created) {
