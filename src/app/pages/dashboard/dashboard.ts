@@ -172,7 +172,7 @@ export class Dashboard implements OnInit {
 
     return {
       ...(raw as ProjectResponse),
-      _id: id,
+      _id: id ? String(id) : '',
       title: raw.title,
       description: raw.description,
       creator,
@@ -187,8 +187,8 @@ export class Dashboard implements OnInit {
     const projId = raw.project_id ?? raw.projectId ?? projectId;
 
     return {
-      _id: String(id),
-      project_id: String(projId),
+      _id: id ? String(id) : '',
+      project_id: projId ? String(projId) : '',
       title: raw.title ?? '',
       description: raw.description,
       is_done: raw.is_done ?? raw.isDone,
@@ -218,9 +218,9 @@ export class Dashboard implements OnInit {
       : [];
 
     return {
-      _id: String(id),
+      _id: id ? String(id) : '',
       project_id: String(raw.project_id ?? raw.projectId ?? projectId),
-      phase_id: String(phaseId),
+      phase_id: phaseId ? String(phaseId) : '',
       title: raw.title ?? '',
       description: raw.description,
       expiration_date: expiration,
@@ -525,7 +525,7 @@ export class Dashboard implements OnInit {
   markCompleted(task: Task): void {
     if (!task?._id) return;
 
-    this.taskService.update(task._id, { status: 'done' } as any).subscribe({
+    this.taskService.update(task._id, { is_done: true }).subscribe({
       next: () => {
         this.toast.success(
           'Completato',
