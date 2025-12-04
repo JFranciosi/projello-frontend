@@ -27,6 +27,7 @@ import {
 import { Navbar } from '../../components/navbar/navbar';
 import { ProjectTopbar } from '../../components/project-topbar/project-topbar';
 import { ProjectModal } from '../../components/project-modal/project-modal';
+import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-dashboard',
@@ -38,7 +39,8 @@ import { ProjectModal } from '../../components/project-modal/project-modal';
     DashboardSidebar,
     Navbar,
     ProjectTopbar,
-    ProjectModal
+    ProjectModal,
+    ConfirmModal
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
@@ -53,6 +55,10 @@ export class Dashboard implements OnInit {
   private toast = inject(NgToastService);
 
   projectModalOpen = signal(false);
+  removeCollabConfirmOpen = signal(false);
+  collabToRemoveId = signal<string | null>(null);
+  deletePhaseConfirmOpen = signal(false);
+  phaseToDelete = signal<Phase | null>(null);
   sidebarCollapsed = signal(false);
 
   loading = signal(false);
@@ -278,15 +284,20 @@ export class Dashboard implements OnInit {
     this.toast.success('Aggiunto', 'Collaboratore aggiunto (solo UI)', 2000);
   }
 
-  async removeCollaborator(id: string): Promise<void> {
+  removeCollaborator(id: string): void {
+    this.collabToRemoveId.set(id);
+    this.removeCollabConfirmOpen.set(true);
+  }
+
+  async confirmRemoveCollaborator(): Promise<void> {
     const p = this.project();
     if (!p) {
       this.toast.danger('Errore', 'Nessun progetto selezionato.', 2500);
       return;
     }
 
-    const confirmed = confirm('Sei sicuro di voler rimuovere questo collaboratore dal progetto?');
-    if (!confirmed) return;
+    const id = this.collabToRemoveId();
+    if (!id) return;
 
     try {
       const projectId = p._id as string;
@@ -304,6 +315,9 @@ export class Dashboard implements OnInit {
     } catch (error) {
       console.error('Errore nella rimozione del collaboratore:', error);
       this.toast.danger('Errore', 'Rimozione collaboratore fallita', 2500);
+    } finally {
+      this.removeCollabConfirmOpen.set(false);
+      this.collabToRemoveId.set(null);
     }
   }
 
@@ -477,9 +491,13 @@ export class Dashboard implements OnInit {
 
   deletePhase(phase: Phase): void {
     if (!phase?._id) return;
+    this.phaseToDelete.set(phase);
+    this.deletePhaseConfirmOpen.set(true);
+  }
 
-    const confirmed = confirm(`Sei sicuro di voler eliminare la fase "${phase.title}"?`);
-    if (!confirmed) return;
+  confirmDeletePhase(): void {
+    const phase = this.phaseToDelete();
+    if (!phase?._id) return;
 
     this.phaseService.delete(phase._id).subscribe({
       next: () => {
@@ -492,10 +510,14 @@ export class Dashboard implements OnInit {
           this.tasksSig().filter((t) => t.phase_id !== phase._id)
         );
         this.toast.success('OK', 'Fase eliminata', 3000);
+        this.deletePhaseConfirmOpen.set(false);
+        this.phaseToDelete.set(null);
       },
       error: (e) => {
         console.error('delete phase error', e);
         this.toast.danger('Errore', 'Eliminazione fase fallita', 3000);
+        this.deletePhaseConfirmOpen.set(false);
+        this.phaseToDelete.set(null);
       }
     });
   }

@@ -8,13 +8,14 @@ import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { Navbar } from '../../components/navbar/navbar';
 import { ProjectModal } from '../../components/project-modal/project-modal';
+import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
 import { ProjectSearchbar } from '../../components/project-searchbar/project-searchbar';
 import { NgToastService } from 'ng-angular-popup';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, DashboardSidebar, LucideAngularModule, Navbar, ProjectModal, ProjectSearchbar],
+  imports: [CommonModule, DashboardSidebar, LucideAngularModule, Navbar, ProjectModal, ConfirmModal, ProjectSearchbar],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
 })
@@ -25,6 +26,8 @@ export class Projects implements OnInit {
   searchQuery = signal('');
   loading = signal(true);
   projectModalOpen = signal(false);
+  deleteConfirmOpen = signal(false);
+  projectToDelete = signal<ProjectResponse | null>(null);
   sidebarCollapsed = signal(false);
   currentUser = signal<UserResponse | null>(null);
 
@@ -200,11 +203,15 @@ export class Projects implements OnInit {
     }
   }
 
-  async onDeleteProject(p: ProjectResponse, event: Event): Promise<void> {
+  onDeleteProject(p: ProjectResponse, event: Event): void {
     event.stopPropagation();
+    this.projectToDelete.set(p);
+    this.deleteConfirmOpen.set(true);
+  }
 
-    const confirmed = confirm(`Sei sicuro di voler eliminare "${p.title}"?`);
-    if (!confirmed) return;
+  async confirmDeleteProject(): Promise<void> {
+    const p = this.projectToDelete();
+    if (!p) return;
 
     const projectId = p._id;
 
@@ -223,6 +230,9 @@ export class Projects implements OnInit {
     } else {
       this.toast.danger('Errore', 'Eliminazione progetto fallita.', 3000);
     }
+
+    this.deleteConfirmOpen.set(false);
+    this.projectToDelete.set(null);
   }
 
   async onSaveProject(ev: Event): Promise<void> {

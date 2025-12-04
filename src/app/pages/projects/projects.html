@@ -87,3 +87,14 @@
   (close)="closeModal()"
   (create)="onCreateProject($event)"
 ></app-project-modal>
+
+<app-confirm-modal
+  [open]="deleteConfirmOpen()"
+  [title]="'Elimina progetto'"
+  [message]="'Sei sicuro di voler eliminare ' + (projectToDelete()?.title || '') + '?'"
+  [confirmText]="'Elimina'"
+  [cancelText]="'Annulla'"
+  [isDangerous]="true"
+  (confirm)="confirmDeleteProject()"
+  (close)="deleteConfirmOpen.set(false)"
+></app-confirm-modal>

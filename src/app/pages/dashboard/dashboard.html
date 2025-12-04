@@ -224,3 +224,25 @@
 
 <app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
   (create)="onCreateProject($event)"></app-project-modal>
+
+<app-confirm-modal
+  [open]="removeCollabConfirmOpen()"
+  [title]="'Rimuovi collaboratore'"
+  [message]="'Sei sicuro di voler rimuovere questo collaboratore dal progetto?'"
+  [confirmText]="'Rimuovi'"
+  [cancelText]="'Annulla'"
+  [isDangerous]="true"
+  (confirm)="confirmRemoveCollaborator()"
+  (close)="removeCollabConfirmOpen.set(false)"
+></app-confirm-modal>
+
+<app-confirm-modal
+  [open]="deletePhaseConfirmOpen()"
+  [title]="'Elimina fase'"
+  [message]="'Sei sicuro di voler eliminare la fase ' + (phaseToDelete()?.title || '') + '?'"
+  [confirmText]="'Elimina'"
+  [cancelText]="'Annulla'"
+  [isDangerous]="true"
+  (confirm)="confirmDeletePhase()"
+  (close)="deletePhaseConfirmOpen.set(false)"
+></app-confirm-modal>
