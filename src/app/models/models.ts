@@ -65,17 +65,22 @@ export interface TaskFromDB {
   priority?: TaskPriority;
   attachments?: TaskAttachment[];
   assignees?: string[];
+  'is-done'?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface CreateTaskRequestToDB {
   'phase-id': string;
+  phaseId?: string;
   title: string;
   description?: string;
   'expiration-date'?: string;
+  expirationDate?: string;
   priority?: TaskPriority;
   assignees?: string[];
+  'is-done'?: boolean;
+  isDone?: boolean;
 }
 
 // Interfacce per l'applicazione (con underscore per compatibilità)
@@ -89,6 +94,7 @@ export interface Task {
   priority?: TaskPriority;
   attachments?: TaskAttachment[];
   assignees?: string[];
+  is_done?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

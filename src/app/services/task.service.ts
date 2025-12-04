@@ -24,6 +24,7 @@ export class TaskService {
       priority: dbTask.priority,
       attachments: dbTask.attachments,
       assignees: dbTask.assignees,
+      is_done: dbTask['is-done'],
       createdAt: dbTask.createdAt,
       updatedAt: dbTask.updatedAt
     };
@@ -33,11 +34,17 @@ export class TaskService {
    * Converte un CreateTaskRequest dal formato app (con underscore) al formato database (con trattini)
    */
   private createTaskRequestToDB(appRequest: CreateTaskRequest): CreateTaskRequestToDB {
-    const dbRequest: CreateTaskRequestToDB = {
-      'phase-id': appRequest.phase_id,
+    const dbRequest: any = {
       title: appRequest.title,
-      assignees: appRequest.assignees || []
+      assignees: appRequest.assignees || [],
+      'is-done': false,
+      isDone: false // Fallback
     };
+
+    if (appRequest.phase_id && appRequest.phase_id !== 'null') {
+      dbRequest['phase-id'] = appRequest.phase_id;
+      dbRequest.phaseId = appRequest.phase_id; // Fallback
+    }
 
     if (appRequest.description && appRequest.description.trim()) {
       dbRequest.description = appRequest.description.trim();
@@ -45,15 +52,15 @@ export class TaskService {
 
     if (appRequest.expiration_date && appRequest.expiration_date.trim()) {
       dbRequest['expiration-date'] = appRequest.expiration_date.trim();
-      // Fallback: Backend might expect camelCase if annotation is missing
-      (dbRequest as any)['expirationDate'] = appRequest.expiration_date.trim();
+      dbRequest.expirationDate = appRequest.expiration_date.trim(); // Fallback
     }
 
-    if (appRequest.priority) {
-      dbRequest.priority = appRequest.priority;
-    }
+    // Priority removed to strictly follow user requirements
+    // if (appRequest.priority) {
+    //   dbRequest.priority = appRequest.priority;
+    // }
 
-    return dbRequest;
+    return dbRequest as CreateTaskRequestToDB;
   }
 
   list(params: { project_id: string; phase_id?: string; q?: string }): Observable<Task[]> {
@@ -94,6 +101,10 @@ export class TaskService {
     }
     if (dto.priority !== undefined) dbDto.priority = dto.priority;
     if (dto.assignees !== undefined) dbDto.assignees = dto.assignees;
+    if (dto.is_done !== undefined) {
+      dbDto['is-done'] = dto.is_done;
+      dbDto.isDone = dto.is_done; // Fallback
+    }
 
     return this.http.put<TaskFromDB>(`${this.baseUrl}/task/${id}`, dbDto)
       .pipe(
