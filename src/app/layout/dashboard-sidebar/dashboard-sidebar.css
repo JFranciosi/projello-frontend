@@ -1,12 +1,12 @@
 :host {
   display: block;
-  height: 100vh;
+  height: calc(100vh - 70px);
   overflow: hidden;
 }
 
 .sidebar {
   width: 260px;
-  height: 100vh;
+  height: 100%;
   background-color: var(--bg-panel);
   border-right: 1px solid var(--border);
   display: flex;
@@ -139,10 +139,11 @@
 }
 
 .sidebar-footer {
-  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+  padding: 1rem 1.5rem;
   border-top: 1px solid var(--border-soft);
   flex-shrink: 0;
   background-color: var(--bg-panel);
+  margin-top: auto;
 }
 
 .new-project-btn {

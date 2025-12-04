@@ -41,8 +41,6 @@
   /* FONT */
   --font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 
-  /* OVERFLOW BLOCCATO */
-   overflow-y: hidden !important;
 }
 
 body {

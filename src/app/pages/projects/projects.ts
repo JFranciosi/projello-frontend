@@ -1,29 +1,66 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ProjectsService } from '../../services/project.service';
-import { ProjectResponse } from '../../models/models';
+import { ProjectResponse, UserResponse } from '../../models/models';
 import { DashboardSidebar } from '../../layout/dashboard-sidebar/dashboard-sidebar';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../services/auth.service';
 import { Navbar } from '../../components/navbar/navbar';
 import { ProjectModal } from '../../components/project-modal/project-modal';
+import { ProjectSearchbar } from '../../components/project-searchbar/project-searchbar';
 import { NgToastService } from 'ng-angular-popup';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, DashboardSidebar, LucideAngularModule, Navbar, ProjectModal],
+  imports: [CommonModule, DashboardSidebar, LucideAngularModule, Navbar, ProjectModal, ProjectSearchbar],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
 })
 export class Projects implements OnInit {
   private readonly toast = inject(NgToastService);
 
-  projects = signal<ProjectResponse[]>([]);
+  allProjects = signal<ProjectResponse[]>([]);
+  searchQuery = signal('');
   loading = signal(true);
   projectModalOpen = signal(false);
   sidebarCollapsed = signal(false);
+  currentUser = signal<UserResponse | null>(null);
+
+  avatarInitials = computed(() => {
+    const user = this.currentUser();
+    if (!user) return 'PJ';
+    
+    if (user.firstName || user.lastName) {
+      const fi = user.firstName?.trim()[0] ?? '';
+      const li = user.lastName?.trim()[0] ?? '';
+      const res = (fi + li).toUpperCase();
+      if (res) return res;
+    }
+    if (user.username) {
+      return user.username.trim().slice(0, 2).toUpperCase();
+    }
+    return 'PJ';
+  });
+
+  // Progetti filtrati in base alla ricerca
+  projects = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    if (!query) {
+      return this.allProjects();
+    }
+
+    return this.allProjects().filter(project => {
+      const titleMatch = project.title?.toLowerCase().includes(query);
+      const descriptionMatch = project.description?.toLowerCase().includes(query);
+      const creatorMatch = project.creator?.username?.toLowerCase().includes(query) ||
+                         project.creator?.firstName?.toLowerCase().includes(query) ||
+                         project.creator?.lastName?.toLowerCase().includes(query);
+      
+      return titleMatch || descriptionMatch || creatorMatch;
+    });
+  });
 
   constructor(
     private router: Router,
@@ -38,7 +75,22 @@ export class Projects implements OnInit {
       this.sidebarCollapsed.set(JSON.parse(saved));
     }
     
+    // Carica i dati dell'utente corrente
+    this.loadCurrentUser();
+    
     this.loadProjects();
+  }
+
+  private loadCurrentUser(): void {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        this.currentUser.set(user as UserResponse);
+      } catch (e) {
+        console.error('Errore nel caricamento dell\'utente:', e);
+      }
+    }
   }
 
   onSidebarCollapse(collapsed: boolean) {
@@ -72,13 +124,17 @@ export class Projects implements OnInit {
     try {
       const data = await this.projectsService.getProjects();
       const normalized = (data || []).map((p: any) => this.normalizeProject(p));
-      this.projects.set(normalized);
+      this.allProjects.set(normalized);
     } catch (e) {
       console.error('Errore nel caricamento dei progetti:', e);
-      this.projects.set([]);
+      this.allProjects.set([]);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  onSearchChange(query: string): void {
+    this.searchQuery.set(query);
   }
 
   navigateToProject(project: ProjectResponse): void {
@@ -142,7 +198,7 @@ export class Projects implements OnInit {
     const ok = await this.projectsService.deleteProject(projectId);
 
     if (ok) {
-      this.projects.update((list) =>
+      this.allProjects.update((list) =>
         list.filter((prj) => prj._id !== projectId)
       );
       this.toast.success('Progetto eliminato', 'Il progetto è stato eliminato correttamente.', 3000);

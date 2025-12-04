@@ -7,7 +7,9 @@
   box-shadow: var(--shadow-soft);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1000;
+  width: 100%;
+  min-height: 70px;
 }
 
 .nav-left {

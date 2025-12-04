@@ -1,0 +1,24 @@
+<div class="project-searchbar">
+  <div class="search-input-wrapper">
+    <lucide-icon name="Search" class="search-icon" aria-hidden="true"></lucide-icon>
+    <input
+      type="text"
+      class="search-input"
+      [value]="searchQuery()"
+      (input)="onSearchInput($event)"
+      placeholder="Cerca progetti..."
+      aria-label="Cerca progetti"
+    />
+    @if (searchQuery()) {
+      <button
+        type="button"
+        class="clear-button"
+        (click)="clearSearch()"
+        aria-label="Cancella ricerca"
+      >
+        <lucide-icon name="x" aria-hidden="true"></lucide-icon>
+      </button>
+    }
+  </div>
+</div>
+

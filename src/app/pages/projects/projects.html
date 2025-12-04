@@ -8,15 +8,38 @@
     (collapseChanged)="onSidebarCollapse($event)"
   ></app-dashboard-sidebar>
   <main class="projects-main" role="main" aria-label="Elenco progetti">
-    <div class="projects-header">
-      <h1>I tuoi progetti</h1>
+    <div class="projects-topbar">
+      <div class="projects-topbar-left">
+        <h1 class="projects-title">I tuoi progetti</h1>
+      </div>
+      @if (currentUser(); as user) {
+        <div class="projects-topbar-right">
+          <div class="user-info">
+            <div class="user-details">
+              <span class="user-name">{{ (user.firstName || '') + ' ' + (user.lastName || '') || user.username }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+            <div class="avatar-circle" aria-hidden="true">
+              <span>{{ avatarInitials() }}</span>
+            </div>
+          </div>
+        </div>
+      }
     </div>
+
+    <app-project-searchbar (searchChange)="onSearchChange($event)"></app-project-searchbar>
 
     <section class="projects-grid" aria-live="polite">
       @if (loading()) {
         <div class="empty-state">Caricamento in corso…</div>
       } @else if (projects().length === 0) {
-        <div class="empty-state">Nessun progetto trovato. Crea un nuovo progetto dalla sidebar.</div>
+        <div class="empty-state">
+          @if (searchQuery()) {
+            Nessun progetto trovato per "{{ searchQuery() }}". Prova con un'altra ricerca.
+          } @else {
+            Nessun progetto trovato. Crea un nuovo progetto dalla sidebar.
+          }
+        </div>
       } @else {
         @for (p of projects(); track p) {
           <article
