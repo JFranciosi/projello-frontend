@@ -8,10 +8,7 @@ import { AuthService } from './auth.service';
 export class ProjectsService {
   private readonly apiUrl = 'http://localhost:8080/project';
 
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService
-  ) { }
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   private getAuthHeaders(): { [key: string]: string } {
     const token = this.authService.getAccessToken();
@@ -97,11 +94,15 @@ export class ProjectsService {
   }
 
   /**  Crea un nuovo progetto */
-  async createProject(payload: { title: string; description?: string; collaborators?: string[] }): Promise<ProjectResponse | null> {
+  async createProject(payload: {
+    title: string;
+    description?: string;
+    collaborators?: string[];
+  }): Promise<ProjectResponse | null> {
     const safePayload = {
       title: payload.title,
       description: payload.description,
-      collaborators: payload.collaborators ?? []
+      collaborators: payload.collaborators ?? [],
     };
 
     const doRequest = async () => {
@@ -124,8 +125,7 @@ export class ProjectsService {
       return result;
     } catch (error) {
       console.error('❌ Errore nella creazione del progetto:', error);
-      
-      // Se è un errore 401, prova a fare refresh del token
+
       if (error instanceof HttpErrorResponse && error.status === 401) {
         console.warn('Token scaduto durante la creazione, provo il refresh...');
         const refreshed = await this.authService.refreshTokens();
@@ -164,7 +164,7 @@ export class ProjectsService {
     }
 
     const id = typeof rawId === 'string' ? rawId.trim() : String(rawId ?? '').trim();
-    
+
     console.log('🔧 normalizeProjectResponse – rawId:', rawId, '→ id:', id, 'raw:', raw);
 
     const normalized: ProjectResponse = {
@@ -175,14 +175,16 @@ export class ProjectsService {
       collaborators: raw.collaborators || [],
       creator: raw.creator || raw.creatorId || null,
       createdAt: raw.createdAt || raw.created_at,
-      updatedAt: raw.updatedAt || raw.updated_at
+      updatedAt: raw.updatedAt || raw.updated_at,
     };
 
     return normalized;
   }
 
-  /** Aggiorna un progetto esistente */
-  async updateProject(id: string, payload: { title?: string; description?: string }): Promise<ProjectResponse | null> {
+  async updateProject(
+    id: string,
+    payload: { title: string | null; collaborators?: string[] }
+  ): Promise<ProjectResponse | null> {
     try {
       return await firstValueFrom(
         this.http.put<ProjectResponse>(`${this.apiUrl}/${id}`, payload, {
@@ -190,10 +192,31 @@ export class ProjectsService {
           headers: this.getAuthHeaders(),
         })
       );
-    } catch (error) {
-      console.error(`Errore nell'aggiornamento del progetto ${id}:`, error);
+    } catch (error: any) {
+      if (error.status === 401) {
+        const refreshed = await this.authService.refreshTokens();
+        if (refreshed) {
+          try {
+            return await firstValueFrom(
+              this.http.put<ProjectResponse>(`${this.apiUrl}/${id}`, payload, {
+                withCredentials: true,
+                headers: this.getAuthHeaders(),
+              })
+            );
+          } catch (err2) {
+            this.redirectToLogin();
+          }
+        }
+        this.redirectToLogin();
+      }
+
       return null;
     }
+  }
+
+  redirectToLogin() {
+    this.authService.clearTokens();
+    window.location.href = '/login';
   }
 
   /**  Elimina un progetto */

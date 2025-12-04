@@ -38,9 +38,9 @@ export class ProjectTopbar {
     const email = this.collabEmail.trim();
     if (!email) return;
 
-    this.addCollaborator.emit(email);
-    this.collabEmail = '';
-    this.addingCollaborator.set(false);
+    const collaborators: string[] = [email]
+    const payload = {"title": null, "collaborators": collaborators};
+    this.projectsService.updateProject(this.project._id, payload);
   }
 
   async onRemoveCollaborator(id: string): Promise<void> {
