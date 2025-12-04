@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { CreateUserRequestPayload, UserResponse } from '../models/models';
 import { NotifyService } from './notify.service';
+import { Router } from '@angular/router';
 
 type TokenResponse = { accessToken: string; refreshToken?: string | null ; userResponse: UserResponse };
 
@@ -14,6 +15,7 @@ export class AuthService {
   private AUTH_API = 'http://localhost:8080/auth';
   private USER_API = 'http://localhost:8080/user';
   private notifyService = inject(NotifyService);
+  private router = inject(Router);
 
   constructor(private http: HttpClient) { }
 
@@ -36,12 +38,10 @@ export class AuthService {
 
   /** UPDATE USER */
   async editUser(payload: CreateUserRequestPayload): Promise<void> {
-    await firstValueFrom(
+    await this.apiCall(() => 
       this.http.put(`${this.USER_API}`, payload, {
         responseType: 'text' as 'json',
-        headers: {
-          Authorization: `Bearer ${this.getAccessToken()}`,
-        }
+        headers: { Authorization: `Bearer ${this.getAccessToken()}` }
       })
     );
   }
@@ -50,6 +50,7 @@ export class AuthService {
   /** LOGOUT */
   logout(): void {
     this.clearTokens();
+    this.router.navigate(['/login']);
   }
 
   /** STATO */
@@ -123,6 +124,29 @@ export class AuthService {
     } catch (err) {
       this.clearTokens();
       return false;
+    }
+  }
+
+  async apiCall<T>( requestFn: () => Observable<T> ): Promise<T> {
+    try {
+      return await firstValueFrom(requestFn());
+    } catch (error: any) {
+      
+      if (error.status === 401) {
+        console.warn('Token scaduto (401), provo il refresh...');
+        
+        const refreshed = await this.refreshTokens();
+
+        if (refreshed) {
+          return await firstValueFrom(requestFn());
+        }
+      }
+
+      if (error.status === 401) {
+          this.logout(); 
+      }
+      
+      throw error;
     }
   }
 }

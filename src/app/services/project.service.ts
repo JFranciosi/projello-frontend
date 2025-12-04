@@ -112,16 +112,14 @@ export class ProjectsService {
           headers: this.getAuthHeaders(),
         })
       );
-      console.log('✅ createProject - Risposta dal backend:', response);
       // Normalizza la risposta
       const normalized = this.normalizeProjectResponse(response);
-      console.log('✅ createProject - Risposta normalizzata:', normalized);
       return normalized;
     };
 
     try {
       const result = await doRequest();
-      console.log('✅ createProject - Risultato finale:', result);
+
       return result;
     } catch (error) {
       console.error('❌ Errore nella creazione del progetto:', error);
@@ -236,7 +234,6 @@ export class ProjectsService {
   }
 
   async removeCollaborator(projectId: string, userId: string): Promise<boolean> {
-    console.log('Chiamata a removeCollaborator con projectId:', projectId, 'e userId:', userId);
     try {
       await firstValueFrom(
         this.http.put(

@@ -2,13 +2,23 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Task, CreateTaskRequest, TaskFromDB, CreateTaskRequestToDB } from '../models/models';
+import { AuthService } from './auth.service';
 
 export type Priority = 'high' | 'medium' | 'low';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
   private readonly baseUrl = 'http://localhost:8080';
+
+  private getHeaders(): { [key: string]: string } {
+    const token = this.auth.getAccessToken();
+    if (token) {
+        return { 'Authorization': `Bearer ${token}` };
+    }
+    return {};
+  }
 
   /**
    * Converte un Task dal formato database (con trattini) al formato app (con underscore)
@@ -97,12 +107,14 @@ export class TaskService {
       );
   }
 
-  create(dto: CreateTaskRequest): Observable<Task> {
+  async create(dto: CreateTaskRequest): Promise<Task> {
     const dbPayload = this.createTaskRequestToDB(dto);
-    return this.http.post<TaskFromDB>(`${this.baseUrl}/task`, dbPayload)
-      .pipe(
-        map(task => this.taskFromDBToApp(task, dto.project_id))
-      );
+    return this.auth.apiCall<Task>(() => {
+      return this.http.post<any>(`${this.baseUrl}/task`, dbPayload, { headers: this.getHeaders() })
+        .pipe(
+          map(task => this.taskFromDBToApp(task, dto.project_id))
+        );
+    });
   }
 
   update(id: string, dto: Partial<Task>): Observable<Task> {
@@ -143,22 +155,30 @@ export class TaskService {
       );
   }
 
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/task/${id}`);
+  async delete(id: string): Promise<void> {
+    return this.auth.apiCall<void>(() => {
+      return this.http.delete<void>(`${this.baseUrl}/task/${id}`, { headers: this.getHeaders() });
+    });
   }
 
-  getByPhaseId(phaseId: string): Observable<Task[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/task/${phaseId}`)
-      .pipe(
-        map(tasks => tasks.map(t => this.taskFromDBToApp(t)))
-      );
+  async getByPhaseId(phaseId: string): Promise<Task[]> {
+    return this.auth.apiCall<Task[]>(() => {
+      return this.http.get<any[]>(`${this.baseUrl}/task/${phaseId}`, { headers: this.getHeaders() })
+        .pipe(
+          map(tasks => tasks.map(t => this.taskFromDBToApp(t)))
+        );
+    });
   }
 
-  markAsDone(id: string): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/task/${id}/complete`, {});
+  async markAsDone(id: string): Promise<void> {
+    return this.auth.apiCall<void>(() => {
+      return this.http.put<void>(`${this.baseUrl}/task/${id}/complete`, {}, { headers: this.getHeaders() });
+    });
   }
 
-  markAsIncomplete(id: string): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/task/${id}/incomplete`, {});
+  async markAsIncomplete(id: string): Promise<void> {
+    return this.auth.apiCall<void>(() => {
+      return this.http.put<void>(`${this.baseUrl}/task/${id}/incomplete`, {}, { headers: this.getHeaders() });
+    });
   }
 }

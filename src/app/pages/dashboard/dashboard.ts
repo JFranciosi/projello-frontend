@@ -179,7 +179,7 @@ export class Dashboard implements OnInit {
       const allTasks: Task[] = [];
       
       const tasksPromises = normalizedPhases.map(phase => 
-        firstValueFrom(this.taskService.getByPhaseId(phase._id))
+        this.taskService.getByPhaseId(phase._id)
       );
 
       const results = await Promise.all(tasksPromises);
@@ -190,7 +190,6 @@ export class Dashboard implements OnInit {
         }
       });
 
-      console.log('Task scaricati:', allTasks); 
       this.tasksSig.set(allTasks);
 
     } catch (err) {
@@ -341,7 +340,7 @@ export class Dashboard implements OnInit {
     }
   }
 
-  saveInlineTask(): void {
+  async saveInlineTask(): Promise<void> {
     const phaseId = this.inlineTaskPhaseId();
     const d = this.inlineDraft();
     const p = this.project();
@@ -387,25 +386,21 @@ export class Dashboard implements OnInit {
       assignees: assigneeEmails
     };
 
-    this.taskService.create(payload).subscribe({
-      next: (created: any) => {
+    try {
+      const created = await this.taskService.create(payload);
         
-        console.log("TASK CREATA DAL SERVER:", created);
-        
-        this.tasksSig.update(list => [...list, {
-            ...created, 
-            assignees: d.assigneeIds,
-            priority: d.priority
-        }]);
+      this.tasksSig.update(list => [...list, {
+          ...created, 
+          assignees: d.assigneeIds,
+          priority: d.priority
+      }]);
 
-        this.inlineTaskPhaseId.set(null);
-        this.toast.success('Ottimo', 'Task creato', 3000);
-      },
-      error: (e) => {
-        console.error('create task error', e);
+      this.inlineTaskPhaseId.set(null);
+      this.toast.success('Ottimo', 'Task creato', 3000);
+    } catch (e) {
+      console.error('create task error', e);
         this.toast.danger('Errore', 'Creazione task fallita', 3000);
-      }
-    });
+    }
   }
 
   openPanel(t: Task): void {
@@ -418,23 +413,23 @@ export class Dashboard implements OnInit {
     this.selectedTask.set(null);
   }
 
-  deleteTask(task: Task): void {
+  async deleteTask(task: Task): Promise<void> {
     if (!task?._id) return;
 
-    this.taskService.delete(task._id).subscribe({
-      next: () => {
-        this.tasksSig.set(
-          this.tasksSig().filter((t) => t._id !== task._id)
-        );
-        this.panelOpen.set(false);
-        this.selectedTask.set(null);
-        this.toast.success('OK', 'Task eliminato', 3000);
-      },
-      error: (e) => {
-        console.error('delete task error', e);
-        this.toast.danger('Errore', 'Eliminazione task fallita', 3000);
-      }
-    });
+    try {
+      await this.taskService.delete(task._id);
+
+      this.tasksSig.set(
+        this.tasksSig().filter((t) => t._id !== task._id)
+      );
+      this.panelOpen.set(false);
+      this.selectedTask.set(null);
+      this.toast.success('OK', 'Task eliminato', 3000);
+
+    } catch (e) {
+      console.error('delete task error', e);
+      this.toast.danger('Errore', 'Eliminazione task fallita', 3000);
+    }
   }
 
   deletePhase(phase: Phase): void {
@@ -470,44 +465,42 @@ export class Dashboard implements OnInit {
     });
   }
 
-  markCompleted(task: Task): void {
+  async markCompleted(task: Task): Promise<void> {
     if (!task?._id) return;
 
-    this.taskService.markAsDone(task._id).subscribe({
-      next: () => {
-        this.toast.success('Completato!', 'Task segnata come completata.', 3000);
+    try {
+      await this.taskService.markAsDone(task._id);
+
+      this.toast.success('Completato!', 'Task segnata come completata.', 3000);
         
         this.tasksSig.update(tasks => 
           tasks.map(t => t._id === task._id ? { ...t, is_done: true } : t)
         );
         
         this.closePanel();
-      },
-      error: (e) => {
-        console.error('Errore completamento task', e);
+    } catch (e) {
+      console.error('Errore completamento task', e);
         this.toast.danger('Errore', 'Impossibile completare il task.', 3000);
-      }
-    });
+    }
   }
 
-  markAsIncomplete(task: Task): void {
+  async markAsIncomplete(task: Task): Promise<void> {
     if (!task?._id) return;
 
-    this.taskService.markAsIncomplete(task._id).subscribe({
-      next: () => {
-        this.toast.info('Ripristinato', 'Task segnata come da fare.', 3000);
+    try {
+      await this.taskService.markAsIncomplete(task._id);
+
+      this.toast.info('Ripristinato', 'Task segnata come da fare.', 3000);
         
-        this.tasksSig.update(tasks => 
-          tasks.map(t => t._id === task._id ? { ...t, is_done: false } : t)
-        );
-        
-        this.closePanel();
-      },
-      error: (e) => {
-        console.error('Errore', e);
+      this.tasksSig.update(tasks => 
+        tasks.map(t => t._id === task._id ? { ...t, is_done: false } : t)
+      );
+      
+      this.closePanel();
+    } catch (e) {
+      console.error('Errore', e);
         this.toast.danger('Errore', 'Impossibile aggiornare il task.', 3000);
-      }
-    });
+    }
   }
 
   openModal(_type: 'project'): void {
