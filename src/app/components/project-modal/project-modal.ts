@@ -20,7 +20,7 @@ export class ProjectModal {
   collaborators: string[] = [];
 
   addEmail() {
-    const email = this.emailInput.trim().toLowerCase();
+    const email = this.emailInput.trim();
     if (!email || !email.includes('@') || this.collaborators.includes(email)) return;
 
     this.collaborators.push(email);

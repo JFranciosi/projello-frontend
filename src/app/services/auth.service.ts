@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CreateUserRequestPayload, UserResponse } from '../models/models';
+import { NotifyService } from './notify.service';
 
 type TokenResponse = { accessToken: string; refreshToken?: string | null ; userResponse: UserResponse };
 
@@ -12,6 +13,7 @@ const REFRESH_TOKEN_KEY = 'refreshToken';
 export class AuthService {
   private AUTH_API = 'http://localhost:8080/auth';
   private USER_API = 'http://localhost:8080/user';
+  private notifyService = inject(NotifyService);
 
   constructor(private http: HttpClient) { }
 
@@ -62,19 +64,32 @@ export class AuthService {
   getRefreshToken(): string | null {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
   }
-
   /** SET/REMOVE token */
   setTokens(access: string, refresh: string | null, user: UserResponse) {
+    // Pulisci le notifiche dell'utente precedente prima di salvare le nuove
+    this.notifyService.clearLocalNotifications();
+    
     localStorage.setItem(ACCESS_TOKEN_KEY, access);
     if (refresh != null) {
       localStorage.setItem(REFRESH_TOKEN_KEY, refresh);
     }
     localStorage.setItem('user', JSON.stringify(user));
+    
+    // Salva le notifiche in localStorage se presenti nella UserResponse
+    if (user.notifies) {
+      console.log('Saving notifications:', user.notifies);
+      this.notifyService.saveNotifications(user.notifies);
+    } else {
+      console.log('No notifies in UserResponse, initializing empty array');
+      this.notifyService.saveNotifications([]);
+    }
   }
 
   clearTokens() {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem('user');
+    this.notifyService.clearLocalNotifications();
   }
 
   /** REFRESH TOKENS */

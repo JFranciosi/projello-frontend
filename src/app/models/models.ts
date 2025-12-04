@@ -12,7 +12,7 @@ export interface UserResponse {
   username: string;
   firstName: string;
   lastName: string;
-  notifies: string[];
+  notifies?: Notify[];
 }
 
 export interface CreateProjectRequest {
@@ -111,4 +111,13 @@ export interface MoveTaskRequest {
 export interface ListTasksParams {
   project_id: string;
   phase_id?: string;
+}
+
+export interface Notify {
+  id: string;
+  type: string;
+  message: string;
+  relatedObjectType?: string;
+  relatedObjectId?: string;
+  isRead: boolean;
 }

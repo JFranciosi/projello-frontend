@@ -30,20 +30,20 @@
 
     <div class="notifications-list">
       @if (notifications().length > 0) {
-        @for (notification of notifications(); track notification._id) {
+        @for (notification of notifications(); track notification.id) {
           <div 
             class="notification-item"
           >
             <div class="notification-indicator"></div>
             <div class="notification-content">
               <p class="notification-type">
-                <strong>{{ notification.type === 'informazione' ? 'Informazione' : 'Scadenza' }}</strong>
+                <strong>{{ notification.type }}</strong>
               </p>
-              <p class="notification-message">{{ notification.content }}</p>
+              <p class="notification-message">{{ notification.message }}</p>
             </div>
             <button 
               class="delete-btn"
-              (click)="deleteNotification(notification._id, $event)"
+              (click)="deleteNotification(notification.id, $event)"
               aria-label="Elimina notifica"
             >
               <lucide-icon name="trash-2" size="18"></lucide-icon>
