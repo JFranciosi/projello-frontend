@@ -54,6 +54,7 @@ export class Dashboard implements OnInit {
   private auth = inject(AuthService);
   private toast = inject(NgToastService);
 
+  assigneeFilter = signal('');
   projectModalOpen = signal(false);
   removeCollabConfirmOpen = signal(false);
   collabToRemoveId = signal<string | null>(null);
@@ -116,10 +117,32 @@ export class Dashboard implements OnInit {
   });
 
   phases = computed(() => this.phasesSig());
-  tasksFor = (phaseId: string) =>
-    this.tasksSig().filter((t) => t.phase_id === phaseId);
+  
+  tasksFor = (phaseId: string) => {
+    const tasksInPhase = this.tasksSig().filter((t) => t.phase_id === phaseId);
+    
+    const filterText = this.assigneeFilter().toLowerCase().trim();
+
+    if (!filterText) {
+      return tasksInPhase;
+    }
+
+    return tasksInPhase.filter(task => {
+      if (!task.assignees || task.assignees.length === 0) return false;
+
+      return task.assignees.some(assigneeId => {
+        const member = this.assignableMembers().find(m => m.id === assigneeId);
+        if (!member) return false;
+        return member.label.toLowerCase().includes(filterText);
+      });
+    });
+  };
+
   currentProject = () => this.project();
   inlineTaskForPhase = () => this.inlineTaskPhaseId();
+  updateFilter(text: string) {
+    this.assigneeFilter.set(text);
+  }
 
   ngOnInit(): void {
     // Carica lo stato della sidebar dalla localStorage
@@ -156,6 +179,24 @@ export class Dashboard implements OnInit {
       );
 
       this.phasesSig.set(normalizedPhases);
+
+      const allTasks: Task[] = [];
+      
+      const tasksPromises = normalizedPhases.map(phase => 
+        firstValueFrom(this.taskService.getByPhaseId(phase._id))
+      );
+
+      const results = await Promise.all(tasksPromises);
+
+      results.forEach(tasksList => {
+        if (tasksList && tasksList.length > 0) {
+          allTasks.push(...tasksList);
+        }
+      });
+
+      console.log('Task scaricati:', allTasks); 
+      this.tasksSig.set(allTasks);
+
     } catch (err) {
       console.error('loadProject error:', err);
       this.toast.danger('Errore', 'Caricamento progetto fallito', 3000);
@@ -230,58 +271,6 @@ export class Dashboard implements OnInit {
       createdAt: raw.createdAt ?? raw.created_at,
       updatedAt: raw.updatedAt ?? raw.updated_at
     };
-  }
-
-  openAddCollaboratorModal(): void {
-    const p = this.project();
-    if (!p) {
-      this.toast.danger(
-        'Errore',
-        'Seleziona o carica un progetto prima di aggiungere collaboratori.',
-        2500
-      );
-      return;
-    }
-
-    this.collabEmail = '';
-    this.addingCollaborator.set(true);
-  }
-
-  addCollaborator(): void {
-    const email = (this.collabEmail || '').trim();
-    if (!email) {
-      this.toast.info('Info', 'Inserisci una email valida.', 2000);
-      return;
-    }
-
-    const [local] = email.split('@');
-    const pretty = (local || 'User').replace(/[._-]+/g, ' ').trim();
-    const firstName = pretty.split(' ')[0] || 'User';
-    const lastName = pretty.split(' ').slice(1).join(' ') || '';
-
-    const p = this.project();
-    if (!p) {
-      this.toast.danger('Errore', 'Nessun progetto selezionato.', 2500);
-      return;
-    }
-
-    const newC: UserResponse = {
-      id: 'tmp-' + uid(),
-      email,
-      username: pretty || 'user',
-      firstName,
-      lastName,
-      notifies: []
-    };
-
-    this.project.set({
-      ...p,
-      collaborators: [...(p.collaborators || []), newC]
-    });
-
-    this.collabEmail = '';
-    this.addingCollaborator.set(false);
-    this.toast.success('Aggiunto', 'Collaboratore aggiunto (solo UI)', 2000);
   }
 
   removeCollaborator(id: string): void {
@@ -440,18 +429,18 @@ export class Dashboard implements OnInit {
     };
 
     this.taskService.create(payload).subscribe({
-      next: (created: Task) => {
-        const normalized = this.normalizeTask(created, p._id as string);
-        this.tasksSig.set([
-          ...this.tasksSig(),
-          {
-            ...normalized,
+      next: (created: any) => {
+        
+        console.log("TASK CREATA DAL SERVER:", created);
+        
+        this.tasksSig.update(list => [...list, {
+            ...created, 
             assignees: d.assigneeIds,
             priority: d.priority
-          }
-        ]);
+        }]);
+
         this.inlineTaskPhaseId.set(null);
-        this.toast.success('OK', 'Task creato', 3000);
+        this.toast.success('Ottimo', 'Task creato', 3000);
       },
       error: (e) => {
         console.error('create task error', e);
@@ -525,21 +514,39 @@ export class Dashboard implements OnInit {
   markCompleted(task: Task): void {
     if (!task?._id) return;
 
-    this.taskService.update(task._id, { is_done: true }).subscribe({
+    this.taskService.markAsDone(task._id).subscribe({
       next: () => {
-        this.toast.success(
-          'Completato',
-          'Task marcato come completato',
-          3000
+        this.toast.success('Completato!', 'Task segnata come completata.', 3000);
+        
+        this.tasksSig.update(tasks => 
+          tasks.map(t => t._id === task._id ? { ...t, is_done: true } : t)
         );
+        
+        this.closePanel();
       },
       error: (e) => {
-        console.error('update task error', e);
-        this.toast.danger(
-          'Errore',
-          'Impossibile aggiornare il task',
-          3000
+        console.error('Errore completamento task', e);
+        this.toast.danger('Errore', 'Impossibile completare il task.', 3000);
+      }
+    });
+  }
+
+  markAsIncomplete(task: Task): void {
+    if (!task?._id) return;
+
+    this.taskService.markAsIncomplete(task._id).subscribe({
+      next: () => {
+        this.toast.info('Ripristinato', 'Task segnata come da fare.', 3000);
+        
+        this.tasksSig.update(tasks => 
+          tasks.map(t => t._id === task._id ? { ...t, is_done: false } : t)
         );
+        
+        this.closePanel();
+      },
+      error: (e) => {
+        console.error('Errore', e);
+        this.toast.danger('Errore', 'Impossibile aggiornare il task.', 3000);
       }
     });
   }

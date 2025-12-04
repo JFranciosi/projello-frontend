@@ -13,18 +13,35 @@ export class TaskService {
   /**
    * Converte un Task dal formato database (con trattini) al formato app (con underscore)
    */
-  private taskFromDBToApp(dbTask: TaskFromDB, projectId?: string): Task {
+  // In service/task.service.ts
+
+  private taskFromDBToApp(dbTask: any, projectId?: string): Task {
+    let realId = '';
+
+    if (dbTask.id) {
+      realId = dbTask.id;
+    } 
+    else if (typeof dbTask._id === 'string') {
+      realId = dbTask._id;
+    }
+    else if (dbTask._id && dbTask._id.$oid) {
+      realId = dbTask._id.$oid;
+    }
+    else if (dbTask._id) {
+      realId = dbTask._id.toString();
+    }
+
     return {
-      _id: dbTask._id,
-      project_id: dbTask['project-id'] || projectId || '',
-      phase_id: dbTask['phase-id'],
+      _id: realId,
+      project_id: dbTask['project-id'] || dbTask.projectId || projectId || '',
+      phase_id: dbTask['phase-id'] || dbTask.phaseId, 
       title: dbTask.title,
       description: dbTask.description,
-      expiration_date: dbTask['expiration-date'],
+      expiration_date: dbTask['expiration-date'] || dbTask.expirationDate,
       priority: dbTask.priority,
       attachments: dbTask.attachments,
       assignees: dbTask.assignees,
-      is_done: dbTask['is-done'],
+      is_done: dbTask['is-done'] || dbTask.isDone || dbTask.done, // Anche qui controlliamo tutte le varianti
       createdAt: dbTask.createdAt,
       updatedAt: dbTask.updatedAt
     };
@@ -89,24 +106,27 @@ export class TaskService {
   }
 
   update(id: string, dto: Partial<Task>): Observable<Task> {
-    // Converte il DTO parziale al formato database
     const dbDto: any = {};
+
     if (dto.phase_id !== undefined) dbDto['phase-id'] = dto.phase_id;
     if (dto.title !== undefined) dbDto.title = dto.title;
     if (dto.description !== undefined) dbDto.description = dto.description;
+    
     if (dto.expiration_date !== undefined) {
       dbDto['expiration-date'] = dto.expiration_date && dto.expiration_date.trim()
         ? dto.expiration_date.trim()
         : undefined;
     }
-    if (dto.priority !== undefined) dbDto.priority = dto.priority;
+
     if (dto.assignees !== undefined) dbDto.assignees = dto.assignees;
+
     if (dto.is_done !== undefined) {
       dbDto['is-done'] = dto.is_done;
-      dbDto.isDone = dto.is_done; // Fallback
+      dbDto.isDone = dto.is_done;
+      dbDto.done = dto.is_done;
     }
 
-    return this.http.put<TaskFromDB>(`${this.baseUrl}/task/${id}`, dbDto)
+    return this.http.put<any>(`${this.baseUrl}/task/${id}`, dbDto)
       .pipe(
         map(task => this.taskFromDBToApp(task))
       );
@@ -125,5 +145,20 @@ export class TaskService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/task/${id}`);
+  }
+
+  getByPhaseId(phaseId: string): Observable<Task[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/task/${phaseId}`)
+      .pipe(
+        map(tasks => tasks.map(t => this.taskFromDBToApp(t)))
+      );
+  }
+
+  markAsDone(id: string): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/task/${id}/complete`, {});
+  }
+
+  markAsIncomplete(id: string): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/task/${id}/incomplete`, {});
   }
 }

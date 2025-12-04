@@ -18,12 +18,19 @@ export class ProjectTopbar {
   @Input({ required: true }) project!: ProjectResponse;
   @Output() addCollaborator = new EventEmitter<string>();   // email
   @Output() removeCollaborator = new EventEmitter<string>(); // id
+  @Output() filterChange = new EventEmitter<string>();
 
   private readonly projectsService = inject(ProjectsService);
   private readonly router = inject(Router);
+  private toast = inject(NgToastService);
+
   addingCollaborator = signal(false);
   collabEmail = '';
-  private toast = inject(NgToastService);
+
+  addingAssignees = signal(false);
+  assigneesEmailName = '';
+
+  isLoading = signal(false);
 
   startInlineAdd(): void {
     this.addingCollaborator.set(true);
@@ -34,24 +41,90 @@ export class ProjectTopbar {
     this.collabEmail = '';
   }
 
-  submitInlineAdd(): void {
+  async submitInlineAdd(): Promise<void> {
     const email = this.collabEmail.trim();
-    if (!email) return;
+    
+    if (!email || !email.includes('@')) {
+      this.toast.info('Attenzione', 'Inserisci un indirizzo email valido.', 3000);
+      return;
+    }
 
-    const collaborators: string[] = [email]
-    const payload = {"title": null, "collaborators": collaborators};
-    this.projectsService.updateProject(this.project._id, payload);
+    this.isLoading.set(true);
+
+    const payload = { "title": null, "collaborators": [email] };
+
+    try {
+      await this.projectsService.updateProject(this.project._id, payload);
+
+      const refreshedProject = await this.projectsService.getProjectById(this.project._id);
+
+      if (refreshedProject) {
+        const tempProject = refreshedProject as any;
+
+        if (!tempProject._id && tempProject.id) {
+          tempProject._id = tempProject.id;
+        }
+
+        this.project = refreshedProject;
+        this.toast.success('Aggiunto!', `Collaboratore aggiunto: ${email}`, 3000);
+        this.collabEmail = '';
+        this.addingCollaborator.set(false);
+      } 
+
+    } catch (error) {
+      console.error(error);
+      this.toast.danger('Errore', 'Impossibile aggiungere. Controlla che l\'email sia di un utente registrato.', 4000);
+    }
+
+    this.isLoading.set(false);
   }
 
-  async onRemoveCollaborator(id: string): Promise<void> {
-    const res = await this.projectsService.removeCollaborator(this.project._id, id);
+  async onRemoveCollaborator(userId: string): Promise<void> {
+    if (this.isLoading()) return;
 
-    if (res){
-      this.toast.success('Collaboratore rimosso con successo!', 'Operazione completata', 4000);
-      window.location.reload();
-    } else {
-      this.toast.danger('Errore durante la rimozione del collaboratore.', 'Operazione fallita', 4000);
+    if (!confirm('Sei sicuro di voler rimuovere questo collaboratore?')) {
+        return;
     }
+
+    this.isLoading.set(true);
+
+    try {
+        const res = await this.projectsService.removeCollaborator(this.project._id, userId);
+    
+        if (res){
+          this.project.collaborators = this.project.collaborators.filter(c => c.id !== userId);
+          this.toast.success('Rimosso', 'Collaboratore rimosso con successo!', 4000);
+        } else {
+          this.toast.danger('Errore', 'Impossibile rimuovere il collaboratore.', 4000);
+        }
+    } catch (e) {
+        this.toast.danger('Errore', 'Si è verificato un errore tecnico.', 4000);
+    }
+
+    this.isLoading.set(false);
+  }
+
+  startInlineAddAssignees(): void {
+    this.addingAssignees.set(true);
+  }
+
+  cancelInlineAddAssignees(): void {
+    this.assigneesEmailName = '';
+    this.filterChange.emit('');
+    this.addingAssignees.set(false);
+  }
+
+  cancelBlurAddAssignees(): void {
+
+  }
+
+  onFilterChange(newValue: string): void {
+    this.assigneesEmailName = newValue;
+    this.filterChange.emit(newValue);
+  }
+
+  filterByAssignees(): void {
+    this.filterChange.emit(this.assigneesEmailName);
   }
 
   goToProjects(): void {

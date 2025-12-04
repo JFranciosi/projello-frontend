@@ -1,49 +1,36 @@
 <section class="project-topbar" role="region" aria-label="Intestazione progetto">
   <header class="topbar-head">
     <h1 class="topbar-title">{{ project.title }}</h1>
-    <div class="collab-header">
-      @if (!addingCollaborator()) {
-        <button
-          type="button"
-          class="add-collab-btn"
-          (click)="startInlineAdd()"
-          aria-label="Aggiungi collaboratore"
-        >
-          <lucide-icon name="plus"></lucide-icon>
-          <span>Aggiungi</span>
-        </button>
-      } @else {
+    <div class="collab-assignees-header">
+      <div class="assignees-header">
         <form
-          class="add-collab-inline"
-          (ngSubmit)="submitInlineAdd()"
+          class="filter-by-assignees-inline"
+          (ngSubmit)="filterByAssignees()"
           autocomplete="off"
           novalidate
         >
           <input
-            type="email"
-            class="add-collab-input"
-            name="collabEmail"
-            required
-            [(ngModel)]="collabEmail"
-            placeholder="Email collaboratore..."
+            type="text"
+            class="filter-by-assignees-input"
+            name="assigneesEmailName"
+            [ngModel]="assigneesEmailName" 
+            (ngModelChange)="onFilterChange($event)"
+            placeholder="Cerca per email o nome incaricato..."
+            (focus)="startInlineAddAssignees()"
           />
 
-          <button
-            type="button"
-            class="btn ghost tiny"
-            (click)="cancelInlineAdd()"
-          >
-            Annulla
-          </button>
-
-          <button
-            type="submit"
-            class="btn tiny"
-          >
-            Invita
-          </button>
+          @if (addingAssignees()) {
+            <button
+              type="button"
+              class="btn ghost tiny"
+              (click)="cancelInlineAddAssignees()"
+              (mousedown)="$event.preventDefault()" 
+            >
+              Annulla
+            </button>
+          }
         </form>
-      }
+      </div>
     </div>
   </header>
   
@@ -78,6 +65,7 @@
             <button
               type="button"
               class="pill-x"
+              [disabled]="isLoading()"
               (click)="onRemoveCollaborator(c.id)"
               aria-label="Rimuovi collaboratore"
             >
@@ -85,6 +73,45 @@
             </button>
           </span>
         }
+        <div class="collab-header">
+          @if (!addingCollaborator()) {
+            <button
+              type="button"
+              class="add-collab-btn"
+              (click)="startInlineAdd()"
+              aria-label="Aggiungi collaboratore"
+            >
+              <lucide-icon name="plus"></lucide-icon>
+              <span>Aggiungi</span>
+            </button>
+          } @else {
+            <form
+              class="add-collab-inline"
+              (ngSubmit)="submitInlineAdd()"
+              autocomplete="off"
+              novalidate
+            >
+              <input
+                type="email"
+                class="add-collab-input"
+                name="collabEmail"
+                required
+                [(ngModel)]="collabEmail"
+                placeholder="Email collaboratore..."
+              />
+
+              <button
+                type="button"
+                class="btn ghost tiny"
+                (click)="cancelInlineAdd()"
+              >
+                Annulla
+              </button>
+
+              <button type="submit" class="btn tiny" [disabled]="isLoading()">Invita</button>
+            </form>
+          }
+        </div>
       </div>
     </div>
   </div>

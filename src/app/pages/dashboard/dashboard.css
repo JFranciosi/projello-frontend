@@ -822,3 +822,28 @@ body {
   border-color: var(--brand);
   color: white;
 }
+
+.panel-backdrop {
+  position: fixed;
+  z-index: 1999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.task-panel {
+  z-index: 2000;
+}
+
+.task-row.completed {
+  background-color: #dcfce7;
+  opacity: 0.8;
+}
+
+.task-row.completed .task-title {
+  text-decoration: line-through;
+  color: #555;
+}

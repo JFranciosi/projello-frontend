@@ -318,3 +318,84 @@ lucide-icon {
   align-items: center;
   justify-content: center;
 }
+
+.assignees-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+
+.filter-by-assignees-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filter-by-assignees-input {
+  width: 300px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+  background-color: #ffffff;
+  color: var(--ink);
+}
+
+.filter-by-assignees-input::placeholder {
+  color: #9ca3af;
+}
+
+.filter-by-assignees-input:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px #E4B36333;
+}
+
+.filter-by-assignees-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px dashed var(--border-soft);
+  background-color: var(--bg-panel);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  height: 28px;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.18s ease,
+    transform 0.06s ease;
+}
+
+.filter-by-assignees-btn lucide-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2;
+}
+
+.filter-by-assignees-btn:hover {
+  background-color: #FFF8EE;
+  border-color: #F5DDB7;
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-1px);
+}
+
+.filter-by-assignees-btn:active {
+  transform: translateY(1px);
+}
+
+.filter-by-assignees-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #E4B36333;
+}
+
+.collab-assignees-header {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
