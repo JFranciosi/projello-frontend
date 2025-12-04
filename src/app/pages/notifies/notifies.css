@@ -1,0 +1,200 @@
+:host, body {
+  display: block;
+  font-family: var(--font);
+  color: var(--ink);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+:host ::ng-deep app-dashboard-sidebar:host {
+  height: auto;
+  overflow: visible;
+}
+
+:host ::ng-deep app-dashboard-sidebar .sidebar-body {
+  overflow: hidden;
+}
+
+.notifications-container {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
+  height: calc(100vh - 74px);
+}
+
+.notifications-container.sidebar-collapsed {
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
+.notifications-content {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color, #e5e7eb);
+}
+
+.notifications-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink);
+}
+
+.delete-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #dc2626;
+  transition: all 0.2s ease;
+}
+
+.delete-all-btn:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.delete-all-btn lucide-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 64px - 4rem - 1rem - 80px);
+  padding-right: 0.5rem;
+}
+
+.notification-item {
+  display: grid;
+  grid-template-columns: 4px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.notification-indicator {
+  width: 4px;
+  height: 100%;
+  min-height: 60px;
+  background-color: var(--brand);
+  border-radius: 2px;
+  transition: background-color 0.2s ease;
+}
+
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.notification-type {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--brand);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.notification-type strong {
+  font-weight: 700;
+}
+
+.notification-message {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  padding: 0.4rem;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  color: #dc2626;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background-color: rgba(220, 38, 38, 0.1);
+  color: #991b1b;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 2rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.empty-state lucide-icon {
+  color: #d1d5db;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .notifications-container {
+    grid-template-columns: 60px minmax(0, 1fr);
+  }
+
+  .notifications-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .notifications-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .notifications-header h1 {
+    font-size: 1.5rem;
+  }
+}

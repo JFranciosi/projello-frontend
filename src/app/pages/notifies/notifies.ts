@@ -24,18 +24,36 @@ export class Notifies {
   sidebarCollapsed = signal(false);
   projectModalOpen = signal(false);
 
-  // Dati e API per la lista notifiche usati nel template
-  notifications = signal<Array<{ _id: string; message: string; timestamp: string; read: boolean }>>([
-    { _id: 'n1', message: 'Benvenuto su Projello! 🎉', timestamp: new Date().toISOString(), read: false },
+
+
+//
+  notifications = signal<Array<{ _id: string; type: 'informazione' | 'scadenza'; message: string; content: string }>>([
+    { _id: 'n1', type: 'informazione', message: 'Benvenuto su Projello! 🎉', content: 'Benvenuto su Projello! 🎉' },
+    { _id: 'n2', type: 'scadenza', message: 'Un collaboratore ha commentato il tuo task', content: 'Task: Implementare login' },
+    { _id: 'n3', type: 'informazione', message: 'Nuovo progetto assegnato a te', content: 'Progetto: E-commerce' },
+    { _id: 'n4', type: 'scadenza', message: 'Un task è stato completato', content: 'Scadenza: 15 dicembre' },
+    { _id: 'n5', type: 'informazione', message: 'Sei stato aggiunto a un nuovo progetto', content: 'Progetto: Redesign' },
   ]);
 
-  markAsRead = (id: string) => {
-    this.notifications.set(this.notifications().map(n => n._id === id ? { ...n, read: true } : n));
+  constructor() {}
+
+  deleteNotification = (id: string, event: Event) => {
+    event.stopPropagation();
+    this.notifications.set(this.notifications().filter(n => n._id !== id));
+    this.toast.success('Notifica eliminata', 'La notifica è stata rimossa.', 3000);
+  };
+
+  deleteAllNotifications = () => {
+    this.notifications.set([]);
+    this.toast.success('Tutte le notifiche eliminate', 'Tutte le notifiche sono state rimosse.', 3000);
   };
 
 
+//
 
-   logout(): void {
+
+
+  logout(): void {
     try {
       localStorage.removeItem('auth_token');
       sessionStorage.removeItem('auth_token');
@@ -77,16 +95,8 @@ export class Notifies {
       this.projectModalOpen.set(false);
 
     } catch (err) {
-      console.error('Errore creazione progetto (profile):', err);
+      console.error('Errore creazione progetto (notifies):', err);
       this.toast.danger('Errore', 'Creazione progetto fallita', 3000);
     }
   }
-
-
-
-
-
-
-
-  
 }
