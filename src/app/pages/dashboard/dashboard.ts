@@ -73,16 +73,41 @@ export class Dashboard implements OnInit {
     description?: string;
     expiration_date?: string;
     priority: 'high' | 'medium' | 'low';
-    assigneeId?: string;
+    assigneeIds: string[];
   }>({
     title: '',
     description: undefined,
     expiration_date: undefined,
     priority: 'medium',
-    assigneeId: undefined
+    assigneeIds: []
   });
   panelOpen = signal(false);
   selectedTask = signal<Task | null>(null);
+  assignableMembers = computed(() => {
+    const p = this.project();
+    if (!p) return [];
+
+    const membersMap = new Map<string, { id: string; label: string }>();
+
+    if (p.creator?.id) {
+      membersMap.set(p.creator.id, {
+        id: p.creator.id,
+        label: this.formatUserName(p.creator)
+      });
+    }
+
+    (p.collaborators || []).forEach((c) => {
+      if (!c?.id) return;
+      if (!membersMap.has(c.id)) {
+        membersMap.set(c.id, {
+          id: c.id,
+          label: this.formatUserName(c)
+        });
+      }
+    });
+
+    return Array.from(membersMap.values());
+  });
 
   phases = computed(() => this.phasesSig());
   tasksFor = (phaseId: string) =>
@@ -96,7 +121,7 @@ export class Dashboard implements OnInit {
     if (saved !== null) {
       this.sidebarCollapsed.set(JSON.parse(saved));
     }
-    
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
       this.router.navigateByUrl('/projects');
@@ -182,12 +207,9 @@ export class Dashboard implements OnInit {
       raw['expiration-date'] ??
       undefined;
 
-    let assignees: any = raw.assignees;
-    if (Array.isArray(assignees)) {
-      if (assignees.length && typeof assignees[0] === 'object') {
-        assignees = assignees.map((a: any) => a.id ?? JSON.stringify(a));
-      }
-    }
+    const assignees: string[] = Array.isArray(raw.assignees)
+      ? raw.assignees.map((a: any) => (typeof a === 'string' ? a : a.id ?? a._id))
+      : [];
 
     return {
       _id: String(id),
@@ -325,7 +347,7 @@ export class Dashboard implements OnInit {
       description: undefined,
       expiration_date: undefined,
       priority: 'medium',
-      assigneeId: creatorId
+      assigneeIds: creatorId ? [creatorId] : []
     });
   }
 
@@ -337,7 +359,7 @@ export class Dashboard implements OnInit {
       description: undefined,
       expiration_date: undefined,
       priority: 'medium',
-      assigneeId: creatorId
+      assigneeIds: creatorId ? [creatorId] : []
     });
   }
 
@@ -348,23 +370,49 @@ export class Dashboard implements OnInit {
     });
   }
 
+  toggleAssignee(memberId: string): void {
+    const current = this.inlineDraft().assigneeIds;
+    if (current.includes(memberId)) {
+      this.inlineDraft.update(d => ({ ...d, assigneeIds: current.filter(id => id !== memberId) }));
+    } else {
+      this.inlineDraft.update(d => ({ ...d, assigneeIds: [...current, memberId] }));
+    }
+  }
+
   saveInlineTask(): void {
     const phaseId = this.inlineTaskPhaseId();
     const d = this.inlineDraft();
     const p = this.project();
     if (!phaseId || !d.title?.trim() || !p) return;
 
-    const assigneesLabels: string[] = [];
-    const assigneeId = d.assigneeId || p.creator.id;
+    const assigneeEmails: string[] = [];
+    (d.assigneeIds || []).forEach(id => {
+      if (p.creator?.id === id && p.creator.email) {
+        assigneeEmails.push(p.creator.email);
+      } else {
+        const collaborator = (p.collaborators || []).find((c) => c.id === id);
+        if (collaborator?.email) {
+          assigneeEmails.push(collaborator.email);
+        }
+      }
+    });
 
-    if (assigneeId === p.creator.id) {
-      assigneesLabels.push(
-        `${p.creator.firstName} ${p.creator.lastName}`.trim()
-      );
-    }
-    const c = (p.collaborators || []).find((x) => x.id === assigneeId);
-    if (c) {
-      assigneesLabels.push(`${c.firstName} ${c.lastName}`.trim());
+    // FIX: Backend crashes if expiration_date is null. Set default to 7 days from now if missing.
+    // Also ensure format is compatible with LocalDateTime (ISO-8601)
+    let expirationDate = d.expiration_date;
+    if (!expirationDate || !expirationDate.trim()) {
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      // Format: YYYY-MM-DDTHH:mm:ss
+      expirationDate = date.toISOString().split('.')[0];
+    } else {
+      // Input type="datetime-local" returns "YYYY-MM-DDTHH:mm"
+      // We need to append seconds if missing to match LocalDateTime format "YYYY-MM-DDTHH:mm:ss"
+      if (expirationDate.length === 16) { // YYYY-MM-DDTHH:mm
+        expirationDate += ':00';
+      } else if (expirationDate.length === 10) { // YYYY-MM-DD (fallback)
+        expirationDate += 'T23:59:59';
+      }
     }
 
     const payload: CreateTaskRequest = {
@@ -372,9 +420,9 @@ export class Dashboard implements OnInit {
       phase_id: phaseId,
       title: d.title.trim(),
       description: (d.description || '').trim() || undefined,
-      expiration_date: (d.expiration_date && d.expiration_date.trim()) ? d.expiration_date.trim() : undefined,
+      expiration_date: expirationDate,
       priority: d.priority,
-      assignees: [] // Array vuoto come richiesto dal backend
+      assignees: assigneeEmails
     };
 
     this.taskService.create(payload).subscribe({
@@ -384,7 +432,7 @@ export class Dashboard implements OnInit {
           ...this.tasksSig(),
           {
             ...normalized,
-            assignees: assigneesLabels,
+            assignees: d.assigneeIds,
             priority: d.priority
           }
         ]);
@@ -515,6 +563,47 @@ export class Dashboard implements OnInit {
   logout(): void {
     this.auth.logout();
     this.router.navigateByUrl('/login');
+  }
+
+  private formatUserName(user?: UserResponse | null): string {
+    if (!user) return 'Membro senza nome';
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    return fullName || user.username || user.email || 'Membro del progetto';
+  }
+
+  private assigneeLabelById(id: string | undefined, project: ProjectResponse | null): string | null {
+    if (!id || !project) return null;
+    if (project.creator?.id === id) {
+      return this.formatUserName(project.creator);
+    }
+    const collaborator = (project.collaborators || []).find((c) => c.id === id);
+    return collaborator ? this.formatUserName(collaborator) : null;
+  }
+
+  getSelectedNames(): string {
+    const ids = this.inlineDraft().assigneeIds;
+    if (ids.length === 0) return '';
+
+    const p = this.project();
+    if (!p) return '';
+
+    const names = ids.map(id => this.assigneeLabelById(id, p)).filter(n => n !== null) as string[];
+
+    if (names.length <= 2) {
+      return names.join(', ');
+    }
+    return `${names.length} selezionati`;
+  }
+  getAssigneeNames(task: Task): string {
+    if (!task.assignees || task.assignees.length === 0) return '';
+    const p = this.project();
+    if (!p) return '';
+
+    const names = task.assignees
+      .map((id) => this.assigneeLabelById(id as string, p))
+      .filter((n) => n !== null) as string[];
+
+    return names.join(', ');
   }
 }
 

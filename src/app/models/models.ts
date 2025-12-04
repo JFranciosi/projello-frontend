@@ -64,7 +64,7 @@ export interface TaskFromDB {
   'expiration-date'?: string;
   priority?: TaskPriority;
   attachments?: TaskAttachment[];
-  assignees?: string[] | UserResponse[];
+  assignees?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
@@ -88,7 +88,7 @@ export interface Task {
   expiration_date?: string;
   priority?: TaskPriority;
   attachments?: TaskAttachment[];
-  assignees?: string[] | UserResponse[];
+  assignees?: string[];
   createdAt?: string;
   updatedAt?: string;
 }

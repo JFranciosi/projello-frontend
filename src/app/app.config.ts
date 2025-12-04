@@ -10,15 +10,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { routes } from './app.routes';
 import { provideNgToast } from 'ng-angular-popup';
 import {
-  LucideAngularModule,User,
+  LucideAngularModule, User,
   Bell, Search, UserCircle2, LogOut,
   LayoutDashboard, Calendar, CalendarClock, Archive,
   Paperclip, MessageSquare, CheckSquare2, Clock, Tag, MoreVertical, Flag,
-  Copy, Trash2, X, FileText, Square, Plus,Pencil,Lock,
+  Copy, Trash2, X, FileText, Square, Plus, Pencil, Lock,
   ChevronRight,
   ChevronLeft,
   PanelLeftClose,
-  PanelRightClose
+  PanelRightClose,
+  UserRound,
+  Check
 } from 'lucide-angular';
 
 export const appConfig: ApplicationConfig = {
@@ -35,8 +37,10 @@ export const appConfig: ApplicationConfig = {
         Bell, Search, UserCircle2, User, LogOut,
         LayoutDashboard, Calendar, CalendarClock, Archive,
         Paperclip, MessageSquare, CheckSquare2, Clock, Tag, MoreVertical, Flag,
-        Copy, Trash2, X, FileText, Square, Plus,Pencil,Lock,ChevronRight,ChevronLeft,
-        PanelLeftClose,PanelRightClose
+        Copy, Trash2, X, FileText, Square, Plus, Pencil, Lock, ChevronRight, ChevronLeft,
+        PanelLeftClose, PanelRightClose,
+        UserRound,
+        Check
       })
     ),
   ],

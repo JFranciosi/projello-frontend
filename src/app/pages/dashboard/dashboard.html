@@ -2,96 +2,117 @@
   <app-navbar (logout)="logout()"></app-navbar>
 </header>
 
-<div
-  class="dashboard-container"
-  (keydown)="null"
-  [class.sidebar-collapsed]="sidebarCollapsed()"
->
-  <app-dashboard-sidebar
-    [collapsed]="sidebarCollapsed()"
-    (createProject)="openModal('project')"
-    (collapseChanged)="onSidebarCollapse($event)"
-  ></app-dashboard-sidebar>
+<div class="dashboard-container" (keydown)="null" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <app-dashboard-sidebar [collapsed]="sidebarCollapsed()" (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse($event)"></app-dashboard-sidebar>
 
   <div class="board-container">
     @if (currentProject(); as project) {
-      <app-project-topbar
-        [project]="project"
-        (addCollaborator)="addCollaborator()"
-        (removeCollaborator)="removeCollaborator($event)"
-      ></app-project-topbar>
+    <app-project-topbar [project]="project" (addCollaborator)="addCollaborator()"
+      (removeCollaborator)="removeCollaborator($event)"></app-project-topbar>
     }
-    
+
     <!-- GRID FASI -->
     <main class="phases-grid" role="main" aria-label="Bacheca fasi">
       @for (p of phases(); track p._id) {
-        <section class="phase-card" [attr.aria-labelledby]="'card-' + p._id">
-          <header class="phase-head">
-            <div class="phase-title-wrapper">
-              <span class="count-badge">{{ tasksFor(p._id).length }}</span>
-              <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
+      <section class="phase-card" [attr.aria-labelledby]="'card-' + p._id">
+        <header class="phase-head">
+          <div class="phase-title-wrapper">
+            <span class="count-badge">{{ tasksFor(p._id).length }}</span>
+            <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
+          </div>
+          <button type="button" class="delete-phase-btn" (click)="deletePhase(p)"
+            [attr.aria-label]="'Elimina fase ' + p.title" title="Elimina fase">
+            <lucide-icon name="x" aria-hidden="true"></lucide-icon>
+          </button>
+        </header>
+
+        <!-- Ghost / Inline new task -->
+        @if (inlineTaskForPhase() !== p._id) {
+        <div class="ghost-task-card" (click)="startInlineTask(p._id)">
+          <lucide-icon name="plus"></lucide-icon>
+          <span>Nuovo task</span>
+        </div>
+        } @else {
+        <form class="inline-task-form" (ngSubmit)="saveInlineTask()">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Titolo</label>
+              <input type="text" required [(ngModel)]="inlineDraft().title" name="title" />
             </div>
-            <button 
-              type="button" 
-              class="delete-phase-btn" 
-              (click)="deletePhase(p)"
-              [attr.aria-label]="'Elimina fase ' + p.title"
-              title="Elimina fase"
-            >
-              <lucide-icon name="x" aria-hidden="true"></lucide-icon>
-            </button>
-          </header>
-
-          <!-- Ghost / Inline new task -->
-          @if (inlineTaskForPhase() !== p._id) {
-            <div class="ghost-task-card" (click)="startInlineTask(p._id)">
-              <lucide-icon name="plus"></lucide-icon>
-              <span>Nuovo task</span>
+            <div class="form-group">
+              <label>Scadenza</label>
+              <input type="datetime-local" [(ngModel)]="inlineDraft().expiration_date" name="date" />
             </div>
-          } @else {
-            <form class="inline-task-form" (ngSubmit)="saveInlineTask()">
-              <div class="grid-2">
-                <div class="form-group">
-                  <label>Titolo</label>
-                  <input type="text" required [(ngModel)]="inlineDraft().title" name="title" />
-                </div>
-                <div class="form-group">
-                  <label>Scadenza</label>
-                  <input type="date" [(ngModel)]="inlineDraft().expiration_date" name="date" />
-                </div>
-              </div>
+          </div>
 
-              <div class="form-group">
-                <label>Descrizione</label>
-                <textarea [(ngModel)]="inlineDraft().description" name="desc" rows="3"></textarea>
-              </div>
+          <div class="form-group">
+            <label>Descrizione</label>
+            <textarea [(ngModel)]="inlineDraft().description" name="desc" rows="3"></textarea>
+          </div>
 
-              <div class="form-actions right">
-                <button type="button" class="btn ghost" (click)="cancelInlineTask()">Annulla</button>
-                <button type="submit" class="btn">Salva</button>
+          <div class="form-group assign-task">
+            <label>Assegna task</label>
+            <div class="assignee-select multi-select">
+              <div class="multi-select-header">
+                <lucide-icon name="user-round"></lucide-icon>
+                <span class="header-text">
+                  @if (inlineDraft().assigneeIds.length === 0) {
+                  Seleziona assegnatari
+                  } @else {
+                  {{ getSelectedNames() }}
+                  }
+                </span>
               </div>
-            </form>
-          }
-
-          <!-- Task list -->
-          <ul class="task-list">
-            @for (t of tasksFor(p._id); track t._id) {
-              <li class="task-row" (click)="openPanel(t)">
-                <h3 class="task-title">{{ t.title }}</h3>
-                @if (t.expiration_date) {
-                  <div class="task-date">
-                    <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
-                    <span>{{ t.expiration_date }}</span>
+              <div class="multi-select-dropdown">
+                @if (assignableMembers().length === 0) {
+                <div class="empty-members">Nessun membro disponibile</div>
+                } @else {
+                @for (member of assignableMembers(); track member.id) {
+                <div class="member-option" [class.selected]="inlineDraft().assigneeIds.includes(member.id)"
+                  (click)="toggleAssignee(member.id)">
+                  <div class="checkbox">
+                    @if (inlineDraft().assigneeIds.includes(member.id)) {
+                    <lucide-icon name="check" size="14"></lucide-icon>
+                    }
                   </div>
+                  <span>{{ member.label }}</span>
+                </div>
                 }
-                @if (t.description) {
-                  <p class="task-description">{{ t.description }}</p>
                 }
-              </li>
+              </div>
+            </div>
+            <small class="helper-text">
+              Puoi assegnare il task al creatore o a un collaboratore del progetto.
+            </small>
+          </div>
+
+          <div class="form-actions right">
+            <button type="button" class="btn ghost" (click)="cancelInlineTask()">Annulla</button>
+            <button type="submit" class="btn">Salva</button>
+          </div>
+        </form>
+        }
+
+        <!-- Task list -->
+        <ul class="task-list">
+          @for (t of tasksFor(p._id); track t._id) {
+          <li class="task-row" (click)="openPanel(t)">
+            <h3 class="task-title">{{ t.title }}</h3>
+            @if (t.expiration_date) {
+            <div class="task-date">
+              <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
+              <span>{{ t.expiration_date | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
             }
-            @empty { <li class="task-empty">Nessun task nella fase.</li> }
-          </ul>
-        </section>
+            @if (t.description) {
+            <p class="task-description">{{ t.description }}</p>
+            }
+          </li>
+          }
+          @empty { <li class="task-empty">Nessun task nella fase.</li> }
+        </ul>
+      </section>
       }
 
       <!-- CARD "AGGIUNGI FASE"  -->
@@ -101,15 +122,13 @@
         </button>
 
         <!-- Form inline -->
-        <form class="inline-phase-form"
-              [class.is-hidden]="!addingPhase()"
-              autocomplete="off" novalidate
-              (submit)="$event.preventDefault(); saveInlinePhase()">
+        <form class="inline-phase-form" [class.is-hidden]="!addingPhase()" autocomplete="off" novalidate
+          (submit)="$event.preventDefault(); saveInlinePhase()">
 
           <div class="form-group">
             <label>Nome della fase</label>
             <input type="text" required [(ngModel)]="phaseDraft().title" name="p_title"
-                  placeholder="Da fare, In corso, Fatto…"/>
+              placeholder="Da fare, In corso, Fatto…" />
           </div>
 
           <div class="inline-actions">
@@ -125,9 +144,12 @@
 <!-- PANNELLO TASK (slide-in a destra) -->
 <div class="task-panel" [class.open]="panelOpen()" role="region" aria-label="Dettagli task">
   <div class="panel-header">
-    <div class="panel-title"><h2>Dettagli Task</h2></div>
+    <div class="panel-title">
+      <h2>Dettagli Task</h2>
+    </div>
     <div class="panel-actions">
-      <button class="btn-icon danger" title="Elimina" [disabled]="!selectedTask()" (click)="selectedTask() && deleteTask(selectedTask()!); $event.stopPropagation()">
+      <button class="btn-icon danger" title="Elimina" [disabled]="!selectedTask()"
+        (click)="selectedTask() && deleteTask(selectedTask()!); $event.stopPropagation()">
         <lucide-icon name="trash-2"></lucide-icon>
       </button>
       <button class="btn-icon" title="Chiudi" (click)="closePanel()">
@@ -142,7 +164,7 @@
         <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
         <div>
           <div class="meta-label">Scadenza</div>
-          <div class="meta-value">{{ selectedTask()?.expiration_date || '—' }}</div>
+          <div class="meta-value">{{ (selectedTask()?.expiration_date | date:'dd/MM/yyyy HH:mm') || '—' }}</div>
         </div>
       </div>
       <div class="meta-chip">
@@ -150,8 +172,10 @@
         <div>
           <div class="meta-label">Priorità</div>
           <div class="meta-value">
-            <span class="priority" [class.high]="selectedTask()?.priority === 'high'" [class.medium]="selectedTask()?.priority === 'medium'" [class.low]="selectedTask()?.priority === 'low'">
-              @if (selectedTask()?.priority === 'high') { Alta } @else if (selectedTask()?.priority === 'medium') { Media } @else { Bassa }
+            <span class="priority" [class.high]="selectedTask()?.priority === 'high'"
+              [class.medium]="selectedTask()?.priority === 'medium'" [class.low]="selectedTask()?.priority === 'low'">
+              @if (selectedTask()?.priority === 'high') { Alta } @else if (selectedTask()?.priority === 'medium') {
+              Media } @else { Bassa }
             </span>
           </div>
         </div>
@@ -160,7 +184,7 @@
         <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
         <div>
           <div class="meta-label">Assegnatari</div>
-          <div class="meta-value">{{ selectedTask()?.assignees?.join(', ') || '—' }}</div>
+          <div class="meta-value">{{ selectedTask() ? getAssigneeNames(selectedTask()!) : '—' }}</div>
         </div>
       </div>
     </div>
@@ -181,10 +205,10 @@
       </div>
       <ul class="files">
         @for (att of (selectedTask()?.attachments || []); track att.name) {
-          <li class="file">
-            <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
-            <a href="#" download>{{ att.name }}</a>
-          </li>
+        <li class="file">
+          <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
+          <a href="#" download>{{ att.name }}</a>
+        </li>
         }
         @empty { <li class="file muted">Nessun allegato.</li> }
       </ul>
@@ -198,8 +222,5 @@
   </div>
 </div>
 
-<app-project-modal
-  [open]="projectModalOpen()"
-  (close)="closeModal()"
-  (create)="onCreateProject($event)"
-></app-project-modal>
+<app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
+  (create)="onCreateProject($event)"></app-project-modal>

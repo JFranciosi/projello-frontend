@@ -45,6 +45,8 @@ export class TaskService {
 
     if (appRequest.expiration_date && appRequest.expiration_date.trim()) {
       dbRequest['expiration-date'] = appRequest.expiration_date.trim();
+      // Fallback: Backend might expect camelCase if annotation is missing
+      (dbRequest as any)['expirationDate'] = appRequest.expiration_date.trim();
     }
 
     if (appRequest.priority) {
@@ -57,7 +59,7 @@ export class TaskService {
   list(params: { project_id: string; phase_id?: string; q?: string }): Observable<Task[]> {
     let q = new HttpParams().set('project_id', params.project_id);
     if (params.phase_id) q = q.set('phase_id', params.phase_id);
-    if (params.q)        q = q.set('q', params.q);
+    if (params.q) q = q.set('q', params.q);
     return this.http.get<TaskFromDB[]>(`${this.baseUrl}/tasks`, { params: q })
       .pipe(
         map(tasks => tasks.map(t => this.taskFromDBToApp(t, params.project_id)))
@@ -86,12 +88,12 @@ export class TaskService {
     if (dto.title !== undefined) dbDto.title = dto.title;
     if (dto.description !== undefined) dbDto.description = dto.description;
     if (dto.expiration_date !== undefined) {
-      dbDto['expiration-date'] = dto.expiration_date && dto.expiration_date.trim() 
-        ? dto.expiration_date.trim() 
+      dbDto['expiration-date'] = dto.expiration_date && dto.expiration_date.trim()
+        ? dto.expiration_date.trim()
         : undefined;
     }
     if (dto.priority !== undefined) dbDto.priority = dto.priority;
-    if ((dto as any).assignees !== undefined) dbDto.assignees = (dto as any).assignees;
+    if (dto.assignees !== undefined) dbDto.assignees = dto.assignees;
 
     return this.http.put<TaskFromDB>(`${this.baseUrl}/tasks/${id}`, dbDto)
       .pipe(
