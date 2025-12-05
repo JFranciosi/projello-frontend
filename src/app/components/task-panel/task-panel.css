@@ -71,17 +71,41 @@
 
 .meta-chip {
     display: flex;
-    gap: .55rem;
+    gap: .7rem;
     align-items: center;
-    padding: .5rem .6rem;
+    padding: .6rem .8rem;
     border: 1px solid var(--border);
     border-radius: 12px;
     background-color: #FAFAFA;
+    /* Or var(--surface) if available, sticking to file's pattern */
+    transition: border-color .2s, background-color .2s;
+}
+
+.meta-chip:hover {
+    border-color: #d1d5db;
+    /* Slight darken on hover */
+    background-color: #fff;
+}
+
+.meta-chip lucide-icon {
+    color: var(--ink-muted);
+    /* Maybe opacity: .8; */
 }
 
 .meta-label {
-    font-size: .8rem;
+    font-size: .75rem;
     color: var(--ink-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.meta-value {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 0.92rem;
+    line-height: 1.2;
 }
 
 .panel-section {

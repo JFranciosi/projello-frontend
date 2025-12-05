@@ -32,6 +32,13 @@
                     <div class="meta-value">{{ task ? getAssigneeNames(task) : '—' }}</div>
                 </div>
             </div>
+            <div class="meta-chip">
+                <lucide-icon name="kanban-square" aria-hidden="true"></lucide-icon>
+                <div>
+                    <div class="meta-label">Fase</div>
+                    <div class="meta-value">{{ getPhaseName(task?.phase_id) }}</div>
+                </div>
+            </div>
         </div>
 
         <section class="panel-section">

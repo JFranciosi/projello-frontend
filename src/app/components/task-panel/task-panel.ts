@@ -21,6 +21,7 @@ export class TaskPanel {
     @Input() task: Task | null = null;
     @Input() isOpen = false;
     @Input() project: ProjectResponse | null = null;
+    @Input() phases: any[] = [];
 
     @Output() close = new EventEmitter<void>();
     @Output() markCompleted = new EventEmitter<Task>();
@@ -74,5 +75,11 @@ export class TaskPanel {
         if (!user) return 'Membro senza nome';
         const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
         return fullName || user.username || user.email || 'Membro del progetto';
+    }
+
+    getPhaseName(phaseId?: string): string {
+        if (!phaseId || !this.phases) return '—';
+        const phase = this.phases.find(p => p._id === phaseId);
+        return phase ? phase.title : '—';
     }
 }

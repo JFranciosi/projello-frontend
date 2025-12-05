@@ -39,14 +39,15 @@
         </div>
         } @else {
         <form class="inline-task-form" (ngSubmit)="saveInlineTask()">
-          <div class="grid-2">
-            <div class="form-group">
-              <label>Titolo</label>
-              <input type="text" required [(ngModel)]="inlineDraft().title" name="title" />
-            </div>
-            <div class="form-group">
-              <label>Scadenza</label>
+          <div class="form-group">
+            <label>Titolo</label>
+            <input type="text" required [(ngModel)]="inlineDraft().title" name="title" />
+          </div>
+          <div class="form-group">
+            <label>Scadenza</label>
+            <div class="date-input-wrapper">
               <input type="datetime-local" [(ngModel)]="inlineDraft().expiration_date" name="date" />
+              <lucide-icon name="calendar" class="date-icon"></lucide-icon>
             </div>
           </div>
 
@@ -145,8 +146,9 @@
   </div>
 </div>
 
-<app-task-panel [task]="selectedTask()" [isOpen]="panelOpen()" [project]="currentProject()" (close)="closePanel()"
-  (markCompleted)="markCompleted($event)" (markIncomplete)="markAsIncomplete($event)" (deleteTask)="deleteTask($event)">
+<app-task-panel [task]="selectedTask()" [isOpen]="panelOpen()" [project]="currentProject()" [phases]="phases()"
+  (close)="closePanel()" (markCompleted)="markCompleted($event)" (markIncomplete)="markAsIncomplete($event)"
+  (deleteTask)="deleteTask($event)">
 </app-task-panel>
 
 <app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
