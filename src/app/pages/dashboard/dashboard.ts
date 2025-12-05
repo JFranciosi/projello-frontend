@@ -28,6 +28,7 @@ import { Navbar } from '../../components/navbar/navbar';
 import { ProjectTopbar } from '../../components/project-topbar/project-topbar';
 import { ProjectModal } from '../../components/project-modal/project-modal';
 import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
+import { TaskPanel } from '../../components/task-panel/task-panel';
 
 @Component({
   selector: 'app-dashboard',
@@ -40,7 +41,10 @@ import { ConfirmModal } from '../../components/confirm-modal/confirm-modal';
     Navbar,
     ProjectTopbar,
     ProjectModal,
-    ConfirmModal
+    ProjectTopbar,
+    ProjectModal,
+    ConfirmModal,
+    TaskPanel
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
@@ -113,10 +117,10 @@ export class Dashboard implements OnInit {
   });
 
   phases = computed(() => this.phasesSig());
-  
+
   tasksFor = (phaseId: string) => {
     const tasksInPhase = this.tasksSig().filter((t) => t.phase_id === phaseId);
-    
+
     const filterText = this.assigneeFilter().toLowerCase().trim();
 
     if (!filterText) {
@@ -177,8 +181,8 @@ export class Dashboard implements OnInit {
       this.phasesSig.set(normalizedPhases);
 
       const allTasks: Task[] = [];
-      
-      const tasksPromises = normalizedPhases.map(phase => 
+
+      const tasksPromises = normalizedPhases.map(phase =>
         this.taskService.getByPhaseId(phase._id)
       );
 
@@ -388,18 +392,18 @@ export class Dashboard implements OnInit {
 
     try {
       const created = await this.taskService.create(payload);
-        
+
       this.tasksSig.update(list => [...list, {
-          ...created, 
-          assignees: d.assigneeIds,
-          priority: d.priority
+        ...created,
+        assignees: d.assigneeIds,
+        priority: d.priority
       }]);
 
       this.inlineTaskPhaseId.set(null);
       this.toast.success('Ottimo', 'Task creato', 3000);
     } catch (e) {
       console.error('create task error', e);
-        this.toast.danger('Errore', 'Creazione task fallita', 3000);
+      this.toast.danger('Errore', 'Creazione task fallita', 3000);
     }
   }
 
@@ -472,15 +476,20 @@ export class Dashboard implements OnInit {
       await this.taskService.markAsDone(task._id);
 
       this.toast.success('Completato!', 'Task segnata come completata.', 3000);
-        
-        this.tasksSig.update(tasks => 
-          tasks.map(t => t._id === task._id ? { ...t, is_done: true } : t)
-        );
-        
-        this.closePanel();
+
+      this.tasksSig.update(tasks =>
+        tasks.map(t => t._id === task._id ? { ...t, is_done: true } : t)
+      );
+
+      // Don't close panel automatically, let user decide or maybe update selectedTask?
+      // If we update selectedTask in place, the panel updates automatically.
+      if (this.selectedTask()?._id === task._id) {
+        this.selectedTask.update(t => t ? ({ ...t, is_done: true }) : null);
+      }
+
     } catch (e) {
       console.error('Errore completamento task', e);
-        this.toast.danger('Errore', 'Impossibile completare il task.', 3000);
+      this.toast.danger('Errore', 'Impossibile completare il task.', 3000);
     }
   }
 
@@ -491,15 +500,18 @@ export class Dashboard implements OnInit {
       await this.taskService.markAsIncomplete(task._id);
 
       this.toast.info('Ripristinato', 'Task segnata come da fare.', 3000);
-        
-      this.tasksSig.update(tasks => 
+
+      this.tasksSig.update(tasks =>
         tasks.map(t => t._id === task._id ? { ...t, is_done: false } : t)
       );
-      
-      this.closePanel();
+
+      if (this.selectedTask()?._id === task._id) {
+        this.selectedTask.update(t => t ? ({ ...t, is_done: false }) : null);
+      }
+
     } catch (e) {
       console.error('Errore', e);
-        this.toast.danger('Errore', 'Impossibile aggiornare il task.', 3000);
+      this.toast.danger('Errore', 'Impossibile aggiornare il task.', 3000);
     }
   }
 
@@ -574,17 +586,6 @@ export class Dashboard implements OnInit {
       return names.join(', ');
     }
     return `${names.length} selezionati`;
-  }
-  getAssigneeNames(task: Task): string {
-    if (!task.assignees || task.assignees.length === 0) return '';
-    const p = this.project();
-    if (!p) return '';
-
-    const names = task.assignees
-      .map((id) => this.assigneeLabelById(id as string, p))
-      .filter((n) => n !== null) as string[];
-
-    return names.join(', ');
   }
 }
 

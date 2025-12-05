@@ -559,138 +559,7 @@ body {
   will-change: contents;
 }
 
-.task-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 100dvh;
-  width: 380px;
-  max-width: 90vw;
-  background-color: var(--bg-panel);
-  border-left: 1px solid var(--border);
-  box-shadow: -6px 0 16px #00000014;
-  transform: translateX(100%);
-  transition: transform .22s ease;
-  z-index: 200;
-  display: flex;
-  flex-direction: column;
-}
 
-.task-panel.open {
-  transform: translateX(0);
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: .9rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.panel-title h2 {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.panel-actions {
-  display: flex;
-  gap: .5rem;
-}
-
-.panel-body {
-  padding: .85rem;
-  overflow: auto;
-  flex: 1;
-}
-
-.meta-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .6rem;
-  margin-bottom: .8rem;
-}
-
-.meta-chip {
-  display: flex;
-  gap: .55rem;
-  align-items: center;
-  padding: .5rem .6rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background-color: #FAFAFA;
-}
-
-.meta-label {
-  font-size: .8rem;
-  color: var(--ink-muted);
-}
-
-.meta-value .priority {
-  padding: .1rem .4rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-}
-
-.panel-section {
-  margin: .9rem 0;
-}
-
-.section-head {
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-  margin-bottom: .35rem;
-}
-
-.section-badge {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  min-width: 24px;
-  padding: 0 .4rem;
-  background-color: #F3F4F6;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: .8rem;
-}
-
-.files {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: .4rem;
-}
-
-.file {
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-}
-
-.file a {
-  color: #1F2937;
-  text-decoration: none;
-  border-bottom: 1px dashed var(--border-soft);
-}
-
-.file a:hover {
-  color: var(--ink);
-  border-bottom-color: #9CA3AF;
-}
-
-.file.muted {
-  color: var(--ink-muted);
-}
-
-.panel-footer {
-  padding: .85rem;
-  border-top: 1px solid var(--border);
-}
 
 .assign-task {
   margin-top: .6rem;
@@ -823,20 +692,7 @@ body {
   color: white;
 }
 
-.panel-backdrop {
-  position: fixed;
-  z-index: 1999;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-}
 
-.task-panel {
-  z-index: 2000;
-}
 
 .task-row.completed {
   background-color: #dcfce7;

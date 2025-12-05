@@ -8,10 +8,8 @@
 
   <div class="board-container">
     @if (currentProject(); as project) {
-      <app-project-topbar 
-        [project]="project" 
-        (filterChange)="updateFilter($event)"> 
-      </app-project-topbar>
+    <app-project-topbar [project]="project" (filterChange)="updateFilter($event)">
+    </app-project-topbar>
     }
 
     <!-- GRID FASI -->
@@ -31,14 +29,14 @@
 
         <!-- Ghost / Inline new task -->
         @if (inlineTaskForPhase() !== p._id) {
-          <!-- @for(; track $index){
+        <!-- @for(; track $index){
 
           } -->
 
-          <div class="ghost-task-card" (click)="startInlineTask(p._id)">
-            <lucide-icon name="plus"></lucide-icon>
-            <span>Nuovo task</span>
-          </div>
+        <div class="ghost-task-card" (click)="startInlineTask(p._id)">
+          <lucide-icon name="plus"></lucide-icon>
+          <span>Nuovo task</span>
+        </div>
         } @else {
         <form class="inline-task-form" (ngSubmit)="saveInlineTask()">
           <div class="grid-2">
@@ -64,15 +62,15 @@
                 <lucide-icon name="user-round"></lucide-icon>
                 <span class="header-text">
                   @if (inlineDraft().assigneeIds.length === 0) {
-                    Seleziona assegnatari
+                  Seleziona assegnatari
                   } @else {
-                    {{ getSelectedNames() }}
+                  {{ getSelectedNames() }}
                   }
                 </span>
               </div>
               <div class="multi-select-dropdown">
                 @if (assignableMembers().length === 0) {
-                  <div class="empty-members">Nessun membro disponibile</div>
+                <div class="empty-members">Nessun membro disponibile</div>
                 } @else {
                 @for (member of assignableMembers(); track member.id) {
                 <div class="member-option" [class.selected]="inlineDraft().assigneeIds.includes(member.id)"
@@ -106,10 +104,10 @@
           <li class="task-row" (click)="openPanel(t)" [class.completed]="t.is_done">
             <h3 class="task-title">{{ t.title }}</h3>
             @if (t.expiration_date) {
-              <div class="task-date">
-                <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
-                <span>{{ t.expiration_date | date:'dd/MM/yyyy HH:mm' }}</span>
-              </div>
+            <div class="task-date">
+              <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
+              <span>{{ t.expiration_date | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
             }
             @if (t.description) {
             <p class="task-description">{{ t.description }}</p>
@@ -147,113 +145,14 @@
   </div>
 </div>
 
-<!-- PANNELLO TASK (slide-in a destra) -->
- @if (panelOpen()) {
-  <div class="panel-backdrop" (click)="closePanel()"></div>
-}
-<div class="task-panel" [class.open]="panelOpen()" role="region" aria-label="Dettagli task">
-  <div class="panel-header">
-    <div class="panel-title">
-      <h2>Dettagli Task</h2>
-    </div>
-    <div class="panel-actions">
-      <button class="btn-icon danger" title="Elimina" [disabled]="!selectedTask()"
-        (click)="selectedTask() && deleteTask(selectedTask()!); $event.stopPropagation()">
-        <lucide-icon name="trash-2"></lucide-icon>
-      </button>
-      <button class="btn-icon" title="Chiudi" (click)="closePanel()">
-        <lucide-icon name="x"></lucide-icon>
-      </button>
-    </div>
-  </div>
-
-  <div class="panel-body">
-    <div class="meta-grid">
-      <div class="meta-chip">
-        <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
-        <div>
-          <div class="meta-label">Scadenza</div>
-          <div class="meta-value">{{ (selectedTask()?.expiration_date | date:'dd/MM/yyyy HH:mm') || '—' }}</div>
-        </div>
-      </div>
-      <div class="meta-chip">
-        <lucide-icon name="flag" aria-hidden="true"></lucide-icon>
-        <div>
-          <div class="meta-label">Priorità</div>
-          <div class="meta-value">
-            <span class="priority" [class.high]="selectedTask()?.priority === 'high'"
-              [class.medium]="selectedTask()?.priority === 'medium'" [class.low]="selectedTask()?.priority === 'low'">
-              @if (selectedTask()?.priority === 'high') { Alta } @else if (selectedTask()?.priority === 'medium') {
-              Media } @else { Bassa }
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="meta-chip">
-        <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
-        <div>
-          <div class="meta-label">Assegnatari</div>
-          <div class="meta-value">{{ selectedTask() ? getAssigneeNames(selectedTask()!) : '—' }}</div>
-        </div>
-      </div>
-    </div>
-
-    <section class="panel-section">
-      <div class="section-head">
-        <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
-        <h3>{{ selectedTask()?.title || 'Titolo Task' }}</h3>
-      </div>
-      <p>{{ selectedTask()?.description || 'Nessuna descrizione disponibile.' }}</p>
-    </section>
-
-    <section class="panel-section attachments">
-      <div class="section-head">
-        <lucide-icon name="paperclip" aria-hidden="true"></lucide-icon>
-        <h3>Allegati</h3>
-        <span class="section-badge">{{ selectedTask()?.attachments?.length || 0 }}</span>
-      </div>
-      <ul class="files">
-        @for (att of (selectedTask()?.attachments || []); track att.name) {
-        <li class="file">
-          <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
-          <a href="#" download>{{ att.name }}</a>
-        </li>
-        }
-        @empty { <li class="file muted">Nessun allegato.</li> }
-      </ul>
-    </section>
-  </div>
-
-  <div class="panel-footer">
-    @if (selectedTask()?.is_done) {
-      <button 
-        class="btn primary" 
-        (click)="selectedTask() && markAsIncomplete(selectedTask()!)"
-      >
-        <lucide-icon name="rotate-ccw"></lucide-icon> Segna come da completare
-      </button>
-    } @else {
-      <button 
-        class="btn primary" 
-        [disabled]="!selectedTask()" 
-        (click)="selectedTask() && markCompleted(selectedTask()!)"
-      >
-        <lucide-icon name="check-square-2"></lucide-icon> Segna come completato
-      </button>
-    }
-  </div>
-</div>
+<app-task-panel [task]="selectedTask()" [isOpen]="panelOpen()" [project]="currentProject()" (close)="closePanel()"
+  (markCompleted)="markCompleted($event)" (markIncomplete)="markAsIncomplete($event)" (deleteTask)="deleteTask($event)">
+</app-task-panel>
 
 <app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
   (create)="onCreateProject($event)"></app-project-modal>
 
-<app-confirm-modal
-  [open]="deletePhaseConfirmOpen()"
-  [title]="'Elimina fase'"
-  [message]="'Sei sicuro di voler eliminare la fase ' + (phaseToDelete()?.title || '') + '?'"
-  [confirmText]="'Elimina'"
-  [cancelText]="'Annulla'"
-  [isDangerous]="true"
-  (confirm)="confirmDeletePhase()"
-  (close)="deletePhaseConfirmOpen.set(false)"
-></app-confirm-modal>
+<app-confirm-modal [open]="deletePhaseConfirmOpen()" [title]="'Elimina fase'"
+  [message]="'Sei sicuro di voler eliminare la fase ' + (phaseToDelete()?.title || '') + '?'" [confirmText]="'Elimina'"
+  [cancelText]="'Annulla'" [isDangerous]="true" (confirm)="confirmDeletePhase()"
+  (close)="deletePhaseConfirmOpen.set(false)"></app-confirm-modal>

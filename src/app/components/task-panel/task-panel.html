@@ -1,0 +1,57 @@
+@if (isOpen) {
+<div class="panel-backdrop" (click)="onClose()"></div>
+}
+<div class="task-panel" [class.open]="isOpen" role="region" aria-label="Dettagli task">
+    <div class="panel-header">
+        <div class="panel-title">
+            <h2>Dettagli Task</h2>
+        </div>
+        <div class="panel-actions">
+            <button class="btn-icon danger" title="Elimina" [disabled]="!task" (click)="onDelete($event)">
+                <lucide-icon name="trash-2"></lucide-icon>
+            </button>
+            <button class="btn-icon" title="Chiudi" (click)="onClose()">
+                <lucide-icon name="x"></lucide-icon>
+            </button>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <div class="meta-grid">
+            <div class="meta-chip">
+                <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
+                <div>
+                    <div class="meta-label">Scadenza</div>
+                    <div class="meta-value">{{ (task?.expiration_date | date:'dd/MM/yyyy HH:mm') || '—' }}</div>
+                </div>
+            </div>
+            <div class="meta-chip">
+                <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
+                <div>
+                    <div class="meta-label">Assegnatari</div>
+                    <div class="meta-value">{{ task ? getAssigneeNames(task) : '—' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <section class="panel-section">
+            <div class="section-head">
+                <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
+                <h3>{{ task?.title || 'Titolo Task' }}</h3>
+            </div>
+            <p>{{ task?.description || 'Nessuna descrizione disponibile.' }}</p>
+        </section>
+    </div>
+
+    <div class="panel-footer">
+        @if (task?.is_done) {
+        <button class="btn primary" (click)="onMarkIncomplete()">
+            <lucide-icon name="rotate-ccw"></lucide-icon> Segna come da completare
+        </button>
+        } @else {
+        <button class="btn primary" [disabled]="!task" (click)="onMarkCompleted()">
+            <lucide-icon name="check-square-2"></lucide-icon> Segna come completato
+        </button>
+        }
+    </div>
+</div>
