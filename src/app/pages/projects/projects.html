@@ -11,20 +11,21 @@
       </div>
       @if (currentUser(); as user) {
       <div class="projects-topbar-right">
-        <div class="user-info">
-          <div class="user-details">
+        <div class="projects-topbar-actions">
+          <div class="user-info">
+            <div class="user-details">
             <span class="user-name">{{ (user.firstName || '') + ' ' + (user.lastName || '') || user.username }}</span>
             <span class="user-email">{{ user.email }}</span>
+            </div>
+            <div class="avatar-circle" aria-hidden="true">
+              <span>{{ avatarInitials() }}</span>
+            </div>
           </div>
-          <div class="avatar-circle" aria-hidden="true">
-            <span>{{ avatarInitials() }}</span>
-          </div>
+          <app-project-searchbar (searchChange)="onSearchChange($event)"></app-project-searchbar>
         </div>
       </div>
-      }
+       }
     </div>
-
-    <app-project-searchbar (searchChange)="onSearchChange($event)"></app-project-searchbar>
 
     <section class="projects-grid" aria-live="polite">
       @if (loading()) {
