@@ -1,4 +1,5 @@
-:host,body {
+:host,
+body {
   display: block;
   font-family: var(--font);
   color: var(--ink);
@@ -12,13 +13,17 @@
   transform: scale(1.06);
   opacity: .92;
 }
+
 .icon-btn lucide-icon {
   width: 22px;
   height: 22px;
   stroke-width: 1.8;
   color: var(--ink);
 }
-.logout lucide-icon { color: #b91c1c; }
+
+.logout lucide-icon {
+  color: #b91c1c;
+}
 
 .dashboard-container {
   display: grid;
@@ -243,22 +248,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(0,0,0,.45);
+  background: rgba(0, 0, 0, .45);
   backdrop-filter: blur(5px);
   z-index: 110;
   animation: fadeIn .22s ease;
 }
+
 .modal-content {
   position: relative;
   width: 560px;
   max-width: 92vw;
   background: var(--bg-panel);
   border-radius: 14px;
-  box-shadow: 0 18px 50px rgba(0,0,0,.28);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .28);
   overflow: hidden;
   padding: 0;
   animation: scaleIn .18s ease;
 }
+
 .modal-content::before {
   content: "";
   position: absolute;
@@ -268,7 +275,8 @@
   width: 100%;
   background: var(--brand);
 }
-.modal-content > h2 {
+
+.modal-content>h2 {
   margin: 0;
   padding: 1.1rem 1.2rem .9rem;
   font-size: 1.2rem;
@@ -276,6 +284,7 @@
   color: var(--ink);
   border-bottom: 1px solid #f0f0f0;
 }
+
 .modal-content .close {
   position: absolute;
   top: .7rem;
@@ -293,19 +302,23 @@
   cursor: pointer;
   transition: transform .15s, background-color .2s, opacity .2s, border-color .2s;
 }
+
 .modal-content .close:hover {
   background: #F5F5F5;
   border-color: #D9D9D9;
   transform: scale(1.06);
   opacity: .95;
 }
+
 .modal-content form {
   padding: 1.1rem 1.2rem 1.3rem;
   display: block;
 }
+
 .form-group {
   margin-bottom: 1rem;
 }
+
 .form-group label {
   display: block;
   margin: 0 0 .35rem;
@@ -313,6 +326,7 @@
   font-weight: 600;
   color: var(--ink-soft);
 }
+
 input,
 textarea {
   width: 100%;
@@ -325,10 +339,12 @@ textarea {
   outline: none;
   transition: border-color .2s, box-shadow .2s;
 }
+
 textarea {
   min-height: 110px;
   resize: vertical;
 }
+
 input:focus,
 textarea:focus {
   border-color: var(--brand);
@@ -348,6 +364,7 @@ textarea:focus {
   cursor: pointer;
   transition: background-color .25s, transform .12s, box-shadow .2s;
 }
+
 .save-btn:hover {
   background: #222;
   box-shadow: var(--shadow-medium);
@@ -357,45 +374,27 @@ textarea:focus {
   position: absolute;
   top: 7rem;
   right: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease;
   z-index: 10;
-  opacity: 0.5;
-}
-
-.delete-project:hover {
-  opacity: 1;
-}
-
-.delete-project:active {
-  transform: scale(0.95);
-}
-
-.delete-project lucide-icon {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2;
-  color: var(--ink);
-  transition: color 0.15s ease;
-}
-
-.delete-project:hover lucide-icon {
-  color: var(--danger);
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
+
 @keyframes scaleIn {
-  from { transform: scale(.96); opacity: .6; }
-  to   { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(.96);
+    opacity: .6;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

@@ -38,6 +38,7 @@
     opacity: 0;
     transform: translateY(10px) scale(0.97);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -68,30 +69,7 @@
   line-height: 1.4;
 }
 
-.icon-btn {
-  border: none;
-  background: transparent;
-  border-radius: var(--radius);
-  padding: 0.5rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.15s ease, transform 0.1s ease;
-  color: var(--ink-muted);
-}
 
-.icon-btn lucide-icon {
-  width: 20px;
-  height: 20px;
-  stroke-width: 2;
-  color: var(--ink-muted);
-}
-
-.icon-btn:hover {
-  background-color: var(--bg);
-  color: var(--ink);
-}
 
 .modal-body {
   padding: 1.5rem;
@@ -154,7 +132,8 @@
   margin-top: 0.5rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;          /* padding visivo tra le chip */
+  gap: 0.5rem;
+  /* padding visivo tra le chip */
   max-width: 100%;
 }
 

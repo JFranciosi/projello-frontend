@@ -19,10 +19,10 @@
     <div class="panel-body">
         <div class="meta-grid">
             <div class="meta-chip">
-                <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
+                <lucide-icon name="kanban-square" aria-hidden="true"></lucide-icon>
                 <div>
-                    <div class="meta-label">Scadenza</div>
-                    <div class="meta-value">{{ (task?.expiration_date | date:'dd/MM/yyyy HH:mm') || '—' }}</div>
+                    <div class="meta-label">Fase</div>
+                    <div class="meta-value">{{ getPhaseName(task?.phase_id) }}</div>
                 </div>
             </div>
             <div class="meta-chip">
@@ -33,21 +33,23 @@
                 </div>
             </div>
             <div class="meta-chip">
-                <lucide-icon name="kanban-square" aria-hidden="true"></lucide-icon>
+                <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
                 <div>
-                    <div class="meta-label">Fase</div>
-                    <div class="meta-value">{{ getPhaseName(task?.phase_id) }}</div>
+                    <div class="meta-label">Scadenza</div>
+                    <div class="meta-value">{{ (task?.expiration_date | date:'dd/MM/yyyy HH:mm') || '—' }}</div>
                 </div>
             </div>
         </div>
 
-        <section class="panel-section">
-            <div class="section-head">
-                <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
-                <h3>{{ task?.title || 'Titolo Task' }}</h3>
-            </div>
-            <p>{{ task?.description || 'Nessuna descrizione disponibile.' }}</p>
-        </section>
+        <div class="task-content-card">
+            <section class="panel-section">
+                <div class="section-head">
+                    <lucide-icon name="file-text" aria-hidden="true"></lucide-icon>
+                    <h3>{{ task?.title || 'Titolo Task' }}</h3>
+                </div>
+                <p>{{ task?.description || 'Nessuna descrizione disponibile.' }}</p>
+            </section>
+        </div>
     </div>
 
     <div class="panel-footer">

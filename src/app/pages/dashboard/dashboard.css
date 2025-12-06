@@ -147,41 +147,7 @@ body {
   flex-shrink: 0;
 }
 
-.delete-phase-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
-  flex-shrink: 0;
-  opacity: 0.5;
-}
 
-.delete-phase-btn:hover {
-  background-color: var(--bg);
-  opacity: 1;
-}
-
-.delete-phase-btn:active {
-  transform: scale(0.95);
-}
-
-.delete-phase-btn lucide-icon {
-  width: 18px;
-  height: 18px;
-  stroke-width: 2;
-  color: var(--ink);
-  transition: color 0.15s ease;
-}
-
-.delete-phase-btn:hover lucide-icon {
-  color: var(--danger);
-}
 
 .ghost-task-card {
   display: flex;

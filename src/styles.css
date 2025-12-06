@@ -29,9 +29,9 @@
   --danger-dark: #c0392b;
 
   /* SHADOWS */
-  --shadow-soft: 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-medium: 0 4px 12px rgba(0,0,0,0.12);
-  --shadow-strong: 0 8px 22px rgba(0,0,0,0.18);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-strong: 0 8px 22px rgba(0, 0, 0, 0.18);
 
   /* RADIUS */
   --radius-sm: 6px;
@@ -121,4 +121,49 @@ body {
   position: absolute;
   left: 0;
   top: 0;
+}
+
+/* Global Button Icon Style */
+.btn-icon {
+  background: transparent;
+  border: 1px solid transparent;
+  margin-left: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+}
+
+.btn-icon:hover {
+  background-color: #fff;
+  border-color: var(--border);
+  transform: translateY(-1px);
+  color: var(--ink);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-icon:active {
+  transform: translateY(0);
+}
+
+.btn-icon.danger {
+  color: #ef4444;
+  /* Red-500 */
+}
+
+.btn-icon.danger:hover {
+  background-color: #FEF2F2;
+  border-color: #FECACA;
+  color: #DC2626;
+}
+
+.btn-icon[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }

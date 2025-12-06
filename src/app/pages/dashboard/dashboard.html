@@ -21,7 +21,7 @@
             <span class="count-badge">{{ tasksFor(p._id).length }}</span>
             <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
           </div>
-          <button type="button" class="delete-phase-btn" (click)="deletePhase(p)"
+          <button type="button" class="btn-icon danger" (click)="deletePhase(p)"
             [attr.aria-label]="'Elimina fase ' + p.title" title="Elimina fase">
             <lucide-icon name="x" aria-hidden="true"></lucide-icon>
           </button>
