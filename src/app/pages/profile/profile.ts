@@ -6,7 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { DashboardSidebar } from '../../layout/dashboard-sidebar/dashboard-sidebar';
 import { NgToastService } from 'ng-angular-popup';
 import { AuthService } from '../../services/auth.service';
-import { CreateUserRequestPayload } from '../../models/models';
+import { CreateUserRequestPayload, ChangePasswordRequest } from '../../models/models';
 import { Navbar } from "../../components/navbar/navbar";
 import { ProjectModal } from "../../components/project-modal/project-modal";
 import { ProjectsService } from '../../services/project.service';
@@ -28,15 +28,22 @@ type ProfileTab = 'personal' | 'security';
   styleUrls: ['./profile.css'],
 })
 export class Profile {
+  // Dati profilo
   profile = signal({
     username: '',
     email: '',
     firstName: '',
     lastName: '',
   });
+
+  // Dati cambio password
+  oldPassword = '';
   newPassword = '';
   confirmPassword = '';
+
   selectedTab = signal<ProfileTab>('personal');
+  
+  // Stato editing campi
   editing = {
     username: false,
     email: false,
@@ -46,6 +53,7 @@ export class Profile {
 
   sidebarCollapsed = signal(false);
   projectModalOpen = signal(false);
+
   avatarInitials = computed(() => {
     const { firstName, lastName, username } = this.profile();
     if (firstName || lastName) {
@@ -64,13 +72,12 @@ export class Profile {
   private readonly toast = inject(NgToastService);
   private readonly auth = inject(AuthService);
   private readonly projectsService = inject(ProjectsService);
+
   constructor() {
-    // Carica lo stato della sidebar dalla localStorage
     const saved = localStorage.getItem('sidebarCollapsed');
     if (saved !== null) {
       this.sidebarCollapsed.set(JSON.parse(saved));
     }
-    
     this.loadProfileFromLocalStorage();
   }
 
@@ -89,6 +96,10 @@ export class Profile {
 
   selectTab(tab: ProfileTab): void {
     this.selectedTab.set(tab);
+    // Reset password fields when switching tabs
+    if (tab === 'security') {
+      this.resetPasswordFields();
+    }
   }
 
   toggleFieldEdit(field: 'username' | 'email' | 'firstName' | 'lastName'): void {
@@ -96,54 +107,82 @@ export class Profile {
   }
 
   logout(): void {
-    try {
-      localStorage.removeItem('auth_token');
-      sessionStorage.removeItem('auth_token');
-    } catch {}
-    this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
+    this.auth.logout();
   }
 
-  async saveProfile(): Promise<void> {
-    if (this.newPassword || this.confirmPassword) {
-      if (this.newPassword !== this.confirmPassword) {
-        this.toast.danger('Errore', 'Le password non coincidono.');
-        return;
-      }
-    }
-
+  // --- LOGICA AGGIORNAMENTO DATI PERSONALI ---
+  async onUpdateProfile(): Promise<void> {
     const current = this.profile();
 
     const payload: CreateUserRequestPayload = {
       username: current.username,
       email: current.email,
-      password: this.newPassword || '',
       firstName: current.firstName,
       lastName: current.lastName,
+      // Non inviamo la password qui
+      password: '' 
     };
 
     try {
       await this.auth.editUser(payload);
 
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          username: payload.username,
-          email: payload.email,
-          firstName: payload.firstName,
-          lastName: payload.lastName,
-        }),
-      );
+      // Aggiorna local storage
+      localStorage.setItem('user', JSON.stringify(payload));
+      
+      // Blocca modifica
+      this.editing.username = false;
+      this.editing.email = false;
+      this.editing.firstName = false;
+      this.editing.lastName = false;
 
-      this.newPassword = '';
-      this.confirmPassword = '';
-
-      this.toast.success('Profilo aggiornato', 'I dati sono stati aggiornati correttamente.');
-    } catch {
+      this.toast.success('Successo', 'Profilo aggiornato correttamente.');
+    } catch (error) {
+      console.error(error);
       this.toast.danger('Errore', 'Impossibile aggiornare il profilo.');
     }
   }
 
-    onSidebarCollapse(collapsed: boolean): void {
+  // --- LOGICA CAMBIO PASSWORD ---
+  async onChangePassword(): Promise<void> {
+    // Validazioni base
+    if (!this.oldPassword || !this.newPassword || !this.confirmPassword) {
+      this.toast.warning('Attenzione', 'Compila tutti i campi della password.');
+      return;
+    }
+
+    if (this.newPassword !== this.confirmPassword) {
+      this.toast.danger('Errore', 'Le nuove password non coincidono.');
+      return;
+    }
+
+    const payload: ChangePasswordRequest = {
+      oldPassword: this.oldPassword,
+      newPassword: this.newPassword
+    };
+
+    try {
+      await this.auth.changePassword(payload);
+      this.toast.success('Successo', 'Password aggiornata con successo.');
+      this.resetPasswordFields();
+    } catch (error: any) {
+      console.error(error);
+      // Gestione errore specifico dal backend
+      if (error.status === 400 || error.status === 404) {
+         this.toast.danger('Errore', error.error || 'La vecchia password non è corretta.');
+      } else {
+         this.toast.danger('Errore', 'Errore durante il cambio password.');
+      }
+    }
+  }
+
+  private resetPasswordFields() {
+    this.oldPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+  }
+
+  // --- SIDEBAR & MODAL ---
+  onSidebarCollapse(collapsed: boolean): void {
     this.sidebarCollapsed.set(collapsed);
   }
 
@@ -163,21 +202,14 @@ export class Profile {
     }
 
     try {
-      const created = await this.projectsService.createProject({
+      await this.projectsService.createProject({
         title,
         collaborators: []
       });
-
-      if (created) {
-        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
-      } else {
-        this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
-      }
-
+      this.toast.success('Successo', 'Progetto creato correttamente.', 3000);
       this.projectModalOpen.set(false);
-
     } catch (err) {
-      console.error('Errore creazione progetto (profile):', err);
+      console.error('Errore creazione progetto:', err);
       this.toast.danger('Errore', 'Creazione progetto fallita', 3000);
     }
   }

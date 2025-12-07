@@ -27,7 +27,6 @@
         </div>
       </header>
 
-      <!-- TABS -->
       <nav
         class="profile-tabs"
         role="tablist"
@@ -58,7 +57,6 @@
         </button>
       </nav>
 
-      <!-- TAB: DATI PERSONALI -->
       @if (selectedTab() === 'personal') {
         <section
           class="tab-panel"
@@ -67,8 +65,7 @@
         >
           <h2>Dati personali</h2>
 
-          <form class="profile-form" (ngSubmit)="saveProfile()">
-            <!-- NOME + COGNOME -->
+          <form class="profile-form" (ngSubmit)="onUpdateProfile()">
             <div class="form-grid-2">
               <div class="field-row">
                 <label class="field-label" for="firstName">Nome</label>
@@ -113,7 +110,6 @@
               </div>
             </div>
 
-            <!-- USERNAME -->
             <div class="field-row">
               <label class="field-label" for="displayName">Username</label>
               <div class="field-block" [class.is-editing]="editing.username">
@@ -136,7 +132,6 @@
               </div>
             </div>
 
-            <!-- EMAIL -->
             <div class="field-row">
               <label class="field-label" for="email">Email</label>
               <div class="field-block" [class.is-editing]="editing.email">
@@ -166,7 +161,6 @@
         </section>
       }
 
-      <!-- TAB: SICUREZZA / CAMBIA PASSWORD -->
       @if (selectedTab() === 'security') {
         <section
           class="tab-panel"
@@ -178,7 +172,21 @@
             Imposta una nuova password per il tuo account.
           </p>
 
-          <form class="profile-form" (ngSubmit)="saveProfile()">
+          <form class="profile-form" (ngSubmit)="onChangePassword()">
+            
+            <div class="field-row">
+              <label class="field-label" for="oldPassword">Password attuale</label>
+              <input
+                id="oldPassword"
+                class="simple-input"
+                type="password"
+                name="oldPassword"
+                [(ngModel)]="oldPassword"
+                placeholder="Inserisci la password attuale"
+                required
+              />
+            </div>
+
             <div class="field-row">
               <label class="field-label" for="newPassword">Nuova password</label>
               <input
@@ -187,6 +195,8 @@
                 type="password"
                 name="newPassword"
                 [(ngModel)]="newPassword"
+                placeholder="Minimo 8 caratteri"
+                required
               />
             </div>
 
@@ -198,6 +208,8 @@
                 type="password"
                 name="confirmPassword"
                 [(ngModel)]="confirmPassword"
+                placeholder="Ripeti la nuova password"
+                required
               />
             </div>
 

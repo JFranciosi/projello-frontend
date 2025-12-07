@@ -6,6 +6,11 @@ export interface CreateUserRequestPayload {
   lastName: string;
 }
 
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface UserResponse {
   id: string;
   email: string;
@@ -54,7 +59,6 @@ export interface TaskAttachment {
   url?: string;
 }
 
-// Interfacce per il database (con trattini come nel JSON del backend)
 export interface TaskFromDB {
   _id: string;
   'project-id'?: string;
@@ -83,7 +87,6 @@ export interface CreateTaskRequestToDB {
   isDone?: boolean;
 }
 
-// Interfacce per l'applicazione (con underscore per compatibilità)
 export interface Task {
   _id: string;
   project_id: string;

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Observable } from 'rxjs';
-import { CreateUserRequestPayload, UserResponse } from '../models/models';
+import { CreateUserRequestPayload, UserResponse, ChangePasswordRequest } from '../models/models';
 import { NotifyService } from './notify.service';
 import { Router } from '@angular/router';
 
@@ -13,7 +13,8 @@ const REFRESH_TOKEN_KEY = 'refreshToken';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private AUTH_API = 'http://localhost:8080/auth';
-  private USER_API = 'http://localhost:8080/user';
+  private USER_API = 'http://localhost:8080/user'; 
+  
   private notifyService = inject(NotifyService);
   private router = inject(Router);
 
@@ -36,7 +37,7 @@ export class AuthService {
     );
   }
 
-  /** UPDATE USER */
+  /** UPDATE USER INFO */
   async editUser(payload: CreateUserRequestPayload): Promise<void> {
     await this.apiCall(() => 
       this.http.put(`${this.USER_API}`, payload, {
@@ -46,6 +47,15 @@ export class AuthService {
     );
   }
 
+  /** CHANGE PASSWORD */
+  async changePassword(payload: ChangePasswordRequest): Promise<void> {
+    await this.apiCall(() => 
+      this.http.put(`${this.USER_API}/change-password`, payload, {
+        responseType: 'text' as 'json',
+        headers: { Authorization: `Bearer ${this.getAccessToken()}` }
+      })
+    );
+  }
 
   /** LOGOUT */
   logout(): void {
@@ -65,9 +75,9 @@ export class AuthService {
   getRefreshToken(): string | null {
     return localStorage.getItem(REFRESH_TOKEN_KEY);
   }
+
   /** SET/REMOVE token */
   setTokens(access: string, refresh: string | null, user: UserResponse) {
-    // Pulisci le notifiche dell'utente precedente prima di salvare le nuove
     this.notifyService.clearLocalNotifications();
     
     localStorage.setItem(ACCESS_TOKEN_KEY, access);
@@ -76,12 +86,9 @@ export class AuthService {
     }
     localStorage.setItem('user', JSON.stringify(user));
     
-    // Salva le notifiche in localStorage se presenti nella UserResponse
     if (user.notifies) {
-      console.log('Saving notifications:', user.notifies);
       this.notifyService.saveNotifications(user.notifies);
     } else {
-      console.log('No notifies in UserResponse, initializing empty array');
       this.notifyService.saveNotifications([]);
     }
   }
@@ -105,7 +112,7 @@ export class AuthService {
       const res = await firstValueFrom(
         this.http.post<TokenResponse>(
           `${this.AUTH_API}/refresh`,
-          {}, // corpo vuoto
+          {},
           {
             withCredentials: true,
             headers: {
@@ -134,9 +141,7 @@ export class AuthService {
       
       if (error.status === 401) {
         console.warn('Token scaduto (401), provo il refresh...');
-        
         const refreshed = await this.refreshTokens();
-
         if (refreshed) {
           return await firstValueFrom(requestFn());
         }

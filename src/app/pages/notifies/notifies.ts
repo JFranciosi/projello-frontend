@@ -30,6 +30,11 @@ export class Notifies implements OnInit {
   loadingNotifications = signal(true);
 
   ngOnInit(): void {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    if (saved !== null) {
+      this.sidebarCollapsed.set(JSON.parse(saved));
+    }
+
     this.loadNotifications();
   }
 
@@ -72,7 +77,7 @@ export class Notifies implements OnInit {
     try {
       localStorage.removeItem('auth_token');
       sessionStorage.removeItem('auth_token');
-    } catch {}
+    } catch { }
     this.router.navigateByUrl('/login').catch(() => (window.location.href = '/login'));
   }
 
