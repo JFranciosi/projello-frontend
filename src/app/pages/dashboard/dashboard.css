@@ -755,7 +755,26 @@ body {
   opacity: 0.8;
 }
 
-.task-row.completed .task-title {
-  text-decoration: line-through;
-  color: #555;
+
+/* CDK Drag and Drop Styles */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-strong);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--brand);
+  opacity: 0.95;
+  padding: 1rem;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.task-list.cdk-drop-list-dragging .task-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }

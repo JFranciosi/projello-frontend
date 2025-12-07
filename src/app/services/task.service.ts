@@ -144,17 +144,6 @@ export class TaskService {
       );
   }
 
-  move(id: string, payload: { phase_id: string; position: number }): Observable<Task> {
-    const dbPayload = {
-      'phase-id': payload.phase_id,
-      position: payload.position
-    };
-    return this.http.patch<TaskFromDB>(`${this.baseUrl}/task/${id}/move`, dbPayload)
-      .pipe(
-        map(task => this.taskFromDBToApp(task))
-      );
-  }
-
   async delete(id: string): Promise<void> {
     return this.auth.apiCall<void>(() => {
       return this.http.delete<void>(`${this.baseUrl}/task/${id}`, { headers: this.getHeaders() });

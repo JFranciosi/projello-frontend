@@ -13,7 +13,7 @@
     }
 
     <!-- GRID FASI -->
-    <main class="phases-grid" role="main" aria-label="Bacheca fasi">
+    <main class="phases-grid" role="main" aria-label="Bacheca fasi" cdkDropListGroup>
       @for (p of phases(); track p._id) {
       <section class="phase-card" [attr.aria-labelledby]="'card-' + p._id">
         <header class="phase-head">
@@ -100,9 +100,10 @@
         }
 
         <!-- Task list -->
-        <ul class="task-list">
+        <ul class="task-list" cdkDropList [cdkDropListData]="tasksFor(p._id)" [id]="p._id"
+          (cdkDropListDropped)="drop($event)">
           @for (t of tasksFor(p._id); track t._id) {
-          <li class="task-row" (click)="openPanel(t)" [class.completed]="t.is_done">
+          <li class="task-row" (click)="openPanel(t)" [class.completed]="t.is_done" cdkDrag [cdkDragData]="t">
             <h3 class="task-title">{{ t.title }}</h3>
             @if (getTaskAssigneeLabel(t)) {
             <div class="task-assignee">

@@ -17,6 +17,7 @@ import { PhaseService } from '../../services/phase.service';
 import { TaskService } from '../../services/task.service';
 import { AuthService } from '../../services/auth.service';
 
+import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import {
   ProjectResponse,
   Phase,
@@ -37,10 +38,9 @@ import { TaskPanel } from '../../components/task-panel/task-panel';
     CommonModule,
     FormsModule,
     LucideAngularModule,
+    DragDropModule,
     DashboardSidebar,
     Navbar,
-    ProjectTopbar,
-    ProjectModal,
     ProjectTopbar,
     ProjectModal,
     ConfirmModal,
@@ -50,6 +50,31 @@ import { TaskPanel } from '../../components/task-panel/task-panel';
   styleUrls: ['./dashboard.css']
 })
 export class Dashboard implements OnInit {
+
+  drop(event: CdkDragDrop<Task[]>): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      const task = event.item.data as Task;
+      const newPhaseId = event.container.id;
+
+      // Optimistic update via Signal
+      this.tasksSig.update(tasks =>
+        tasks.map(t => (t._id === task._id ? { ...t, phase_id: newPhaseId } : t))
+      );
+
+      // Call Backend
+      this.taskService.update(task._id, { phase_id: newPhaseId }).subscribe({
+        next: () => {
+          // Success
+        },
+        error: (err) => {
+          console.error('Drag drop update failed', err);
+          this.toast.danger('Errore', 'Spostamento fallito', 3000);
+        }
+      });
+    }
+  }
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private projectsService = inject(ProjectsService);
