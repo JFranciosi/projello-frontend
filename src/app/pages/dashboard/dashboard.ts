@@ -587,6 +587,21 @@ export class Dashboard implements OnInit {
     }
     return `${names.length} selezionati`;
   }
+
+  getTaskAssigneeLabel(task: Task): string | null {
+    if (!task.assignees || task.assignees.length === 0) return null;
+
+    // Tenta di risolvere il nome del primo assegnatario
+    const firstId = task.assignees[0];
+    const member = this.assignableMembers().find((m) => m.id === firstId);
+
+    if (!member) return null;
+
+    if (task.assignees.length > 1) {
+      return `${member.label} +${task.assignees.length - 1}`;
+    }
+    return member.label;
+  }
 }
 
 function uid(): string {

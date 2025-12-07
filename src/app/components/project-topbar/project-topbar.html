@@ -3,37 +3,25 @@
     <h1 class="topbar-title">{{ project.title }}</h1>
     <div class="collab-assignees-header">
       <div class="assignees-header">
-        <form
-          class="filter-by-assignees-inline"
-          (ngSubmit)="filterByAssignees()"
-          autocomplete="off"
-          novalidate
-        >
-          <input
-            type="text"
-            class="filter-by-assignees-input"
-            name="assigneesEmailName"
-            [ngModel]="assigneesEmailName" 
-            (ngModelChange)="onFilterChange($event)"
-            placeholder="Cerca per email o nome incaricato..."
-            (focus)="startInlineAddAssignees()"
-          />
+        <form class="filter-by-assignees-inline" (ngSubmit)="filterByAssignees()" autocomplete="off" novalidate>
+          <div class="search-input-wrapper">
+            <lucide-icon name="search" class="search-icon"></lucide-icon>
+            <input type="text" class="filter-by-assignees-input" name="assigneesEmailName"
+              [ngModel]="assigneesEmailName" (ngModelChange)="onFilterChange($event)"
+              placeholder="Cerca per email o nome incaricato..." (focus)="startInlineAddAssignees()" />
+          </div>
 
           @if (addingAssignees()) {
-            <button
-              type="button"
-              class="btn ghost tiny"
-              (click)="cancelInlineAddAssignees()"
-              (mousedown)="$event.preventDefault()" 
-            >
-              Annulla
-            </button>
+          <button type="button" class="btn ghost tiny" (click)="cancelInlineAddAssignees()"
+            (mousedown)="$event.preventDefault()">
+            Annulla
+          </button>
           }
         </form>
       </div>
     </div>
   </header>
-  
+
   <div class="topbar-body">
     <div class="topbar-left">
       <div class="topbar-header">
@@ -43,7 +31,7 @@
         </button>
       </div>
       @if (project.description) {
-        <p class="topbar-sub">{{ project.description }}</p>
+      <p class="topbar-sub">{{ project.description }}</p>
       }
     </div>
     <div class="topbar-right">
@@ -56,60 +44,35 @@
           </span>
         </span>
         @for (c of project.collaborators; track c.id) {
-          <span class="pill" title="Collaboratore">
-            <lucide-icon name="User"></lucide-icon>
-            <span class="pill-role"></span>
-            <span class="pill-name">
-              {{ c.firstName }} {{ c.lastName }}
-            </span>
-            <button
-              type="button"
-              class="pill-x"
-              [disabled]="isLoading()"
-              (click)="onRemoveCollaborator(c.id)"
-              aria-label="Rimuovi collaboratore"
-            >
-              <lucide-icon name="x"></lucide-icon>
-            </button>
+        <span class="pill" title="Collaboratore">
+          <lucide-icon name="User"></lucide-icon>
+          <span class="pill-role"></span>
+          <span class="pill-name">
+            {{ c.firstName }} {{ c.lastName }}
           </span>
+          <button type="button" class="pill-x" [disabled]="isLoading()" (click)="onRemoveCollaborator(c.id)"
+            aria-label="Rimuovi collaboratore">
+            <lucide-icon name="x"></lucide-icon>
+          </button>
+        </span>
         }
         <div class="collab-header">
           @if (!addingCollaborator()) {
-            <button
-              type="button"
-              class="add-collab-btn"
-              (click)="startInlineAdd()"
-              aria-label="Aggiungi collaboratore"
-            >
-              <lucide-icon name="plus"></lucide-icon>
-              <span>Aggiungi</span>
-            </button>
+          <button type="button" class="add-collab-btn" (click)="startInlineAdd()" aria-label="Aggiungi collaboratore">
+            <lucide-icon name="plus"></lucide-icon>
+            <span>Aggiungi</span>
+          </button>
           } @else {
-            <form
-              class="add-collab-inline"
-              (ngSubmit)="submitInlineAdd()"
-              autocomplete="off"
-              novalidate
-            >
-              <input
-                type="email"
-                class="add-collab-input"
-                name="collabEmail"
-                required
-                [(ngModel)]="collabEmail"
-                placeholder="Email collaboratore..."
-              />
+          <form class="add-collab-inline" (ngSubmit)="submitInlineAdd()" autocomplete="off" novalidate>
+            <input type="email" class="add-collab-input" name="collabEmail" required [(ngModel)]="collabEmail"
+              placeholder="Email collaboratore..." />
 
-              <button
-                type="button"
-                class="btn ghost tiny"
-                (click)="cancelInlineAdd()"
-              >
-                Annulla
-              </button>
+            <button type="button" class="btn ghost tiny" (click)="cancelInlineAdd()">
+              Annulla
+            </button>
 
-              <button type="submit" class="btn tiny" [disabled]="isLoading()">Invita</button>
-            </form>
+            <button type="submit" class="btn tiny" [disabled]="isLoading()">Invita</button>
+          </form>
           }
         </div>
       </div>

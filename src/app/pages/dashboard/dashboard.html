@@ -104,6 +104,12 @@
           @for (t of tasksFor(p._id); track t._id) {
           <li class="task-row" (click)="openPanel(t)" [class.completed]="t.is_done">
             <h3 class="task-title">{{ t.title }}</h3>
+            @if (getTaskAssigneeLabel(t)) {
+            <div class="task-assignee">
+              <lucide-icon name="user" aria-hidden="true"></lucide-icon>
+              <span>{{ getTaskAssigneeLabel(t) }}</span>
+            </div>
+            }
             @if (t.expiration_date) {
             <div class="task-date">
               <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>

@@ -332,11 +332,26 @@ lucide-icon {
   gap: 0.4rem;
 }
 
+.search-input-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--ink-muted);
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
+
 .filter-by-assignees-input {
-  width: 300px;
+  width: 270px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  padding: 0.35rem 0.7rem;
+  padding: 0.35rem 0.7rem 0.35rem 2.4rem;
   font-size: 0.85rem;
   background-color: #ffffff;
   color: var(--ink);
