@@ -67,10 +67,17 @@ export class TaskPanel {
             title: this.task.title,
             description: this.task.description || '',
             phase_id: this.task.phase_id,
-            expiration_date: this.task.expiration_date || '',
+            expiration_date: this.formatDateForInput(this.task.expiration_date),
             assigneeIds: [...(this.task.assignees || [])]
         });
         this.isEditing.set(true);
+    }
+
+    private formatDateForInput(dateStr?: string): string {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        const pad = (n: number) => n < 10 ? '0' + n : n;
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
     }
 
     cancelEdit(event?: Event) {
@@ -83,12 +90,16 @@ export class TaskPanel {
     saveEdit() {
         if (!this.task) return;
         const d = this.editDraft();
+        let isoDate = undefined;
+        if (d.expiration_date) {
+            isoDate = new Date(d.expiration_date).toISOString();
+        }
 
         const updates: Partial<Task> = {
             title: d.title,
             description: d.description,
             phase_id: d.phase_id,
-            expiration_date: d.expiration_date || undefined,
+            expiration_date: isoDate,
             assignees: d.assigneeIds
         };
 
@@ -114,7 +125,7 @@ export class TaskPanel {
         (this.project.collaborators || []).forEach(c => {
             if (c.id) members.push({ id: c.id, label: this.formatUserName(c) });
         });
-        // Remove duplicates if any
+        // Remove duplicates
         return members.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
     }
 

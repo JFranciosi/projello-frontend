@@ -630,14 +630,33 @@ export class Dashboard implements OnInit {
   async onUpdateTask(event: { taskId: string, data: Partial<Task> }) {
     const { taskId, data } = event;
     try {
-      // Optimistic update
       this.tasksSig.update(tasks =>
         tasks.map(t => (t._id === taskId ? { ...t, ...data } : t))
       );
 
       this.selectedTask.update(t => t && t._id === taskId ? { ...t, ...data } : t);
 
-      await firstValueFrom(this.taskService.update(taskId, data));
+      const serverPayload = { ...data };
+
+      if (serverPayload.assignees && Array.isArray(serverPayload.assignees)) {
+        const p = this.project();
+        if (p) {
+          const emailList: string[] = [];
+          serverPayload.assignees.forEach(id => {
+            if (p.creator?.id === id && p.creator.email) {
+              emailList.push(p.creator.email);
+            } else {
+              const collaborator = (p.collaborators || []).find((c) => c.id === id);
+              if (collaborator?.email) {
+                emailList.push(collaborator.email);
+              }
+            }
+          });
+          serverPayload.assignees = emailList;
+        }
+      }
+
+      await firstValueFrom(this.taskService.update(taskId, serverPayload));
 
       this.toast.success('Salvato', 'Task aggiornato con successo', 3000);
     } catch (e) {
