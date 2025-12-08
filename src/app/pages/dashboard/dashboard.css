@@ -135,12 +135,11 @@ body {
 }
 
 .edit-phase-btn {
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
+  scale: 1.4;
   width: 28px;
   height: 28px;
   color: var(--ink-soft);
-  margin-left: 0.25rem;
+  margin-left: 6.35rem;
 }
 
 .phase-head:hover .edit-phase-btn,
