@@ -1,6 +1,27 @@
 <section class="project-topbar" role="region" aria-label="Intestazione progetto">
   <header class="topbar-head">
-    <h1 class="topbar-title">{{ project.title }}</h1>
+    @if (isEditingTitle()) {
+    <div class="title-edit-wrapper">
+      <input type="text" class="title-edit-input" [(ngModel)]="newTitle" (keydown.enter)="saveTitle()"
+        placeholder="Nome progetto..." autoFocus />
+      <div class="title-edit-actions">
+        <button type="button" class="btn-icon success" (click)="saveTitle()" [disabled]="isLoading()" title="Salva">
+          <lucide-icon name="check"></lucide-icon>
+        </button>
+        <button type="button" class="btn-icon danger" (click)="cancelEditingTitle()" [disabled]="isLoading()"
+          title="Annulla">
+          <lucide-icon name="x"></lucide-icon>
+        </button>
+      </div>
+    </div>
+    } @else {
+    <div class="title-display-wrapper">
+      <h1 class="topbar-title">{{ project.title }}</h1>
+      <button type="button" class="btn-icon" (click)="startEditingTitle()" title="Modifica titolo">
+        <lucide-icon name="pencil"></lucide-icon>
+      </button>
+    </div>
+    }
     <div class="collab-assignees-header">
       <div class="assignees-header">
         <form class="filter-by-assignees-inline" (ngSubmit)="filterByAssignees()" autocomplete="off" novalidate>

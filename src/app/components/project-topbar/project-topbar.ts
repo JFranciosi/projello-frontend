@@ -30,6 +30,9 @@ export class ProjectTopbar {
 
   isLoading = signal(false);
 
+  isEditingTitle = signal(false);
+  newTitle = '';
+
   startInlineAdd(): void {
     this.addingCollaborator.set(true);
   }
@@ -41,7 +44,7 @@ export class ProjectTopbar {
 
   async submitInlineAdd(): Promise<void> {
     const email = this.collabEmail.trim();
-    
+
     if (!email || !email.includes('@')) {
       this.toast.info('Attenzione', 'Inserisci un indirizzo email valido.', 3000);
       return;
@@ -67,7 +70,7 @@ export class ProjectTopbar {
         this.toast.success('Aggiunto!', `Collaboratore aggiunto: ${email}`, 3000);
         this.collabEmail = '';
         this.addingCollaborator.set(false);
-      } 
+      }
 
     } catch (error) {
       console.error(error);
@@ -77,26 +80,64 @@ export class ProjectTopbar {
     this.isLoading.set(false);
   }
 
+  startEditingTitle(): void {
+    this.newTitle = this.project.title;
+    this.isEditingTitle.set(true);
+  }
+
+  cancelEditingTitle(): void {
+    this.isEditingTitle.set(false);
+    this.newTitle = '';
+  }
+
+  async saveTitle(): Promise<void> {
+    if (!this.newTitle || !this.newTitle.trim()) {
+      this.toast.warning('Attenzione', 'Il titolo non può essere vuoto', 3000);
+      return;
+    }
+
+    if (this.newTitle === this.project.title) {
+      this.cancelEditingTitle();
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      const res = await this.projectsService.updateProject(this.project._id, { title: this.newTitle });
+      if (res) {
+        this.project.title = this.newTitle;
+        this.toast.success('Successo', 'Titolo aggiornato', 3000);
+        this.isEditingTitle.set(false);
+      } else {
+        this.toast.danger('Errore', 'Impossibile aggiornare il titolo', 3000);
+      }
+    } catch (e) {
+      console.error(e);
+      this.toast.danger('Errore', 'Errore tecnico durante l\'aggiornamento', 3000);
+    }
+    this.isLoading.set(false);
+  }
+
   async onRemoveCollaborator(userId: string): Promise<void> {
     if (this.isLoading()) return;
 
     if (!confirm('Sei sicuro di voler rimuovere questo collaboratore?')) {
-        return;
+      return;
     }
 
     this.isLoading.set(true);
 
     try {
-        const res = await this.projectsService.removeCollaborator(this.project._id, userId);
-    
-        if (res){
-          this.project.collaborators = this.project.collaborators.filter(c => c.id !== userId);
-          this.toast.success('Rimosso', 'Collaboratore rimosso con successo!', 4000);
-        } else {
-          this.toast.danger('Errore', 'Impossibile rimuovere il collaboratore.', 4000);
-        }
+      const res = await this.projectsService.removeCollaborator(this.project._id, userId);
+
+      if (res) {
+        this.project.collaborators = this.project.collaborators.filter(c => c.id !== userId);
+        this.toast.success('Rimosso', 'Collaboratore rimosso con successo!', 4000);
+      } else {
+        this.toast.danger('Errore', 'Impossibile rimuovere il collaboratore.', 4000);
+      }
     } catch (e) {
-        this.toast.danger('Errore', 'Si è verificato un errore tecnico.', 4000);
+      this.toast.danger('Errore', 'Si è verificato un errore tecnico.', 4000);
     }
 
     this.isLoading.set(false);

@@ -82,6 +82,60 @@
   letter-spacing: -0.01em;
 }
 
+/* Edit Title Styles */
+.title-display-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title-edit-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title-edit-input {
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.2rem 0.6rem;
+  color: var(--ink);
+  background-color: transparent;
+  min-width: 300px;
+  transition: all 0.2s ease;
+}
+
+.title-edit-input:hover {
+  background-color: var(--bg);
+}
+
+.title-edit-input:focus-visible {
+  outline: none;
+  background-color: #fff;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px #E4B36333;
+}
+
+.title-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Success icon button variant */
+.btn-icon.success {
+  color: var(--success);
+}
+
+.btn-icon.success:hover {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: var(--success-dark);
+}
+
 .topbar-sub {
   margin-top: 0.25rem;
   color: var(--ink-muted);
