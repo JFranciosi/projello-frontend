@@ -130,7 +130,7 @@
             @if (t.expiration_date) {
             <div class="task-date">
               <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
-              <span>{{ t.expiration_date | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span>{{ t.expiration_date | date:'dd/MM/yyyy HH:mm':'UTC' }}</span>
             </div>
             }
             @if (t.description) {

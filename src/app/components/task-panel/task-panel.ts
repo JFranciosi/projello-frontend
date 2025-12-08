@@ -77,7 +77,7 @@ export class TaskPanel {
         if (!dateStr) return '';
         const date = new Date(dateStr);
         const pad = (n: number) => n < 10 ? '0' + n : n;
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
     }
 
     cancelEdit(event?: Event) {
@@ -92,7 +92,8 @@ export class TaskPanel {
         const d = this.editDraft();
         let isoDate = undefined;
         if (d.expiration_date) {
-            isoDate = new Date(d.expiration_date).toISOString();
+            const dateObj = new Date(d.expiration_date);
+            isoDate = new Date(d.expiration_date + ':00.000Z').toISOString();
         }
 
         const updates: Partial<Task> = {
