@@ -1,21 +1,47 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Notify } from '../models/models';
 
 const NOTIFICATIONS_KEY = 'notifications';
+const UNREAD_KEY = 'unreadNotifications';
+const READ_NOTIFICATIONS_KEY = 'readNotifications';
 
 @Injectable({ providedIn: 'root' })
 export class NotifyService {
- 
+  private unreadCountSubject = new BehaviorSubject<number>(0);
+  public unreadCount$ = this.unreadCountSubject.asObservable();
+
+  constructor() {
+    this.loadUnreadCount();
+  }
+
+  private loadUnreadCount(): void {
+    const unread = localStorage.getItem(UNREAD_KEY);
+    const count = unread ? parseInt(unread, 10) : 0;
+    this.unreadCountSubject.next(count);
+  }
+
+  private updateUnreadCount(count: number): void {
+    this.unreadCountSubject.next(count);
+    localStorage.setItem(UNREAD_KEY, count.toString());
+  }
+
+  private getReadNotifications(): Set<string> {
+    const readStr = localStorage.getItem(READ_NOTIFICATIONS_KEY);
+    return readStr ? new Set(JSON.parse(readStr)) : new Set();
+  }
+
+  private saveReadNotifications(readIds: Set<string>): void {
+    localStorage.setItem(READ_NOTIFICATIONS_KEY, JSON.stringify(Array.from(readIds)));
+  }
+
   saveNotifications(notifies: Notify[]): void {
     try {
-      console.log('saveNotifications called with:', notifies);
-      // Rimuovi duplicati mantenendo solo la prima occorrenza di ogni notifica
-      const uniqueNotifies = Array.from(
-        new Map(notifies.map(n => [n.id, n])).values()
-      );
-      console.log('After deduplication:', uniqueNotifies);
-      localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(uniqueNotifies));
-      console.log('Notifications saved to localStorage');
+      localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifies));
+      
+      const readNotifications = this.getReadNotifications();
+      const unreadCount = notifies.filter(n => !readNotifications.has(n.id)).length;
+      this.updateUnreadCount(unreadCount);
     } catch (error) {
       console.error('Errore nel salvataggio delle notifiche:', error);
     }
@@ -31,7 +57,6 @@ export class NotifyService {
     }
   }
 
-
   clearLocalNotifications(): void {
     try {
       localStorage.removeItem(NOTIFICATIONS_KEY);
@@ -40,7 +65,6 @@ export class NotifyService {
     }
   }
 
-  
   async getUserNotifications(): Promise<Notify[]> {
     try {
       return this.getLocalNotifications();
@@ -50,12 +74,16 @@ export class NotifyService {
     }
   }
 
-
   async deleteNotification(notifyId: string): Promise<boolean> {
     try {
       const notifies = this.getLocalNotifications();
       const filtered = notifies.filter(n => n.id !== notifyId);
       this.saveNotifications(filtered);
+      
+      const readNotifications = this.getReadNotifications();
+      readNotifications.add(notifyId);
+      this.saveReadNotifications(readNotifications);
+      
       return true;
     } catch (error) {
       console.error('Errore nell\'eliminazione della notifica:', error);
@@ -66,10 +94,31 @@ export class NotifyService {
   async deleteAllNotifications(): Promise<boolean> {
     try {
       this.clearLocalNotifications();
+      this.updateUnreadCount(0);
       return true;
     } catch (error) {
       console.error('Errore nell\'eliminazione di tutte le notifiche:', error);
       return false;
     }
+  }
+
+  markNotificationsAsRead(): void {
+    const notifies = this.getLocalNotifications();
+    const readNotifications = this.getReadNotifications();
+    
+    // Aggiungi tutte le notifiche attuali alle lette
+    notifies.forEach(n => readNotifications.add(n.id));
+    this.saveReadNotifications(readNotifications);
+    
+    this.updateUnreadCount(0);
+  }
+
+  addUnreadNotification(): void {
+    const currentCount = this.unreadCountSubject.value;
+    this.updateUnreadCount(currentCount + 1);
+  }
+
+  getUnreadCount(): number {
+    return this.unreadCountSubject.value;
   }
 }

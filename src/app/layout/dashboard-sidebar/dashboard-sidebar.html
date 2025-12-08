@@ -16,6 +16,12 @@
           <a [routerLink]="link.path" class="menu-link">
             <lucide-icon [name]="link.icon" class="menu-icon" aria-hidden="true"></lucide-icon>
             <span class="menu-label">{{ link.label }}</span>
+            @if (link.badge) {
+              @let count = (link.badge | async);
+              @if (count && count > 0) {
+                <span class="notification-badge">{{ count }}</span>
+              }
+            }
           </a>
         </li>
         } @empty {

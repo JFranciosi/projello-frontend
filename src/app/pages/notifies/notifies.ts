@@ -36,6 +36,8 @@ export class Notifies implements OnInit {
     }
 
     this.loadNotifications();
+    // Marca le notifiche come lette quando apri la pagina
+    this.notifyService.markNotificationsAsRead();
   }
 
   private async loadNotifications(): Promise<void> {
