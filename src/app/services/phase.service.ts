@@ -11,7 +11,7 @@ export class PhaseService {
   constructor(
     private http: HttpClient,
     private authService: AuthService
-  ) {}
+  ) { }
 
   private getAuthHeaders(): { [key: string]: string } {
     const token = this.authService.getAccessToken();
@@ -36,8 +36,12 @@ export class PhaseService {
 
   /** PUT /phase/{id} */
   updateTitle(id: string, title: string): Observable<void> {
+    const headers = {
+      ...this.getAuthHeaders(),
+      'Content-Type': 'application/json'
+    };
     return this.http.put<void>(`${this.apiUrl}/${id}`, title, {
-      headers: this.getAuthHeaders(),
+      headers,
       withCredentials: true,
     });
   }

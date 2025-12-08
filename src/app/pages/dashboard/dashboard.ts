@@ -494,6 +494,45 @@ export class Dashboard implements OnInit {
     });
   }
 
+  // UPDATE PHASE TITLE
+  editingPhaseId = signal<string | null>(null);
+  editingPhaseName = signal('');
+
+  startEditingPhase(p: Phase): void {
+    this.editingPhaseId.set(p._id);
+    this.editingPhaseName.set(p.title);
+  }
+
+  cancelEditingPhaseName(): void {
+    this.editingPhaseId.set(null);
+    this.editingPhaseName.set('');
+  }
+
+  savePhaseName(): void {
+    const pId = this.editingPhaseId();
+    const newTitle = this.editingPhaseName().trim();
+
+    if (!pId || !newTitle) return;
+
+    // Optimistic update
+    this.phasesSig.update(phases =>
+      phases.map(p => (p._id === pId ? { ...p, title: newTitle } : p))
+    );
+
+    this.phaseService.updateTitle(pId, newTitle).subscribe({
+      next: () => {
+        this.toast.success('Fatto', 'Fase rinominata', 3000);
+        this.editingPhaseId.set(null);
+      },
+      error: (err) => {
+        console.error('Rename phase failed', err);
+        // Revert? For now just show error
+        this.toast.danger('Errore', 'Rinomina fallita', 3000);
+        // We might want to reload or revert logic here if critical
+      }
+    });
+  }
+
   async markCompleted(task: Task): Promise<void> {
     if (!task?._id) return;
 
