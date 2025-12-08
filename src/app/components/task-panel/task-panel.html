@@ -4,19 +4,78 @@
 <div class="task-panel" [class.open]="isOpen" role="region" aria-label="Dettagli task">
     <div class="panel-header">
         <div class="panel-title">
+            @if (isEditing()) {
+            <div class="edit-header-row">
+                <h2>Modifica Task</h2>
+                <button class="back-btn" (click)="cancelEdit($event)">
+                    <lucide-icon name="chevron-left"></lucide-icon>
+                    <span>Dettagli</span>
+                </button>
+            </div>
+            } @else {
             <h2>Dettagli Task</h2>
+            }
         </div>
         <div class="panel-actions">
+            @if (!isEditing()) {
+            <button class="btn-icon" title="Modifica" [disabled]="!task" (click)="startEdit()">
+                <lucide-icon name="pencil"></lucide-icon>
+            </button>
             <button class="btn-icon danger" title="Elimina" [disabled]="!task" (click)="onDelete($event)">
                 <lucide-icon name="trash-2"></lucide-icon>
             </button>
             <button class="btn-icon" title="Chiudi" (click)="onClose()">
                 <lucide-icon name="x"></lucide-icon>
             </button>
+            } @else {
+            <!-- Edit Mode Actions (optional, maybe just save/cancel in footer) -->
+            }
         </div>
     </div>
 
     <div class="panel-body">
+        @if (isEditing()) {
+        <!-- EDIT MODE FORM -->
+        <div class="edit-form">
+            <div class="form-group">
+                <label>Titolo</label>
+                <input type="text" [(ngModel)]="editDraft().title" name="title" />
+            </div>
+
+            <div class="form-group">
+                <label>Scadenza</label>
+                <div class="date-input-wrapper">
+                    <input type="datetime-local" [(ngModel)]="editDraft().expiration_date" name="expire" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Descrizione</label>
+                <textarea [(ngModel)]="editDraft().description" rows="5"></textarea>
+            </div>
+
+            <div class="form-group assign-task">
+                <label>Assegnatari</label>
+                <div class="assignee-select multi-select">
+                    <div class="multi-select-dropdown">
+                        @for (member of assignableMembers; track member.id) {
+                        <div class="member-option" [class.selected]="editDraft().assigneeIds.includes(member.id)"
+                            (click)="toggleDraftAssignee(member.id)">
+                            <div class="checkbox">
+                                @if (editDraft().assigneeIds.includes(member.id)) {
+                                <lucide-icon name="check" size="14"></lucide-icon>
+                                }
+                            </div>
+                            <span>{{ member.label }}</span>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        } @else {
+        <!-- VIEW MODE -->
         <div class="meta-grid">
             <div class="meta-chip">
                 <lucide-icon name="kanban-square" aria-hidden="true"></lucide-icon>
@@ -50,9 +109,13 @@
                 <p>{{ task?.description || 'Nessuna descrizione disponibile.' }}</p>
             </section>
         </div>
+        }
     </div>
 
     <div class="panel-footer">
+        @if (isEditing()) {
+        <button class="btn primary" (click)="saveEdit()">Salva Modifiche</button>
+        } @else {
         @if (task?.is_done) {
         <button class="btn primary" (click)="onMarkIncomplete()">
             <lucide-icon name="rotate-ccw"></lucide-icon> Segna come da completare
@@ -61,6 +124,7 @@
         <button class="btn primary" [disabled]="!task" (click)="onMarkCompleted()">
             <lucide-icon name="check-square-2"></lucide-icon> Segna come completato
         </button>
+        }
         }
     </div>
 </div>

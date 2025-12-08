@@ -7,18 +7,30 @@ import {
     signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ProjectResponse, Task, UserResponse } from '../../models/models';
+
+import { ChangeDetectorRef, inject } from '@angular/core';
 
 @Component({
     selector: 'app-task-panel',
     standalone: true,
-    imports: [CommonModule, LucideAngularModule],
+    imports: [CommonModule, LucideAngularModule, FormsModule],
     templateUrl: './task-panel.html',
     styleUrls: ['./task-panel.css']
 })
 export class TaskPanel {
-    @Input() task: Task | null = null;
+    private cdr = inject(ChangeDetectorRef);
+    private _task: Task | null = null;
+
+    @Input() set task(t: Task | null) {
+        console.log('TaskPanel input task:', t);
+        this._task = t;
+        this.isEditing.set(false);
+    }
+    get task(): Task | null { return this._task; }
+
     @Input() isOpen = false;
     @Input() project: ProjectResponse | null = null;
     @Input() phases: any[] = [];
@@ -27,9 +39,83 @@ export class TaskPanel {
     @Output() markCompleted = new EventEmitter<Task>();
     @Output() markIncomplete = new EventEmitter<Task>();
     @Output() deleteTask = new EventEmitter<Task>();
+    @Output() updateTask = new EventEmitter<{ taskId: string, data: Partial<Task> }>();
+
+    isEditing = signal(false);
+    editDraft = signal<{
+        title: string;
+        description: string;
+        phase_id: string;
+        expiration_date: string;
+        assigneeIds: string[];
+    }>({
+        title: '',
+        description: '',
+        phase_id: '',
+        expiration_date: '',
+        assigneeIds: []
+    });
 
     onClose() {
         this.close.emit();
+        this.isEditing.set(false);
+    }
+
+    startEdit() {
+        if (!this.task) return;
+        this.editDraft.set({
+            title: this.task.title,
+            description: this.task.description || '',
+            phase_id: this.task.phase_id,
+            expiration_date: this.task.expiration_date || '',
+            assigneeIds: [...(this.task.assignees || [])]
+        });
+        this.isEditing.set(true);
+    }
+
+    cancelEdit(event?: Event) {
+        if (event) event.stopPropagation();
+        console.log('Canceling edit. Current task:', this.task);
+        this.isEditing.set(false);
+        this.cdr.detectChanges();
+    }
+
+    saveEdit() {
+        if (!this.task) return;
+        const d = this.editDraft();
+
+        const updates: Partial<Task> = {
+            title: d.title,
+            description: d.description,
+            phase_id: d.phase_id,
+            expiration_date: d.expiration_date || undefined,
+            assignees: d.assigneeIds
+        };
+
+        this.updateTask.emit({ taskId: this.task._id, data: updates });
+        this.isEditing.set(false);
+    }
+
+    toggleDraftAssignee(memberId: string) {
+        const current = this.editDraft().assigneeIds;
+        if (current.includes(memberId)) {
+            this.editDraft.update(d => ({ ...d, assigneeIds: current.filter(id => id !== memberId) }));
+        } else {
+            this.editDraft.update(d => ({ ...d, assigneeIds: [...current, memberId] }));
+        }
+    }
+
+    get assignableMembers() {
+        if (!this.project) return [];
+        const members: { id: string; label: string }[] = [];
+        if (this.project.creator?.id) {
+            members.push({ id: this.project.creator.id, label: this.formatUserName(this.project.creator) });
+        }
+        (this.project.collaborators || []).forEach(c => {
+            if (c.id) members.push({ id: c.id, label: this.formatUserName(c) });
+        });
+        // Remove duplicates if any
+        return members.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
     }
 
     onDelete(event: Event) {
