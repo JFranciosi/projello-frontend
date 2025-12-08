@@ -627,6 +627,24 @@ export class Dashboard implements OnInit {
     }
     return member.label;
   }
+  async onUpdateTask(event: { taskId: string, data: Partial<Task> }) {
+    const { taskId, data } = event;
+    try {
+      // Optimistic update
+      this.tasksSig.update(tasks =>
+        tasks.map(t => (t._id === taskId ? { ...t, ...data } : t))
+      );
+
+      this.selectedTask.update(t => t && t._id === taskId ? { ...t, ...data } : t);
+
+      await firstValueFrom(this.taskService.update(taskId, data));
+
+      this.toast.success('Salvato', 'Task aggiornato con successo', 3000);
+    } catch (e) {
+      console.error('Update failed', e);
+      this.toast.danger('Errore', 'Impossibile aggiornare il task', 3000);
+    }
+  }
 }
 
 function uid(): string {

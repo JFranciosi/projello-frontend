@@ -155,7 +155,7 @@
 
 <app-task-panel [task]="selectedTask()" [isOpen]="panelOpen()" [project]="currentProject()" [phases]="phases()"
   (close)="closePanel()" (markCompleted)="markCompleted($event)" (markIncomplete)="markAsIncomplete($event)"
-  (deleteTask)="deleteTask($event)">
+  (deleteTask)="deleteTask($event)" (updateTask)="onUpdateTask($event)">
 </app-task-panel>
 
 <app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
