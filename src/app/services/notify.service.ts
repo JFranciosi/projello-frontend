@@ -1,18 +1,27 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { Notify } from '../models/models';
 
 const NOTIFICATIONS_KEY = 'notifications';
 const UNREAD_KEY = 'unreadNotifications';
 const READ_NOTIFICATIONS_KEY = 'readNotifications';
+const ACCESS_TOKEN_KEY = 'accessToken';
 
 @Injectable({ providedIn: 'root' })
 export class NotifyService {
+  private NOTIFY_API = 'http://localhost:8080/notify';
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
+  private http = inject(HttpClient);
 
   constructor() {
     this.loadUnreadCount();
+  }
+
+  private getAccessToken(): string {
+    return localStorage.getItem(ACCESS_TOKEN_KEY) || '';
   }
 
   private loadUnreadCount(): void {
@@ -76,6 +85,14 @@ export class NotifyService {
 
   async deleteNotification(notifyId: string): Promise<boolean> {
     try {
+      // Chiama il backend per eliminare la notifica
+      await firstValueFrom(
+        this.http.delete(`${this.NOTIFY_API}/${notifyId}`, {
+          headers: { Authorization: `Bearer ${this.getAccessToken()}` }
+        })
+      );
+
+      // Aggiorna il locale
       const notifies = this.getLocalNotifications();
       const filtered = notifies.filter(n => n.id !== notifyId);
       this.saveNotifications(filtered);
@@ -93,6 +110,14 @@ export class NotifyService {
 
   async deleteAllNotifications(): Promise<boolean> {
     try {
+      // Chiama il backend per eliminare tutte le notifiche
+      await firstValueFrom(
+        this.http.delete(`${this.NOTIFY_API}`, {
+          headers: { Authorization: `Bearer ${this.getAccessToken()}` }
+        })
+      );
+
+      // Aggiorna il locale
       this.clearLocalNotifications();
       this.updateUnreadCount(0);
       return true;
