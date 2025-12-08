@@ -125,26 +125,22 @@ body {
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  min-width: 0;
+  /* Allows text truncation in flex child */
 }
 
 .phase-title {
   font-size: 1.1rem;
   font-weight: 700;
-  margin: 0;
-  color: var(--ink);
 }
 
-.edit-phase-btn {
-  scale: 1.4;
-  width: 28px;
-  height: 28px;
-  color: var(--ink-soft);
-  margin-left: 6.35rem;
-}
-
-.phase-head:hover .edit-phase-btn,
-.phase-edit-form .btn-icon {
-  opacity: 1;
+/* Grouped actions container */
+.phase-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
 }
 
 .phase-edit-form {
@@ -167,25 +163,6 @@ body {
   outline: none;
   background-color: #fff;
   box-shadow: 0 0 0 2px var(--brand-shadow);
-}
-
-.phase-edit-input:focus {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px var(--brand-shadow);
-}
-
-.phase-edit-form .btn-icon {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.phase-edit-form .btn-icon.check {
-  color: var(--success-dark);
-}
-
-.phase-edit-form .btn-icon.cancel {
-  color: var(--danger);
 }
 
 .count-badge {

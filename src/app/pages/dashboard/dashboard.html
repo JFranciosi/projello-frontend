@@ -32,15 +32,19 @@
             </form>
             } @else {
             <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
-            <button class="btn-icon edit-phase-btn" (click)="startEditingPhase(p)" title="Rinomina fase">
+            }
+          </div>
+          <div class="phase-actions">
+            @if (editingPhaseId() !== p._id) {
+            <button class="btn-icon" (click)="startEditingPhase(p)" title="Rinomina fase">
               <lucide-icon name="pencil" size="14"></lucide-icon>
             </button>
             }
+            <button type="button" class="btn-icon danger" (click)="deletePhase(p)"
+              [attr.aria-label]="'Elimina fase ' + p.title" title="Elimina fase">
+              <lucide-icon name="x" aria-hidden="true"></lucide-icon>
+            </button>
           </div>
-          <button type="button" class="btn-icon danger" (click)="deletePhase(p)"
-            [attr.aria-label]="'Elimina fase ' + p.title" title="Elimina fase">
-            <lucide-icon name="x" aria-hidden="true"></lucide-icon>
-          </button>
         </header>
 
         <!-- Ghost / Inline new task -->
