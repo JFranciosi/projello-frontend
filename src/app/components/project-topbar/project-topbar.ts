@@ -1,9 +1,9 @@
-import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { ProjectResponse } from '../../models/models';
+import { ProjectResponse, UserResponse } from '../../models/models';
 import { ProjectsService } from '../../services/project.service';
 import { NgToastService } from 'ng-angular-popup';
 
@@ -14,13 +14,24 @@ import { NgToastService } from 'ng-angular-popup';
   templateUrl: './project-topbar.html',
   styleUrls: ['./project-topbar.css'],
 })
-export class ProjectTopbar {
+export class ProjectTopbar implements OnInit {
   @Input({ required: true }) project!: ProjectResponse;
   @Output() filterChange = new EventEmitter<string>();
 
   private readonly projectsService = inject(ProjectsService);
   private readonly router = inject(Router);
   private toast = inject(NgToastService);
+
+  currentUser = signal<UserResponse | null>(null);
+
+  ngOnInit(): void {
+    const u = localStorage.getItem('user');
+    if (u) {
+      try {
+        this.currentUser.set(JSON.parse(u));
+      } catch (e) { console.error(e); }
+    }
+  }
 
   addingCollaborator = signal(false);
   collabEmail = '';
@@ -43,10 +54,27 @@ export class ProjectTopbar {
   }
 
   async submitInlineAdd(): Promise<void> {
+
+    // Permission check: Only creator can add collaborators
+    const user = this.currentUser();
+    if (user && this.project.creator && user.id !== this.project.creator.id) {
+      this.toast.info('Info', 'Solo il creatore del progetto può aggiungere collaboratori.', 3000);
+      return;
+    }
+
     const email = this.collabEmail.trim();
 
     if (!email || !email.includes('@')) {
       this.toast.info('Attenzione', 'Inserisci un indirizzo email valido.', 3000);
+      return;
+    }
+
+    const lowerEmail = email.toLowerCase();
+    const creatorEmail = this.project.creator?.email?.toLowerCase() || '';
+    const alreadyCollab = this.project.collaborators.some(c => (c.email || '').toLowerCase() === lowerEmail);
+
+    if (lowerEmail === creatorEmail || alreadyCollab) {
+      this.toast.info('Info', 'L\'utente è già nel progetto.', 3000);
       return;
     }
 
@@ -66,6 +94,17 @@ export class ProjectTopbar {
           tempProject._id = tempProject.id;
         }
 
+        // Verify if the user was actually added
+        const isAdded = (refreshedProject.collaborators || []).some(
+          c => (c.email || '').toLowerCase() === email.toLowerCase()
+        );
+
+        if (!isAdded) {
+          this.toast.danger('Errore', 'Utente non registrato.', 3000);
+          this.isLoading.set(false);
+          return;
+        }
+
         this.project = refreshedProject;
         this.toast.success('Aggiunto!', `Collaboratore aggiunto: ${email}`, 3000);
         this.collabEmail = '';
@@ -74,7 +113,7 @@ export class ProjectTopbar {
 
     } catch (error) {
       console.error(error);
-      this.toast.danger('Errore', 'Impossibile aggiungere. Controlla che l\'email sia di un utente registrato.', 4000);
+      this.toast.danger('Errore', 'Utente non registrato.', 3000);
     }
 
     this.isLoading.set(false);
@@ -120,6 +159,13 @@ export class ProjectTopbar {
 
   async onRemoveCollaborator(userId: string): Promise<void> {
     if (this.isLoading()) return;
+
+    // Permission check: Only creator can remove collaborators
+    const user = this.currentUser();
+    if (user && this.project.creator && user.id !== this.project.creator.id) {
+      this.toast.info('Info', 'Solo il creatore può rimuovere i collaboratori.', 3000);
+      return;
+    }
 
     if (!confirm('Sei sicuro di voler rimuovere questo collaboratore?')) {
       return;

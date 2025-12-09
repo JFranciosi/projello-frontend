@@ -34,7 +34,7 @@ export class Projects implements OnInit {
   avatarInitials = computed(() => {
     const user = this.currentUser();
     if (!user) return 'PJ';
-    
+
     if (user.firstName || user.lastName) {
       const fi = user.firstName?.trim()[0] ?? '';
       const li = user.lastName?.trim()[0] ?? '';
@@ -58,9 +58,9 @@ export class Projects implements OnInit {
       const titleMatch = project.title?.toLowerCase().includes(query);
       const descriptionMatch = project.description?.toLowerCase().includes(query);
       const creatorMatch = project.creator?.username?.toLowerCase().includes(query) ||
-                         project.creator?.firstName?.toLowerCase().includes(query) ||
-                         project.creator?.lastName?.toLowerCase().includes(query);
-      
+        project.creator?.firstName?.toLowerCase().includes(query) ||
+        project.creator?.lastName?.toLowerCase().includes(query);
+
       return titleMatch || descriptionMatch || creatorMatch;
     });
   });
@@ -69,7 +69,7 @@ export class Projects implements OnInit {
     private router: Router,
     private projectsService: ProjectsService,
     private auth: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Carica lo stato della sidebar dalla localStorage
@@ -77,10 +77,10 @@ export class Projects implements OnInit {
     if (saved !== null) {
       this.sidebarCollapsed.set(JSON.parse(saved));
     }
-    
+
     // Carica i dati dell'utente corrente
     this.loadCurrentUser();
-    
+
     this.loadProjects();
   }
 
@@ -174,20 +174,13 @@ export class Projects implements OnInit {
 
       console.log('📦 onCreateProject - created:', created);
 
-      // Se createProject ritorna qualcosa (anche null potrebbe essere un caso edge), 
-      // considera la creazione riuscita se non c'è stato un errore HTTP
-      // Il fatto che la promise non abbia lanciato un'eccezione significa che la richiesta è andata a buon fine
       if (created !== null && created !== undefined) {
         this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
         await this.loadProjects();
         this.projectModalOpen.set(false);
       } else {
-        // Se ritorna null, potrebbe essere un errore o il backend non ha ritornato dati
-        // Ma se non c'è stata un'eccezione, probabilmente il progetto è stato creato
-        // Ricarica i progetti per verificare
         console.warn('createProject ha ritornato null, ma ricarico i progetti per verificare');
         await this.loadProjects();
-        // Se dopo il reload ci sono più progetti, probabilmente è stato creato
         const currentCount = this.allProjects().length;
         if (currentCount > 0) {
           this.toast.success('Progetto creato', 'Il progetto è stato creato correttamente.', 3000);
@@ -205,6 +198,14 @@ export class Projects implements OnInit {
 
   onDeleteProject(p: ProjectResponse, event: Event): void {
     event.stopPropagation();
+
+    // Solo il creatore può eliminare il progetto
+    const user = this.currentUser();
+    if (user && p.creator && user.id !== p.creator.id) {
+      this.toast.info('Info', 'Solo il creatore può eliminare il progetto.', 3000);
+      return;
+    }
+
     this.projectToDelete.set(p);
     this.deleteConfirmOpen.set(true);
   }
