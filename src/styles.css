@@ -1,1 +1,171 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* BRAND */
+  --brand: #E4B363;
+  --brand-light: #FFF4DA;
+  --brand-shadow: rgba(228, 179, 99, 0.35);
+
+  /* BASE */
+  --bg: #f1f1f1;
+  --bg-panel: #FFFFFF;
+  --ink: #111827;
+  --ink-soft: #374151;
+  --ink-muted: #6B7280;
+
+  /* BORDI / UI */
+  --border: #E5E7EB;
+  --border-soft: #D1D5DB;
+
+  /* STATES */
+  --success: #2ecc71;
+  --success-dark: #27ae60;
+
+  --danger: #e74c3c;
+  --danger-dark: #c0392b;
+
+  /* SHADOWS */
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-strong: 0 8px 22px rgba(0, 0, 0, 0.18);
+
+  /* RADIUS */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+
+  /* FONT */
+  --font: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+}
+
+body {
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--ink);
+  display: block;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100vw;
+}
+
+/* TOAST */
+
+.ng-toast {
+  position: relative;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-strong);
+  border: 1px solid var(--border);
+  padding: 1rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font);
+  min-width: 300px;
+  max-width: 400px;
+}
+
+.ng-toast.success {
+  background: var(--bg-panel);
+  color: var(--ink);
+  border-color: var(--success);
+}
+
+.ng-toast.success::before {
+  content: '';
+  width: 4px;
+  height: 100%;
+  background: var(--success);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.ng-toast.error,
+.ng-toast.danger {
+  background: var(--bg-panel);
+  color: var(--ink);
+  border-color: var(--danger);
+}
+
+.ng-toast.error::before,
+.ng-toast.danger::before {
+  content: '';
+  width: 4px;
+  height: 100%;
+  background: var(--danger);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.ng-toast.info {
+  background: var(--bg-panel);
+  color: var(--ink);
+  border-color: var(--brand);
+}
+
+.ng-toast.info::before {
+  content: '';
+  width: 4px;
+  height: 100%;
+  background: var(--brand);
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Global Button Icon Style */
+.btn-icon {
+  background: transparent;
+  border: 1px solid transparent;
+  margin-left: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+}
+
+.btn-icon:hover {
+  background-color: #fff;
+  border-color: var(--border);
+  transform: translateY(-1px);
+  color: var(--ink);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-icon:active {
+  transform: translateY(0);
+}
+
+.btn-icon.danger {
+  color: #ef4444;
+  /* Red-500 */
+}
+
+.btn-icon.danger:hover {
+  background-color: #FEF2F2;
+  border-color: #FECACA;
+  color: #DC2626;
+}
+
+.btn-icon[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}

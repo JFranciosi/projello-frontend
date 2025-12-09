@@ -1,0 +1,65 @@
+@if (open) {
+<!-- BACKDROP -->
+<div class="project-modal-backdrop" (click)="closeModal()"></div>
+
+<!-- MODAL -->
+<section class="project-modal" role="dialog" aria-modal="true" aria-labelledby="new-project-title"
+  (click)="$event.stopPropagation()">
+  <header class="modal-header">
+    <div class="title-group">
+      <h2 id="new-project-title">Nuovo progetto</h2>
+      <p class="subtitle">Imposta il titolo e aggiungi eventuali collaboratori.</p>
+    </div>
+
+    <button class="btn-icon close-btn" type="button" (click)="closeModal()" aria-label="Chiudi">
+      <lucide-icon name="x"></lucide-icon>
+    </button>
+  </header>
+
+  <div class="modal-body">
+    <!-- TITOLO PROGETTO -->
+    <div class="field">
+      <label class="field-label" for="projectTitle">Titolo progetto</label>
+      <input id="projectTitle" type="text" [(ngModel)]="title" placeholder="Es. Projello" />
+    </div>
+
+    <!-- COLLABORATORI -->
+    <div class="field">
+      <label class="field-label" for="collabEmail">Collaboratori (email, opzionali)</label>
+
+      <div class="email-input-row">
+        <input id="collabEmail" type="email" [(ngModel)]="emailInput" (keydown)="onEmailKeydown($event)"
+          placeholder="Aggiungi email e premi Invio" />
+
+        <button type="button" class="btn-secondary" (click)="addEmail()">
+          <lucide-icon name="plus" class="plusicon"></lucide-icon>
+          <span>Aggiungi</span>
+        </button>
+      </div>
+
+      @if (collaborators.length > 0) {
+      <div class="chips">
+        @for (mail of collaborators; track mail) {
+        <span class="chip">
+          <span class="chip-label">{{ mail }}</span>
+          <button type="button" class="chip-remove" (click)="removeEmail(mail)" aria-label="Rimuovi collaboratore">
+            <lucide-icon name="x"></lucide-icon>
+          </button>
+        </span>
+        }
+      </div>
+      }
+    </div>
+  </div>
+
+  <footer class="modal-footer">
+    <button type="button" class="btn-ghost" (click)="closeModal()">
+      Annulla
+    </button>
+
+    <button type="button" class="btn-primary" (click)="submit()">
+      Crea progetto
+    </button>
+  </footer>
+</section>
+}

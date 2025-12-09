@@ -1,0 +1,70 @@
+<header class="navbar" role="banner">
+  <app-navbar (logout)="logout()"></app-navbar>
+</header>
+
+<div
+  class="notifications-container"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
+>
+  <app-dashboard-sidebar
+    (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse($event)"
+  ></app-dashboard-sidebar>
+
+
+
+  <main class="notifications-content" role="main">
+    <div class="notifications-header">
+      <h1>Notifiche</h1>
+      @if (notifications().length > 0) {
+        <button 
+          class="delete-all-btn"
+          (click)="deleteAllNotifications()"
+          aria-label="Elimina tutte le notifiche"
+        >
+          <lucide-icon name="trash-2" size="18"></lucide-icon>
+          Elimina tutto
+        </button>
+      }
+    </div>
+
+    <div class="notifications-list">
+      @if (notifications().length > 0) {
+        @for (notification of notifications(); track notification.id) {
+          <div 
+            class="notification-item"
+          >
+            <div class="notification-indicator"></div>
+            <div class="notification-content">
+              <p class="notification-type">
+                <strong>{{ notification.type }}</strong>
+              </p>
+              <p class="notification-message">{{ notification.message }}</p>
+            </div>
+            <button 
+              class="delete-btn"
+              (click)="deleteNotification(notification.id, $event)"
+              aria-label="Elimina notifica"
+            >
+              <lucide-icon name="trash-2" size="18"></lucide-icon>
+            </button>
+          </div>
+        }
+      } @else {
+        <div class="empty-state">
+          <lucide-icon name="bell" size="48"></lucide-icon>
+          <p>Nessuna notifica</p>
+        </div>
+      }
+    </div>
+  </main>
+</div>
+
+
+
+<app-project-modal 
+  [open]="projectModalOpen()" 
+  (close)="closeModal()" 
+  (create)="onCreateProject($event)"
+></app-project-modal>
+

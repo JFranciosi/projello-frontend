@@ -1,0 +1,28 @@
+@if (open) {
+  <div class="modal-overlay" (click)="onCancel()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">{{ title }}</h2>
+        <button class="close-btn" (click)="onCancel()" aria-label="Chiudi">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p>{{ message }}</p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="onCancel()">
+          {{ cancelText }}
+        </button>
+        <button 
+          class="btn" 
+          [ngClass]="isDangerous ? 'btn-danger' : 'btn-primary'"
+          (click)="onConfirm()">
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

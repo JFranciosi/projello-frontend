@@ -1,0 +1,40 @@
+<aside class="sidebar" role="complementary" aria-label="Menu laterale" [class.is-collapsed]="collapsed"
+  [class.no-transition]="noTransition">
+  <div class="sidebar-body">
+    <div class="sidebar-header">
+      <button type="button" class="collapse-toggle" (click)="toggleCollapse()"
+        [attr.aria-label]="collapsed ? 'Espandi menu laterale' : 'Comprimi menu laterale'"
+        [attr.aria-expanded]="!collapsed">
+        <lucide-icon [name]="collapsed ? 'PanelRightClose' : 'PanelLeftClose'" class="collapse-icon"></lucide-icon>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul class="menu">
+        @for (link of nav; track link.path) {
+        <li routerLinkActive="active" [routerLinkActiveOptions]="{ exact: link.path === '/dashboard' }">
+          <a [routerLink]="link.path" class="menu-link">
+            <lucide-icon [name]="link.icon" class="menu-icon" aria-hidden="true"></lucide-icon>
+            <span class="menu-label">{{ link.label }}</span>
+            @if (link.badge) {
+              @let count = (link.badge | async);
+              @if (count && count > 0) {
+                <span class="notification-badge">{{ count }}</span>
+              }
+            }
+          </a>
+        </li>
+        } @empty {
+        <li class="muted">Nessuna voce di menu</li>
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <div class="sidebar-footer">
+    <button type="button" class="new-project-btn" (click)="createProject.emit()">
+      <lucide-icon name="plus" class="new-project-plus"></lucide-icon>
+      <span class="new-project-label">Nuovo progetto</span>
+    </button>
+  </div>
+</aside>

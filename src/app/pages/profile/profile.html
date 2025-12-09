@@ -1,0 +1,230 @@
+<header class="navbar" role="banner">
+  <app-navbar (logout)="logout()"></app-navbar>
+</header>
+
+<div
+  class="profile-shell"
+  [class.sidebar-collapsed]="sidebarCollapsed()"
+>
+  <app-dashboard-sidebar
+    [collapsed]="sidebarCollapsed()"
+    (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse($event)"
+  ></app-dashboard-sidebar>
+
+  <main class="profile-main" role="main" aria-label="Profilo utente">
+    <section class="profile-card">
+      <header class="profile-header">
+        <div class="profile-header-left">
+          <div class="avatar-circle" aria-hidden="true">
+            <span>{{ avatarInitials() }}</span>
+          </div>
+
+          <div class="profile-header-text">
+            <h1>Profilo utente</h1>
+            <p class="profile-subtitle">Gestisci le informazioni del tuo account Projello.</p>
+          </div>
+        </div>
+      </header>
+
+      <nav
+        class="profile-tabs"
+        role="tablist"
+        aria-label="Sezioni profilo"
+      >
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedTab() === 'personal'"
+          role="tab"
+          aria-selected="{{ selectedTab() === 'personal' }}"
+          (click)="selectTab('personal')"
+        >
+          <lucide-icon name="user"></lucide-icon>
+          <span>Dati personali</span>
+        </button>
+
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="selectedTab() === 'security'"
+          role="tab"
+          aria-selected="{{ selectedTab() === 'security' }}"
+          (click)="selectTab('security')"
+        >
+          <lucide-icon name="lock"></lucide-icon>
+          <span>Sicurezza</span>
+        </button>
+      </nav>
+
+      @if (selectedTab() === 'personal') {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Dati personali"
+        >
+          <h2>Dati personali</h2>
+
+          <form class="profile-form" (ngSubmit)="onUpdateProfile()">
+            <div class="form-grid-2">
+              <div class="field-row">
+                <label class="field-label" for="firstName">Nome</label>
+                <div class="field-block" [class.is-editing]="editing.firstName">
+                  <input
+                    id="firstName"
+                    type="text"
+                    name="firstName"
+                    [(ngModel)]="profile().firstName"
+                    [readonly]="!editing.firstName"
+                  />
+                  <button
+                    type="button"
+                    class="field-edit-btn"
+                    (click)="toggleFieldEdit('firstName')"
+                    [attr.aria-label]="editing.firstName ? 'Blocca modifica nome' : 'Modifica nome'"
+                  >
+                    <lucide-icon name="pencil"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <label class="field-label" for="lastName">Cognome</label>
+                <div class="field-block" [class.is-editing]="editing.lastName">
+                  <input
+                    id="lastName"
+                    type="text"
+                    name="lastName"
+                    [(ngModel)]="profile().lastName"
+                    [readonly]="!editing.lastName"
+                  />
+                  <button
+                    type="button"
+                    class="field-edit-btn"
+                    (click)="toggleFieldEdit('lastName')"
+                    [attr.aria-label]="editing.lastName ? 'Blocca modifica cognome' : 'Modifica cognome'"
+                  >
+                    <lucide-icon name="pencil"></lucide-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="displayName">Username</label>
+              <div class="field-block" [class.is-editing]="editing.username">
+                <input
+                  id="displayName"
+                  type="text"
+                  name="displayName"
+                  [(ngModel)]="profile().username"
+                  required
+                  [readonly]="!editing.username"
+                />
+                <button
+                  type="button"
+                  class="field-edit-btn"
+                  (click)="toggleFieldEdit('username')"
+                  [attr.aria-label]="editing.username ? 'Blocca modifica username' : 'Modifica username'"
+                >
+                  <lucide-icon name="pencil"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="email">Email</label>
+              <div class="field-block" [class.is-editing]="editing.email">
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  [(ngModel)]="profile().email"
+                  required
+                  [readonly]="!editing.email"
+                />
+                <button
+                  type="button"
+                  class="field-edit-btn"
+                  (click)="toggleFieldEdit('email')"
+                  [attr.aria-label]="editing.email ? 'Blocca modifica email' : 'Modifica email'"
+                >
+                  <lucide-icon name="pencil"></lucide-icon>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="save-btn">
+              Salva modifiche
+            </button>
+          </form>
+        </section>
+      }
+
+      @if (selectedTab() === 'security') {
+        <section
+          class="tab-panel"
+          role="tabpanel"
+          aria-label="Sicurezza"
+        >
+          <h2>Cambia password</h2>
+          <p class="panel-subtitle">
+            Imposta una nuova password per il tuo account.
+          </p>
+
+          <form class="profile-form" (ngSubmit)="onChangePassword()">
+            
+            <div class="field-row">
+              <label class="field-label" for="oldPassword">Password attuale</label>
+              <input
+                id="oldPassword"
+                class="simple-input"
+                type="password"
+                name="oldPassword"
+                [(ngModel)]="oldPassword"
+                placeholder="Inserisci la password attuale"
+                required
+              />
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="newPassword">Nuova password</label>
+              <input
+                id="newPassword"
+                class="simple-input"
+                type="password"
+                name="newPassword"
+                [(ngModel)]="newPassword"
+                placeholder="Minimo 8 caratteri"
+                required
+              />
+            </div>
+
+            <div class="field-row">
+              <label class="field-label" for="confirmPassword">Conferma nuova password</label>
+              <input
+                id="confirmPassword"
+                class="simple-input"
+                type="password"
+                name="confirmPassword"
+                [(ngModel)]="confirmPassword"
+                placeholder="Ripeti la nuova password"
+                required
+              />
+            </div>
+
+            <button type="submit" class="save-btn">
+              Aggiorna password
+            </button>
+          </form>
+        </section>
+      }
+    </section>
+  </main>
+</div>
+
+<app-project-modal
+  [open]="projectModalOpen()"
+  (close)="closeModal()"
+  (create)="onCreateProject($event)"
+></app-project-modal>

@@ -1,0 +1,187 @@
+<header class="navbar" role="banner">
+  <app-navbar (logout)="logout()"></app-navbar>
+</header>
+
+<div class="dashboard-container" (keydown)="null" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <app-dashboard-sidebar [collapsed]="sidebarCollapsed()" (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse($event)"></app-dashboard-sidebar>
+
+  <div class="board-container">
+    @if (currentProject(); as project) {
+    <app-project-topbar [project]="project" (filterChange)="updateFilter($event)">
+    </app-project-topbar>
+    }
+
+    <!-- GRID FASI -->
+    <main class="phases-grid" role="main" aria-label="Bacheca fasi" cdkDropListGroup>
+      @for (p of phases(); track p._id) {
+      <section class="phase-card" [attr.aria-labelledby]="'card-' + p._id">
+        <header class="phase-head">
+          <div class="phase-title-wrapper">
+            <span class="count-badge">{{ tasksFor(p._id).length }}</span>
+            @if (editingPhaseId() === p._id) {
+            <form (submit)="$event.preventDefault(); savePhaseName()" class="phase-edit-form">
+              <input type="text" [ngModel]="editingPhaseName()" (ngModelChange)="editingPhaseName.set($event)"
+                name="phName" class="phase-edit-input" (keydown.escape)="cancelEditingPhaseName()" autoselect />
+              <button type="submit" class="btn-icon check" title="Salva">
+                <lucide-icon name="check" size="14"></lucide-icon>
+              </button>
+              <button type="button" class="btn-icon cancel" (click)="cancelEditingPhaseName()" title="Annulla">
+                <lucide-icon name="x" size="14"></lucide-icon>
+              </button>
+            </form>
+            } @else {
+            <h2 class="phase-title" [attr.id]="'card-' + p._id">{{ p.title }}</h2>
+            }
+          </div>
+          <div class="phase-actions">
+            @if (editingPhaseId() !== p._id) {
+            <button class="btn-icon" (click)="startEditingPhase(p)" title="Rinomina fase">
+              <lucide-icon name="pencil" size="14"></lucide-icon>
+            </button>
+            }
+            <button type="button" class="btn-icon danger" (click)="deletePhase(p)"
+              [attr.aria-label]="'Elimina fase ' + p.title" title="Elimina fase">
+              <lucide-icon name="x" aria-hidden="true"></lucide-icon>
+            </button>
+          </div>
+        </header>
+
+        <!-- Ghost / Inline new task -->
+        @if (inlineTaskForPhase() !== p._id) {
+        <!-- @for(; track $index){
+
+          } -->
+
+        <div class="ghost-task-card" (click)="startInlineTask(p._id)">
+          <lucide-icon name="plus"></lucide-icon>
+          <span>Nuovo task</span>
+        </div>
+        } @else {
+        <form class="inline-task-form" (ngSubmit)="saveInlineTask()">
+          <div class="form-group">
+            <label>Titolo</label>
+            <input type="text" required [(ngModel)]="inlineDraft().title" name="title" />
+          </div>
+          <div class="form-group">
+            <label>Scadenza</label>
+            <div class="date-input-wrapper">
+              <input type="datetime-local" [(ngModel)]="inlineDraft().expiration_date" name="date" />
+              <lucide-icon name="calendar" class="date-icon"></lucide-icon>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Descrizione</label>
+            <textarea [(ngModel)]="inlineDraft().description" name="desc" rows="3"></textarea>
+          </div>
+
+          <div class="form-group assign-task">
+            <label>Assegna task</label>
+            <div class="assignee-select multi-select">
+              <div class="multi-select-header">
+                <lucide-icon name="user-round"></lucide-icon>
+                <span class="header-text">
+                  @if (inlineDraft().assigneeIds.length === 0) {
+                  Seleziona assegnatari
+                  } @else {
+                  {{ getSelectedNames() }}
+                  }
+                </span>
+              </div>
+              <div class="multi-select-dropdown">
+                @if (assignableMembers().length === 0) {
+                <div class="empty-members">Nessun membro disponibile</div>
+                } @else {
+                @for (member of assignableMembers(); track member.id) {
+                <div class="member-option" [class.selected]="inlineDraft().assigneeIds.includes(member.id)"
+                  (click)="toggleAssignee(member.id)">
+                  <div class="checkbox">
+                    @if (inlineDraft().assigneeIds.includes(member.id)) {
+                    <lucide-icon name="check" size="14"></lucide-icon>
+                    }
+                  </div>
+                  <span>{{ member.label }}</span>
+                </div>
+                }
+                }
+              </div>
+            </div>
+            <small class="helper-text">
+              Puoi assegnare il task al creatore o a un collaboratore del progetto.
+            </small>
+          </div>
+
+          <div class="form-actions right">
+            <button type="button" class="btn ghost" (click)="cancelInlineTask()">Annulla</button>
+            <button type="submit" class="btn">Salva</button>
+          </div>
+        </form>
+        }
+
+        <!-- Task list -->
+        <ul class="task-list" cdkDropList [cdkDropListData]="tasksFor(p._id)" [id]="p._id"
+          (cdkDropListDropped)="drop($event)">
+          @for (t of tasksFor(p._id); track t._id) {
+          <li class="task-row" (click)="openPanel(t)" [class.completed]="t.is_done" cdkDrag [cdkDragData]="t">
+            <h3 class="task-title">{{ t.title }}</h3>
+            @if (getTaskAssigneeLabel(t)) {
+            <div class="task-assignee">
+              <lucide-icon name="user" aria-hidden="true"></lucide-icon>
+              <span>{{ getTaskAssigneeLabel(t) }}</span>
+            </div>
+            }
+            @if (t.expiration_date) {
+            <div class="task-date">
+              <lucide-icon name="calendar" aria-hidden="true"></lucide-icon>
+              <span>{{ t.expiration_date | date:'dd/MM/yyyy HH:mm':'UTC' }}</span>
+            </div>
+            }
+            @if (t.description) {
+            <p class="task-description">{{ t.description }}</p>
+            }
+          </li>
+          }
+          @empty { <li class="task-empty">Nessun task nella fase.</li> }
+        </ul>
+      </section>
+      }
+
+      <!-- CARD "AGGIUNGI FASE"  -->
+      <section class="phase-card new-phase" aria-label="Nuova fase">
+        <button class="add-phase-btn" (click)="startInlinePhase()" [class.is-hidden]="addingPhase()">
+          <lucide-icon name="plus"></lucide-icon><span>Aggiungi Fase</span>
+        </button>
+
+        <!-- Form inline -->
+        <form class="inline-phase-form" [class.is-hidden]="!addingPhase()" autocomplete="off" novalidate
+          (submit)="$event.preventDefault(); saveInlinePhase()">
+
+          <div class="form-group">
+            <label>Nome della fase</label>
+            <input type="text" required [(ngModel)]="phaseDraft().title" name="p_title"
+              placeholder="Da fare, In corso, Fatto…" />
+          </div>
+
+          <div class="inline-actions">
+            <button type="button" class="btn ghost" (click)="cancelInlinePhase()">Annulla</button>
+            <button type="submit" class="btn">Crea fase</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+</div>
+
+<app-task-panel [task]="selectedTask()" [isOpen]="panelOpen()" [project]="currentProject()" [phases]="phases()"
+  (close)="closePanel()" (markCompleted)="markCompleted($event)" (markIncomplete)="markAsIncomplete($event)"
+  (deleteTask)="deleteTask($event)" (updateTask)="onUpdateTask($event)">
+</app-task-panel>
+
+<app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
+  (create)="onCreateProject($event)"></app-project-modal>
+
+<app-confirm-modal [open]="deletePhaseConfirmOpen()" [title]="'Elimina fase'"
+  [message]="'Sei sicuro di voler eliminare la fase ' + (phaseToDelete()?.title || '') + '? Verranno eliminati anche tutti i task al suo interno.'"
+  [confirmText]="'Elimina'" [cancelText]="'Annulla'" [isDangerous]="true" (confirm)="confirmDeletePhase()"
+  (close)="deletePhaseConfirmOpen.set(false)"></app-confirm-modal>

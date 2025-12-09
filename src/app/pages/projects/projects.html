@@ -1,0 +1,76 @@
+<header class="navbar" role="banner">
+  <app-navbar (logout)="logout()"></app-navbar>
+</header>
+<div class="dashboard-container" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <app-dashboard-sidebar [collapsed]="sidebarCollapsed()" (createProject)="openModal('project')"
+    (collapseChanged)="onSidebarCollapse($event)"></app-dashboard-sidebar>
+  <main class="projects-main" role="main" aria-label="Elenco progetti">
+    <div class="projects-topbar">
+      <div class="projects-topbar-left">
+        <h1 class="projects-title">I tuoi progetti</h1>
+      </div>
+      @if (currentUser(); as user) {
+      <div class="projects-topbar-right">
+        <div class="projects-topbar-actions">
+          <div class="user-info">
+            <div class="user-details">
+            <span class="user-name">{{ (user.firstName || '') + ' ' + (user.lastName || '') || user.username }}</span>
+            <span class="user-email">{{ user.email }}</span>
+            </div>
+            <div class="avatar-circle" aria-hidden="true">
+              <span>{{ avatarInitials() }}</span>
+            </div>
+          </div>
+          <app-project-searchbar (searchChange)="onSearchChange($event)"></app-project-searchbar>
+        </div>
+      </div>
+       }
+    </div>
+
+    <section class="projects-grid" aria-live="polite">
+      @if (loading()) {
+      <div class="empty-state">Caricamento in corso…</div>
+      } @else if (projects().length === 0) {
+      <div class="empty-state">
+        @if (searchQuery()) {
+        Nessun progetto trovato per "{{ searchQuery() }}". Prova con un'altra ricerca.
+        } @else {
+        Nessun progetto trovato. Crea un nuovo progetto dalla sidebar.
+        }
+      </div>
+      } @else {
+      @for (p of projects(); track p) {
+      <article class="project-card" (click)="navigateToProject(p)" (keydown.enter)="navigateToProject(p)"
+        (keydown.space)="navigateToProject(p)" tabindex="0" role="button" aria-label="Apri progetto {{ p.title }}">
+        <div class="project-card-header">
+          <h2 class="project-title">{{ p.title }}</h2>
+          <span class="project-phase-count">Progetto</span>
+        </div>
+
+        <p class="project-desc">
+          Creato da {{ p.creator.username || '—' }}
+        </p>
+
+        <div class="project-meta">
+          <span class="meta-item">
+            <lucide-icon name="user-circle-2" aria-hidden="true"></lucide-icon>
+            {{ (p.collaborators.length || 0) + (p.creator ? 1 : 0) }} membri
+          </span>
+        </div>
+        <button class="btn-icon danger delete-project" (click)="onDeleteProject(p, $event)"
+          (keydown.enter)="onDeleteProject(p, $event)" aria-label="Elimina progetto {{ p.title }}">
+          <lucide-icon name="trash-2" aria-hidden="true"></lucide-icon>
+        </button>
+      </article>
+      }
+      }
+    </section>
+  </main>
+</div>
+<app-project-modal [open]="projectModalOpen()" (close)="closeModal()"
+  (create)="onCreateProject($event)"></app-project-modal>
+
+<app-confirm-modal [open]="deleteConfirmOpen()" [title]="'Elimina progetto'"
+  [message]="'Sei sicuro di voler eliminare ' + (projectToDelete()?.title || '') + '?'" [confirmText]="'Elimina'"
+  [cancelText]="'Annulla'" [isDangerous]="true" (confirm)="confirmDeleteProject()"
+  (close)="deleteConfirmOpen.set(false)"></app-confirm-modal>
